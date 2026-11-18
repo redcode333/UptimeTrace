@@ -1,0 +1,161 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/incidents.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "cooldown_end": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "families": {
+   "items": {
+    "enum": [
+     "mem_leak",
+     "disk_fill",
+     "cpu_runaway",
+     "net_flood",
+     "pool_exhaustion",
+     "silent_crash"
+    ]
+   },
+   "type": "array"
+  },
+  "family": {
+   "enum": [
+    "mem_leak",
+    "disk_fill",
+    "cpu_runaway",
+    "net_flood",
+    "pool_exhaustion",
+    "silent_crash"
+   ]
+  },
+  "group": {
+   "enum": [
+    "PRECURSOR",
+    "ABRUPT",
+    "SILENT"
+   ]
+  },
+  "host_id": {
+   "type": "string"
+  },
+  "incident_id": {
+   "type": "string"
+  },
+  "members": {
+   "items": {
+    "additionalProperties": false,
+    "properties": {
+     "conflict_end": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+      "type": "string"
+     },
+     "family": {
+      "enum": [
+       "mem_leak",
+       "disk_fill",
+       "cpu_runaway",
+       "net_flood",
+       "pool_exhaustion",
+       "silent_crash"
+      ]
+     },
+     "fault_id": {
+      "type": "string"
+     },
+     "impact_end": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+      "type": "string"
+     },
+     "impact_start": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+      "type": "string"
+     },
+     "member_relation": {
+      "enum": [
+       "primary",
+       "relapse"
+      ]
+     }
+    },
+    "required": [
+     "fault_id",
+     "family",
+     "member_relation",
+     "impact_start",
+     "impact_end",
+     "conflict_end"
+    ],
+    "type": "object"
+   },
+   "minItems": 1,
+   "type": "array"
+  },
+  "n_members": {
+   "minimum": 1,
+   "type": "integer"
+  },
+  "onset": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "oracle_mask_end": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "oracle_mask_end_source": {
+   "enum": [
+    "cooldown",
+    "return_ramp"
+   ]
+  },
+  "precursor_lead_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "primary_fault_id": {
+   "type": "string"
+  },
+  "recovery": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "severity": {
+   "type": "number"
+  },
+  "silent_reason": {
+   "enum": [
+    "by_construction",
+    "sub_noise",
+    null
+   ]
+  }
+ },
+ "required": [
+  "incident_id",
+  "run_id",
+  "host_id",
+  "onset",
+  "recovery",
+  "cooldown_end",
+  "oracle_mask_end",
+  "oracle_mask_end_source",
+  "primary_fault_id",
+  "family",
+  "families",
+  "members",
+  "severity",
+  "group",
+  "silent_reason",
+  "precursor_lead_s",
+  "n_members"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: incidents",
+ "type": "object"
+}

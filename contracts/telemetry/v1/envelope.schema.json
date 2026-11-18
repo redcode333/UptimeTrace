@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://uptimetrace.dev/contracts/telemetry/v1/envelope.schema.json",
+  "title": "UptimeTrace telemetry envelope v1",
+  "description": "One batch of infrastructure metric observations from a single host, sent by the agent to POST /api/v1/telemetry. This schema validates version \"1.0\" only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "envelope_id",
+    "agent_id",
+    "host_id",
+    "hostname",
+    "timestamp",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Contract version, \"MAJOR.MINOR\". The server accepts only versions it explicitly supports.",
+      "const": "1.0"
+    },
+    "envelope_id": {
+      "description": "Identity of this envelope, a lowercase hyphenated UUID (RFC 9562 versions 1-8, RFC 4122 variant; v4 or v7 recommended). Generated once when the envelope is created and preserved unchanged on every retry of that same envelope; a new envelope always gets a new id. Used by the server for idempotency.",
+      "$ref": "#/$defs/uuid"
+    },
+    "agent_id": {
+      "description": "Stable identifier of the agent installation.",
+      "$ref": "#/$defs/identifier"
+    },
+    "host_id": {
+      "description": "Stable identifier of the monitored host. Survives hostname changes. Part of the series key.",
+      "$ref": "#/$defs/identifier"
+    },
+    "hostname": {
+      "description": "Human-readable hostname as reported by the OS. Display only; not a key.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253
+    },
+    "timestamp": {
+      "description": "Send time: when the agent created and sent this envelope (agent clock, UTC). Used for clock-skew diagnostics, ordering of envelopes and 'last seen'; NOT the time of any observation.",
+      "$ref": "#/$defs/timestamp"
+    },
+    "service": {
+      "description": "Optional logical service this host belongs to, e.g. \"checkout-api\".",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,62}$",
+      "not": {
+        "pattern": "\n"
+      }
+    },
+    "metrics": {
+      "description": "Metric observations. The whole envelope is accepted or rejected as a unit. Observation identity (name + labels + timestamp must be unique within an envelope) is a semantic rule, see README.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/metric"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "not": {
+        "pattern": "\n"
+      }
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "not": {
+        "pattern": "\n"
+      }
+    },
+    "timestamp": {
+      "description": "RFC 3339 instant in UTC, written exactly as YYYY-MM-DDTHH:MM:SS[.f{1,6}]Z: uppercase T and Z; Z is the only accepted zone designator (no numeric offsets, not even +00:00 or -00:00); year 1000-9999; real calendar dates (month lengths and leap years enforced by the pattern itself, so no format-assertion support is required of the validator); seconds 00-59 (leap second :60 is not accepted). ASCII digits only.",
+      "type": "string",
+      "pattern": "^(?:[1-9][0-9]{3}-(?:0[13578]|1[02])-(?:0[1-9]|[12][0-9]|3[01])|[1-9][0-9]{3}-(?:0[469]|11)-(?:0[1-9]|[12][0-9]|30)|[1-9][0-9]{3}-02-(?:0[1-9]|1[0-9]|2[0-8])|(?:[1-9][0-9](?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,6})?Z$",
+      "not": {
+        "pattern": "\n"
+      }
+    },
+    "labels": {
+      "description": "Dimensions that distinguish series of the same metric (e.g. mount, interface).",
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,31}$",
+        "not": {
+          "pattern": "\n"
+        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 128
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "kind",
+        "value",
+        "unit",
+        "timestamp"
+      ],
+      "properties": {
+        "name": {
+          "description": "Dotted lowercase name: <domain>.<subject>.<quantity>, e.g. system.cpu.utilization.",
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+          "not": {
+            "pattern": "\n"
+          }
+        },
+        "kind": {
+          "description": "gauge: point-in-time value. counter: cumulative total since an agent-defined start; never negative; may reset to a lower value on reboot or agent restart.",
+          "enum": [
+            "gauge",
+            "counter"
+          ]
+        },
+        "value": {
+          "description": "Any finite JSON number, integer or floating point, within the IEEE-754 double range. Sign and range are otherwise unconstrained by default; constraints are attached to a unit (percent) or kind (counter) or to a well-known metric name below. NaN and Infinity cannot be expressed in JSON and must be rejected by the parser.",
+          "type": "number",
+          "minimum": -1.7976931348623157e+308,
+          "maximum": 1.7976931348623157e+308
+        },
+        "unit": {
+          "enum": [
+            "percent",
+            "bytes",
+            "seconds",
+            "count"
+          ]
+        },
+        "timestamp": {
+          "description": "Observation time: when the value was sampled (agent clock, UTC). This is the time-series timestamp that gets stored.",
+          "$ref": "#/$defs/timestamp"
+        },
+        "labels": {
+          "$ref": "#/$defs/labels"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "unit": {
+                "const": "percent"
+              }
+            },
+            "required": [
+              "unit"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "counter"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "minimum": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "system.cpu.utilization"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "gauge"
+              },
+              "unit": {
+                "const": "percent"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "system.memory.utilization"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "gauge"
+              },
+              "unit": {
+                "const": "percent"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "const": "system.disk.utilization"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "then": {
+            "required": [
+              "labels"
+            ],
+            "properties": {
+              "kind": {
+                "const": "gauge"
+              },
+              "unit": {
+                "const": "percent"
+              },
+              "labels": {
+                "required": [
+                  "mount"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "name": {
+                "enum": [
+                  "system.network.rx_bytes",
+                  "system.network.tx_bytes"
+                ]
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "then": {
+            "required": [
+              "labels"
+            ],
+            "properties": {
+              "kind": {
+                "const": "counter"
+              },
+              "unit": {
+                "const": "bytes"
+              },
+              "labels": {
+                "required": [
+                  "interface"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

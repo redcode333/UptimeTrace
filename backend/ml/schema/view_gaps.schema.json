@@ -1,0 +1,32 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/view_gaps.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "chunks": {
+   "minimum": 0,
+   "type": "integer"
+  },
+  "gap_id": {
+   "type": "string"
+  },
+  "replay_envelope_ids": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "ticks_buffered": {
+   "minimum": 0,
+   "type": "integer"
+  }
+ },
+ "required": [
+  "gap_id",
+  "replay_envelope_ids",
+  "ticks_buffered",
+  "chunks"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: view_gaps",
+ "type": "object"
+}

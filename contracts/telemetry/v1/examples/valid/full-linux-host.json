@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "envelope_id": "0190f3a2-6b1e-7c4d-9a3f-5d2e8b7a1c04",
+  "agent_id": "agent-7f3a9c",
+  "host_id": "host-web-01",
+  "hostname": "web-01.prod.example.com",
+  "timestamp": "2026-11-10T09:30:00.250Z",
+  "service": "checkout-api",
+  "metrics": [
+    {
+      "name": "system.cpu.utilization",
+      "kind": "gauge",
+      "value": 37.42,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:00Z"
+    },
+    {
+      "name": "system.memory.utilization",
+      "kind": "gauge",
+      "value": 68.9,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:00Z"
+    },
+    {
+      "name": "system.disk.utilization",
+      "kind": "gauge",
+      "value": 81.3,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:00Z",
+      "labels": { "mount": "/", "device": "nvme0n1p2" }
+    },
+    {
+      "name": "system.disk.utilization",
+      "kind": "gauge",
+      "value": 42,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:00Z",
+      "labels": { "mount": "/var/lib/data", "device": "nvme1n1" }
+    },
+    {
+      "name": "system.network.rx_bytes",
+      "kind": "counter",
+      "value": 918273645012,
+      "unit": "bytes",
+      "timestamp": "2026-11-10T09:30:00Z",
+      "labels": { "interface": "eth0" }
+    },
+    {
+      "name": "system.network.tx_bytes",
+      "kind": "counter",
+      "value": 604857392011,
+      "unit": "bytes",
+      "timestamp": "2026-11-10T09:30:00Z",
+      "labels": { "interface": "eth0" }
+    }
+  ]
+}

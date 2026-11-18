@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "envelope_id": "cb6b7ba4-aaf4-4ae5-8b7b-dbb56b7847af",
+  "agent_id": "agent-c90d11",
+  "host_id": "host-db-03",
+  "hostname": "db-03",
+  "timestamp": "2024-02-29T23:59:59.999999Z",
+  "service": "orders-db",
+  "metrics": [
+    {
+      "name": "system.clock.offset",
+      "kind": "gauge",
+      "value": -0.0042,
+      "unit": "seconds",
+      "timestamp": "2024-02-29T23:59:59.5Z"
+    },
+    {
+      "name": "system.process.count",
+      "kind": "gauge",
+      "value": 213,
+      "unit": "count",
+      "timestamp": "2024-02-29T23:59:59.5Z"
+    },
+    {
+      "name": "system.cpu.utilization",
+      "kind": "gauge",
+      "value": 42,
+      "unit": "percent",
+      "timestamp": "2024-02-29T23:59:59.5Z"
+    },
+    {
+      "name": "system.memory.utilization",
+      "kind": "gauge",
+      "value": 42.0,
+      "unit": "percent",
+      "timestamp": "2024-02-29T23:59:59.5Z"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "envelope_id": "b75cd154-ca87-49f9-9e51-b382bffa9409",
+  "agent_id": "agent-b21e04",
+  "host_id": "host-win-dev-02",
+  "hostname": "WIN-DEV-02",
+  "timestamp": "2026-11-10T09:30:05Z",
+  "metrics": [
+    {
+      "name": "system.cpu.utilization",
+      "kind": "gauge",
+      "value": 0,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:04.900Z"
+    },
+    {
+      "name": "system.disk.utilization",
+      "kind": "gauge",
+      "value": 100,
+      "unit": "percent",
+      "timestamp": "2026-11-10T09:30:04.900Z",
+      "labels": { "mount": "C:" }
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Design system</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#0a1420}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.wrap{background:#0a1420;color:#e6eef4;font:13px/1.45 'Public Sans',sans-serif;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+h1{margin:0;font-size:18px;font-weight:600}
+.sub{color:#a3b8c8;font-size:12px;margin-top:2px}
+.prev{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px dashed #f2b64a;padding:1px 6px;border-radius:3px;margin-left:8px;vertical-align:middle}
+.src{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.mono{font:500 12px 'Spline Sans Mono',monospace}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.w{background:#0f1d2c;border:1px solid #20384d;min-width:0;display:flex;flex-direction:column}
+.wh{padding:8px 12px;border-bottom:1px solid #20384d}
+.wh h2{margin:0;font-size:12px;font-weight:600}
+.b{padding:10px 12px;flex:1}
+.sw{display:grid;grid-template-columns:32px minmax(0,1fr);gap:4px 10px;align-items:center;font-size:12px;margin-bottom:5px}
+.sw i{width:32px;height:20px;border:1px solid #2c4a63;display:block}
+.sw b{font:500 11px 'Spline Sans Mono',monospace;margin-right:8px}
+.sw span{color:#a3b8c8}
+.ty div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-top:1px solid #20384d;padding:5px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.btn{border-radius:4px;padding:6px 12px;font-weight:600;border:1px solid #2c4a63;background:#0f1d2c;font-size:12px}
+.btn.p{background:#f2b64a;color:#0a1420;border-color:#f2b64a}
+.btn.d{opacity:.5;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid #62a8ff;outline-offset:2px}
+.flag{font-weight:600;font-size:11px;letter-spacing:.08em;padding:2px 6px;border:1.5px solid var(--c);color:var(--c);display:inline-block}
+.sb{font:600 11px 'Spline Sans Mono',monospace;padding:1px 6px;color:#e6eef4;display:inline-block}
+.live{border:1.5px solid #e6eef4}
+.syn{border:1.5px solid #e6eef4;background:repeating-linear-gradient(135deg,transparent 0 5px,#2c4a63 5px 6px)}
+.rep{border:1.5px dotted #e6eef4}
+.tg{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px solid #f2b64a;border-radius:3px;padding:0 4px}
+.scope{display:inline-flex;border:1px solid #2c4a63;border-radius:4px;overflow:hidden}
+.sc{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-right:1px solid #2c4a63;padding:5px 10px;color:#7f98ad;font-size:12px;font-weight:500;white-space:nowrap}
+.sc:last-child{border-right:0}
+.sc .ck{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;position:relative;flex:none}
+.sc b{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.sc.on{background:#1f4f8f;color:#fff;font-weight:600}
+.sc.on .ck{background:#fff;border-color:#fff}
+.sc.on .ck::after{content:"";position:absolute;left:3px;top:0;width:3px;height:6px;border:solid #1f4f8f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc.on b{color:#cfe2ff}
+.sc.dis{cursor:not-allowed}
+.sc.hov{background:#14283a;color:#e6eef4}
+.sc.foc{outline:2px solid #62a8ff;outline-offset:-2px}
+ul{margin:0;padding-left:16px;color:#a3b8c8;font-size:12px;line-height:1.55}
+.rule{font-size:12px;color:#a3b8c8;line-height:1.55}
+.rule b{color:#e6eef4}
+.cap{font:600 11px 'Public Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#7f98ad;margin:8px 0 4px}
+.ch{height:80px}.ch svg{width:100%;height:100%}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7f98ad;padding:5px 8px;border-bottom:1px solid #20384d}
+td{padding:6px 8px;border-bottom:1px solid #162a3b;font-size:12px}
+@media (max-width:1100px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+</style>
+</helmet>
+<div class="wrap">
+<div>
+<a href="Main.dc.html" class="src">← Back to Command Center</a>
+<h1>UptimeTrace design system <span class="prev">PREVIEW DATA</span></h1>
+<div class="sub">Dense, dark observability console. Amber is reserved for prediction. Source is always visible.</div>
+</div>
+<div class="g3">
+<section class="w"><div class="wh"><h2>Colour</h2></div><div class="b">
+<div class="sw"><i style="background:#0a1420"></i><div><b>#0a1420</b><span>ground</span></div></div>
+<div class="sw"><i style="background:#0f1d2c"></i><div><b>#0f1d2c</b><span>widget and sidebar</span></div></div>
+<div class="sw"><i style="background:#1b3348"></i><div><b>#1b3348</b><span>selected row, nav</span></div></div>
+<div class="sw"><i style="background:#20384d"></i><div><b>#20384d</b><span>seam (1px borders, grid)</span></div></div>
+<div class="sw"><i style="background:#e6eef4"></i><div><b>#e6eef4</b><span>ink, LIVE ring</span></div></div>
+<div class="sw"><i style="background:#a3b8c8"></i><div><b>#a3b8c8</b><span>secondary text</span></div></div>
+<div class="sw"><i style="background:#7f98ad"></i><div><b>#7f98ad</b><span>labels, axes (5.7:1 on widget)</span></div></div>
+<div class="sw"><i style="background:#f2b64a"></i><div><b>#f2b64a</b><span>forecast, experimental, primary action</span></div></div>
+<div class="sw"><i style="background:#e5483a"></i><div><b>#e5483a / #ff6a55</b><span>critical, confirmed</span></div></div>
+<div class="sw"><i style="background:#e0951f"></i><div><b>#e0951f</b><span>warning, confirmed</span></div></div>
+<div class="sw"><i style="background:#1f8f73"></i><div><b>#1f8f73 / #35d0b5</b><span>normal</span></div></div>
+<div class="sw"><i style="background:#1f4f8f"></i><div><b>#1f4f8f</b><span>selected source in scope toggle</span></div></div>
+<div class="sw"><i style="background:#62a8ff"></i><div><b>#62a8ff</b><span>keyboard focus ring</span></div></div>
+<div class="rule" style="margin-top:6px">Series colours: #4aa3ff, #35d0b5, #ff6a55, #a78bfa. Series never use amber.</div>
+</div></section>
+<section class="w"><div class="wh"><h2>Type, space, shape</h2></div><div class="b">
+<div class="ty">
+<div><span style="font-size:18px;font-weight:600">Page title 18 / 600</span><span class="src">Public Sans</span></div>
+<div><span style="font-size:13px">Body and table 13 / 12 · 400</span><span class="src">Public Sans</span></div>
+<div><span style="font-size:12px;font-weight:600">Widget title 12 / 600</span><span class="src">Public Sans</span></div>
+<div><span style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#7f98ad">Group label 11 / 600 caps</span><span class="src">tracked</span></div>
+<div><span class="mono">97%  1.2 MB/s  14:22:08</span><span class="src">Spline Sans Mono 11–13</span></div>
+</div>
+<div class="rule" style="margin-top:8px">Nothing below 11px. Chart axes, legends and source tags are 11px mono; tables and widget text 12px; page text 13px.</div>
+<div class="cap">Space, radius, depth</div>
+<div class="rule">Scale 4 · 8 · 12 · 16 · 24. Page padding 16, widget padding 10/12, gap 12. Radius 4 on controls, 0 on widgets. 1px seams only; no shadows or blur. The mobile scrim is a flat 60% black layer.</div>
+</div></section>
+<section class="w"><div class="wh"><h2>Source badges, flags, tags</h2></div><div class="b">
+<div class="row"><span class="sb live">LIVE</span><span class="sb syn">SYNTHETIC</span><span class="sb rep">REPLAY</span></div>
+<div class="rule">Text word plus border (solid, hatched, dotted) so it survives greyscale. Shown on every host row, tooltip and legend, never hideable. On the host map: white ring LIVE, hatch SYNTHETIC, dotted ring REPLAY.</div>
+<div class="row" style="margin-top:10px"><span class="flag" style="--c:#ff6a55">CRITICAL</span><span class="flag" style="--c:#e0951f">WARNING</span><span class="flag" style="--c:#35d0b5">NORMAL</span><span class="flag" style="--c:#8aa3b8">OFFLINE</span><span class="flag" style="--c:#f2b64a;border-style:dashed">OUTLOOK</span><span class="tg">EXP</span></div>
+<div class="rule">Confirmed state: solid border. Anything predicted: amber, dashed, always beside the confirmed flag, never replacing it. PREVIEW DATA is an amber dashed tag on every board title and on any generated-data widget.</div>
+</div></section>
+</div>
+<section class="w"><div class="wh"><h2>Workspace data-source scope (applies to every page)</h2></div><div class="b">
+<div class="g2">
+<div>
+<div class="cap">States</div>
+<div class="row"><span class="scope"><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc" type="button" aria-pressed="false"><i class="ck"></i>REPLAY <b>2</b></button></span><span class="src">selected = filled blue + check · unselected = outline, dim</span></div>
+<div class="row"><span class="scope"><button class="sc hov" type="button"><i class="ck"></i>hover <b>2</b></button><button class="sc on foc" type="button"><i class="ck"></i>focus <b>3</b></button><button class="sc on dis" type="button" aria-disabled="true"><i class="ck"></i>last one <b>3</b></button></span><span class="src">hover · focus ring · last selected (disabled)</span></div>
+<div class="rule">Each button shows how many hosts the source contributes, including when it is off. Phones keep the three buttons in one full-width row and drop the check box.</div>
+</div>
+<div>
+<div class="cap">Rules</div>
+<ul>
+<li>The scope filters every panel, chart, table, map and count on every page. Nothing ignores it.</li>
+<li>At least one source stays selected; the last one cannot be turned off ("At least one source must stay selected.").</li>
+<li>The selection lives in the URL as <span class="mono">?source=live,synthetic,replay</span>, so links and reloads keep it.</li>
+<li>Page facets (state, OS, agent) narrow within the scope and never widen it. The facet panel says so.</li>
+<li>A page for a host whose source is off shows the "Source hidden by scope" state.</li>
+<li>When a source is off, the page header says so ("REPLAY hidden").</li>
+</ul>
+</div>
+</div>
+<div class="cap">Health is shown twice, on purpose</div>
+<table><thead><tr><th>Group</th><th>Covers</th><th>Label</th><th>Command Center example</th></tr></thead><tbody>
+<tr><td>Selected scope</td><td>every selected source</td><td>"Selected scope · 36 hosts · generated preview fleet"</td><td>Normal 29 · Warning 3 · Critical 2 · Offline 2</td></tr>
+<tr><td>LIVE only</td><td>real connected hosts</td><td>"LIVE only · real connected hosts", white outline</td><td>Connected 2 / 3 · 1 warning, 1 normal, 1 offline</td></tr>
+</tbody></table>
+<div class="rule" style="margin-top:8px">SYNTHETIC and REPLAY hosts are never described as connected infrastructure. While the 36-host fleet is generated, the host map carries a "PREVIEW FLEET" banner and hatching, and the real build shows only actual hosts.</div>
+</div></section>
+<div class="g3">
+<section class="w"><div class="wh"><h2>Controls</h2></div><div class="b">
+<div class="row"><button class="btn p" type="button">Primary</button><button class="btn" type="button">Secondary</button><button class="btn d" type="button" disabled>Disabled</button></div>
+<div class="rule">One amber primary action per page. 2px blue focus ring with offset on every control. Selected nav is a raised fill with heavier weight. Destructive actions are secondary until confirmed in place.</div>
+</div></section>
+<section class="w"><div class="wh"><h2>Chart conventions</h2></div><div class="b">
+<div class="ch"><svg viewBox="0 0 400 80" preserveAspectRatio="none" aria-hidden="true"><g stroke="#162a3b"><path d="M0 20H400M0 40H400M0 60H400"/></g><polygon points="300,28 400,10 400,34 350,30" fill="#f2b64a" fill-opacity=".3" stroke="#f2b64a" stroke-opacity=".7" stroke-dasharray="2 3"/><path d="M300 0V80" stroke="#f2b64a" stroke-dasharray="3 3"/><path d="M0 50 60 44 120 48 180 32 240 38 300 28" fill="none" stroke="#e6eef4" stroke-width="2"/><path d="M300 28 350 22 400 18" fill="none" stroke="#f2b64a" stroke-width="2" stroke-dasharray="5 4"/></svg></div>
+<ul>
+<li>Measured: solid line. Forecast: dashed amber line and a dashed-edge band right of a NOW line.</li>
+<li>Comparison period: dotted, 70%. Replay: fine dash. Threshold: dashed red with label.</li>
+<li>Percent axes 0–100, or zoomed (80–100) with labelled ends. Gaps break the line.</li>
+<li>Tooltip time matches the crosshair; it lists every series with source and value and never covers the crosshair.</li>
+<li>Histograms scale to the data maximum. Predicted bars are outlined, never stacked.</li>
+<li>Missing metric: "Not available" with a reason and no axes.</li>
+</ul>
+</div></section>
+<section class="w"><div class="wh"><h2>Table and widget conventions</h2></div><div class="b">
+<ul>
+<li>Widgets are title-barred panels in a 12-column grid. Widgets in a row share a height; charts and histograms fill it.</li>
+<li>KPI tiles: label, value, sub-line, then a sparkline below the text. Solid red or amber only for critical or warning.</li>
+<li>Text left, numbers right in mono. State comes right after the host name so it is never clipped; low-priority columns (OS, host ID) go last and scroll or truncate.</li>
+<li>Missing value is an en dash. Age is relative with exact time on hover. Default sort is state then name.</li>
+<li>Names and headers never wrap; wide tables scroll inside their widget.</li>
+</ul>
+</div></section>
+</div>
+<div class="g2">
+<section class="w"><div class="wh"><h2>Shell and responsive behaviour</h2></div><div class="b">
+<ul>
+<li>Desktop (above 900px): 216px sidebar with line icons; 46px top bar: breadcrumb, search, scope toggle, time range, alerts, user menu.</li>
+<li>Tablet (700–900px): sidebar becomes a drawer opened by a menu button; the top bar wraps to rows: menu, breadcrumb and alerts; scope toggle full width; search full width; time range.</li>
+<li>Phone (below 700px): widgets stack, KPI tiles two per row, tables scroll inside their widget, time-range buttons share the full width. The drawer overlays content with a scrim; tapping the scrim or the menu button closes it.</li>
+<li>Time range and scope are global and live in the URL.</li>
+</ul>
+</div></section>
+<section class="w"><div class="wh"><h2>Voice and motion</h2></div><div class="b">
+<ul>
+<li>Say what is known and its age: "Last report 14:09", never "recently". Say "Not available" with the reason, never an empty box.</li>
+<li>Errors state the problem and the next step: "Could not load hosts. Retry."</li>
+<li>Motion is functional: skeleton shimmer while loading and a short fade for tooltips; both off under reduced-motion. No entrance animation or pulsing status.</li>
+<li>Icons: one 1.5px line set, drawn in SVG. No emoji.</li>
+</ul>
+</div></section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

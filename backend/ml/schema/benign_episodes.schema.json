@@ -1,0 +1,80 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/benign_episodes.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "counter_reset_at": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "counter_reset_series": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "end": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "episode_id": {
+   "type": "string"
+  },
+  "footprint": {
+   "items": {
+    "enum": [
+     "cpu",
+     "mem",
+     "disk_root",
+     "disk_data",
+     "rx",
+     "tx"
+    ]
+   },
+   "type": [
+    "array",
+    "null"
+   ]
+  },
+  "params": {
+   "type": "object"
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "start": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "type": {
+   "enum": [
+    "deploy_shift",
+    "log_rotation",
+    "cron_batch",
+    "nightly_backup",
+    "planned_reboot",
+    "transient_blip"
+   ]
+  }
+ },
+ "required": [
+  "episode_id",
+  "run_id",
+  "type",
+  "start",
+  "end",
+  "params",
+  "footprint",
+  "counter_reset_at",
+  "counter_reset_series"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: benign_episodes",
+ "type": "object"
+}

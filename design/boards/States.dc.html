@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Empty, loading, error and disconnected states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#0a1420}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:#0a1420;color:#e6eef4;font:13px/1.4 'Public Sans',sans-serif}
+.nav{background:#0f1d2c;border-right:1px solid #20384d;padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.logo{font-weight:700;font-size:16px;letter-spacing:.06em;padding:4px 8px 12px;display:flex;align-items:center;gap:8px}.logo b{color:#f2b64a}
+.logo i{width:18px;height:18px;border:2px solid #e6eef4;border-radius:3px;display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:3px;top:6px;width:8px;height:2px;background:#f2b64a;transform:rotate(-30deg)}
+.ws{border:1px solid #20384d;border-radius:4px;padding:6px 8px;margin:0 0 6px;color:#a3b8c8;font-size:12px;display:flex;justify-content:space-between}
+.grp{font-weight:600;font-size:11px;letter-spacing:.14em;color:#7f98ad;padding:12px 8px 4px;text-transform:uppercase}
+.it{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:4px;color:#a3b8c8}
+.it:hover{background:#14283a}
+.it.on{background:#1b3348;color:#fff;font-weight:600}
+.it svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tg{margin-left:auto;font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px solid #f2b64a;border-radius:3px;padding:0 4px}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{min-height:46px;border-bottom:1px solid #20384d;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0f1d2c}
+.crumb{color:#8aa3b8;font-size:12px;white-space:nowrap}.crumb b{color:#e6eef4;font-weight:600}
+.search{flex:1;max-width:380px;border:1px solid #20384d;border-radius:4px;padding:5px 10px;color:#8aa3b8;background:#0a1420;text-align:left;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.seg{display:flex;border:1px solid #20384d;border-radius:4px;overflow:hidden}
+.seg button{background:transparent;border:0;border-right:1px solid #20384d;padding:5px 9px;color:#a3b8c8;font-size:12px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#1b3348;color:#fff}
+.chip{border:1px solid #20384d;border-radius:4px;padding:5px 9px;color:#a3b8c8;font-size:12px;background:transparent;white-space:nowrap}
+.burger{display:none;background:transparent;border:1px solid #20384d;border-radius:4px;padding:5px 8px;color:#e6eef4}
+.burger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;display:block}
+.scope{display:flex;border:1px solid #2c4a63;border-radius:4px;overflow:hidden}
+.sc{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-right:1px solid #2c4a63;padding:5px 10px;color:#7f98ad;font-size:12px;font-weight:500;white-space:nowrap}
+.sc:last-child{border-right:0}
+.sc .ck{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;position:relative;flex:none}
+.sc b{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.sc.on{background:#1f4f8f;color:#fff;font-weight:600}
+.sc.on .ck{background:#fff;border-color:#fff}
+.sc.on .ck::after{content:"";position:absolute;left:3px;top:0;width:3px;height:6px;border:solid #1f4f8f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc.on b{color:#cfe2ff}
+.sc:focus-visible,.burger:focus-visible{outline:2px solid #62a8ff;outline-offset:-2px}
+.scrim{display:none}
+.bar2{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid #20384d}
+h1{margin:0;font-size:18px;font-weight:600;margin-right:6px}
+.prev{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px dashed #f2b64a;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.src{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.pg{padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.w{background:#0f1d2c;border:1px solid #20384d;min-width:0;display:flex;flex-direction:column}
+.wh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid #20384d}
+.wh h2{margin:0;font-size:12px;font-weight:600}
+.wh span{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.b{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.b p{margin:0;color:#a3b8c8;font-size:12px;line-height:1.5}
+.b strong{font-size:13px;font-weight:600}
+.btn{align-self:flex-start;background:#f2b64a;color:#0a1420;border:0;border-radius:4px;padding:6px 12px;font-weight:600;font-size:12px}
+.btn.o{background:transparent;color:#e6eef4;border:1px solid #2c4a63}
+.code{font:500 11px/1.5 'Spline Sans Mono',monospace;background:#0a1420;border:1px solid #20384d;padding:8px 10px;overflow-x:auto;white-space:pre;color:#e6eef4}
+.sk{height:14px;background:#14283a;position:relative;overflow:hidden}
+.sk::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,#20384d,transparent);animation:sh 1.6s ease-out infinite;transform:translateX(-100%)}
+@keyframes sh{to{transform:translateX(100%)}}
+@media (prefers-reduced-motion:reduce){.sk::after{animation:none}}
+.flag{font-weight:600;font-size:11px;letter-spacing:.08em;padding:2px 6px;border:1.5px solid var(--c);color:var(--c);display:inline-block;align-self:flex-start}
+.stale{border:1px solid #20384d;padding:8px;display:flex;flex-direction:column;gap:6px}
+.stale svg{width:100%;height:56px}
+.pfb{border:1px dashed #f2b64a;color:#f2b64a;font:500 11px 'Spline Sans Mono',monospace;padding:6px 8px;line-height:1.4}
+.hatch{height:34px;background:repeating-linear-gradient(135deg,#1f8f73 0 6px,#17705a 6px 8px);border:1px solid #20384d}
+@media (max-width:1200px){.g{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+.app{grid-template-columns:minmax(0,1fr)}
+.nav{display:none;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:60;overflow-y:auto}
+.nav.open{display:flex}
+.scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+.burger{display:block;order:1}
+.top{flex-wrap:wrap;padding:8px 12px;gap:8px}
+.crumb{order:2;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.top .chip{order:3}
+.scope{order:4;flex:1 1 100%}
+.sc{flex:1;justify-content:center;padding:6px 4px}
+.search{order:5;flex:1 1 100%;max-width:none}
+.top .seg{order:6;margin-left:0!important}
+}
+@media (max-width:700px){.g{grid-template-columns:minmax(0,1fr)}.top .seg{flex:1 1 100%}.top .seg button{flex:1}.sc .ck{display:none}}
+</style>
+</helmet>
+<div class="{{scrim}}" onClick="{{toggleMenu}}"></div>
+<div class="app">
+<nav class="{{menuCls}}" aria-label="Main">
+<div class="logo"><i></i><span>UPTIME<b>TRACE</b></span></div>
+<div class="ws"><span>Workspace · preview</span><span>▾</span></div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="14">
+<sc-if value="{{n.group}}" hint-placeholder-val="{{ false }}"><div class="grp">{{n.label}}</div></sc-if>
+<sc-if value="{{n.item}}" hint-placeholder-val="{{ true }}"><a class="{{n.cls}}" href="{{n.href}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"/></svg>{{n.label}}<sc-if value="{{n.tag}}" hint-placeholder-val="{{ false }}"><span class="tg">{{n.tag}}</span></sc-if></a></sc-if>
+</sc-for>
+</nav>
+<div class="main">
+<div class="top">
+<button class="burger" type="button" aria-label="Open menu" onClick="{{toggleMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="crumb">System / <b>States</b></div>
+<button class="search" type="button">Search hosts, metrics, incidents, or ask…   ⌘K</button>
+<div class="scope" role="group" aria-label="Data source scope"><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>REPLAY <b>2</b></button></div>
+<div class="seg" style="margin-left:auto"><button type="button">1h</button><button type="button" class="on">6h</button><button type="button">1d</button></div>
+<button class="chip" type="button">Alerts 3</button>
+</div>
+<div class="bar2"><h1>Empty, loading, error and disconnected states</h1><span class="prev">PREVIEW DATA</span><span class="src" style="margin-left:auto">pages not built yet land on the "Not available yet" cards</span></div>
+<div class="pg">
+<div class="g">
+<section class="w"><div class="wh"><h2>Empty · no agent yet</h2><span>Hosts</span></div><div class="b">
+<strong>No hosts are reporting</strong>
+<p>Install the UptimeTrace agent on a machine and give it a credential. The host appears here after its first report.</p>
+<div class="code">uptimetrace-agent -url https://api.example/api/v1/telemetry -token-file token.txt</div>
+<button class="btn" type="button">Create agent credential</button></div></section>
+<section class="w"><div class="wh"><h2>Loading</h2><span>table or chart</span></div><div class="b" aria-busy="true">
+<div class="sk" style="width:40%"></div><div class="sk"></div><div class="sk"></div><div class="sk" style="width:80%"></div>
+<p>Rows keep their final column widths while loading. After 10 s the skeleton gives way to the error state. With reduced motion the shimmer is off.</p></div></section>
+<section class="w"><div class="wh"><h2>Error · API unreachable</h2><span>any page</span></div><div class="b">
+<span class="flag" style="--c:#ff6a55">REQUEST FAILED</span>
+<strong>Could not load hosts</strong>
+<p>The console could not reach the UptimeTrace API (network error). The last data shown on this page is kept, dimmed, with its age.</p>
+<button class="btn o" type="button">Retry</button></div></section>
+<section class="w"><div class="wh"><h2>Disconnected agent</h2><span>Host detail</span></div><div class="b">
+<span class="flag" style="--c:#8aa3b8">OFFLINE · SILENT 14 MIN</span>
+<div class="stale"><svg viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 40 36 80 38 120 28 160 30 200 24" fill="none" stroke="#e6eef4" stroke-width="2"/><path d="M200 24H300" stroke="#7f98ad" stroke-dasharray="2 4"/></svg><span class="src">Last report 14:09. The line stops; it is not extended or interpolated.</span></div>
+<p>Offline is declared after 3 missed intervals. Metrics keep their last values, labelled with their age.</p></div></section>
+<section class="w"><div class="wh"><h2>Not available · metric</h2><span>chart widget</span></div><div class="b">
+<strong>Not available</strong>
+<p>Telemetry v1 has no disk I/O metric, so there is nothing to draw. Widgets for missing metrics show this message with no axes and no empty chart.</p>
+<span class="src">Unlocks when: the agent reports disk I/O</span></div></section>
+<section class="w"><div class="wh"><h2>No data in range</h2><span>Metrics Explorer</span></div><div class="b">
+<strong>No samples between 02:00 and 04:00</strong>
+<p>The selected hosts reported nothing in this window. Nearest data is 14 min before the start of the range.</p>
+<button class="btn o" type="button">Jump to last data</button></div></section>
+<section class="w"><div class="wh"><h2>Source hidden by scope</h2><span>Host detail</span></div><div class="b">
+<span class="flag" style="--c:#62a8ff">SCOPE</span>
+<strong>This host's source is hidden</strong>
+<p>dev-win-01 is LIVE, and LIVE is switched off in the scope above. Its data is not shown. Turn LIVE back on to see it.</p>
+<button class="btn o" type="button">Show LIVE</button></div></section>
+<section class="w"><div class="wh"><h2>Preview fleet</h2><span>host map and counts</span></div><div class="b">
+<div class="pfb">PREVIEW FLEET · 36 generated hosts, not connected infrastructure</div>
+<div class="hatch" aria-hidden="true"></div>
+<p>While the fleet is generated, every map, count and list carries this label and SYNTHETIC hosts are hatched. Health totals for connected infrastructure always come from LIVE hosts alone.</p></div></section>
+<section class="w"><div class="wh"><h2>Forbidden · 403</h2><span>any page</span></div><div class="b">
+<span class="flag" style="--c:#ff6a55">NO ACCESS</span>
+<strong>You do not have access to this workspace</strong>
+<p>Your account is signed in but is not a member. Ask a workspace admin to invite you.</p>
+<button class="btn o" type="button">Sign out</button></div></section>
+<section class="w"><div class="wh"><h2>Not available yet · page</h2><span>Dependencies, Anomalies, Alerts, Incidents</span></div><div class="b">
+<strong>This page is not built yet</strong>
+<p>Dependencies needs discovery data; Events has no log ingestion; Anomalies, Alerts and Incidents need the rules engine. Nothing is drawn rather than a guess.</p>
+<span class="src">Unlocks when: the backing API exists</span></div></section>
+<section class="w"><div class="wh"><h2>Replay finished</h2><span>Hosts</span></div><div class="b">
+<span class="flag" style="--c:#8aa3b8">REPLAY · ENDED</span>
+<strong>smd-m1-1 has no newer data</strong>
+<p>This host replays a stored dataset. It is not offline and raises no alert; its last timestamp is the end of the dataset.</p></div></section>
+<section class="w"><div class="wh"><h2>Last source cannot be hidden</h2><span>scope toggle</span></div><div class="b">
+<div class="scope" style="align-self:flex-start"><button class="sc on" type="button" aria-pressed="true" aria-disabled="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc" type="button" aria-pressed="false"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc" type="button" aria-pressed="false"><i class="ck"></i>REPLAY <b>2</b></button></div>
+<p>At least one source stays on. The only selected button is disabled and its tooltip says "At least one source must stay selected."</p></div></section>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props){super(props);this.state={open:false};}
+  renderVals() {
+    const nav=[
+      {item:true,label:'Overview',href:'Main.dc.html',cls:'it',d:'M3 11 12 3l9 8M5 10v10h14V10'},
+      {group:true,label:'Infrastructure'},
+      {item:true,label:'Hosts',href:'Hosts.dc.html',cls:'it',d:'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01'},
+      {item:true,label:'Metrics Explorer',href:'Metrics.dc.html',cls:'it',d:'M4 19V5M4 19h16M8 15l4-5 3 3 5-6'},
+      {item:true,label:'Dependencies',href:'States.dc.html',cls:'it',d:'M6 6h.01M18 6h.01M12 18h.01M6 6l6 12M18 6l-6 12',tag:'soon'},
+      {group:true,label:'Detect & respond'},
+      {item:true,label:'Anomalies',href:'States.dc.html',cls:'it',d:'M3 12h4l3-8 4 16 3-8h4'},
+      {item:true,label:'Alerts & Rules',href:'States.dc.html',cls:'it',d:'M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0'},
+      {item:true,label:'Incidents',href:'States.dc.html',cls:'it',d:'M12 3 2 20h20zM12 10v5M12 18h.01'},
+      {item:true,label:'Events',href:'States.dc.html',cls:'it',d:'M5 5h14M5 10h14M5 15h9M5 20h6'},
+      {group:true,label:'Intelligence'},
+      {item:true,label:'Risk Outlook',href:'Risk.dc.html',cls:'it',d:'M4 18c4 0 4-10 8-10s4 10 8 10',tag:'EXP'},
+      {item:true,label:'Investigations',href:'Investigations.dc.html',cls:'it',d:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5'},
+      {group:true,label:'Settings'},
+      {item:true,label:'Agents',href:'States.dc.html',cls:'it',d:'M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4'},
+      {item:true,label:'Workspace & members',href:'States.dc.html',cls:'it',d:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 4-6 8-6s8 2 8 6'}
+    ];
+    return {menuCls:this.state.open?'nav open':'nav',scrim:this.state.open?'scrim on':'scrim',toggleMenu:()=>this.setState({open:!this.state.open}),nav};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Metrics Explorer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#0a1420}
+*{box-sizing:border-box}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:#0a1420;color:#e6eef4;font:13px/1.4 'Public Sans',sans-serif}
+.nav{background:#0f1d2c;border-right:1px solid #20384d;padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.logo{font-weight:700;font-size:16px;letter-spacing:.06em;padding:4px 8px 12px;display:flex;align-items:center;gap:8px}.logo b{color:#f2b64a}
+.logo i{width:18px;height:18px;border:2px solid #e6eef4;border-radius:3px;display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:3px;top:6px;width:8px;height:2px;background:#f2b64a;transform:rotate(-30deg)}
+.ws{border:1px solid #20384d;border-radius:4px;padding:6px 8px;margin:0 0 6px;color:#a3b8c8;font-size:12px;display:flex;justify-content:space-between}
+.grp{font-weight:600;font-size:11px;letter-spacing:.14em;color:#7f98ad;padding:12px 8px 4px;text-transform:uppercase}
+.it{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:4px;color:#a3b8c8}
+.it:hover{background:#14283a}
+.it.on{background:#1b3348;color:#fff;font-weight:600}
+.it svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tg{margin-left:auto;font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px solid #f2b64a;border-radius:3px;padding:0 4px}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{height:46px;border-bottom:1px solid #20384d;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0f1d2c}
+.crumb{color:#8aa3b8;font-size:12px}.crumb b{color:#e6eef4;font-weight:600}
+.search{flex:1;max-width:420px;border:1px solid #20384d;border-radius:4px;padding:5px 10px;color:#8aa3b8;background:#0a1420;text-align:left;font-size:12px}
+.seg{display:flex;border:1px solid #20384d;border-radius:4px;overflow:hidden}
+.seg button{background:transparent;border:0;border-right:1px solid #20384d;padding:5px 9px;color:#a3b8c8;font-size:12px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#1b3348;color:#fff}
+.chip{border:1px solid #20384d;border-radius:4px;padding:5px 9px;color:#a3b8c8;font-size:12px;background:transparent}
+.bar2{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid #20384d}
+h1{margin:0;font-size:18px;font-weight:600;margin-right:6px}
+.prev{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px dashed #f2b64a;padding:1px 6px;border-radius:3px}
+.pg{padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.w{background:#0f1d2c;border:1px solid #20384d;min-width:0}
+.wh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid #20384d}
+.wh h2{margin:0;font-size:12px;font-weight:600;color:#e6eef4}
+.wh span{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.wb{padding:10px 12px}
+.q{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;font-size:12px}
+.q .a{background:#2f6fd6;color:#fff;font-weight:600;padding:6px 10px;border-radius:4px 0 0 4px;display:flex;align-items:center}
+.q .f{border:1px solid #20384d;border-left:0;background:#0a1420;padding:6px 10px;display:flex;align-items:center;gap:6px;color:#e6eef4}
+.q .f em{font-style:normal;color:#7f98ad}
+.q .f.hl{background:#3a3412;border-color:#6b5a14}
+.q .f:last-child{border-radius:0 4px 4px 0}
+.btn{border:1px solid #2c4a63;border-radius:4px;padding:5px 10px;background:transparent;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;font-size:12px;color:#a3b8c8}
+.row .chip{color:#e6eef4}
+.plot{position:relative;height:300px}
+.plot svg{position:absolute;inset:0;width:100%;height:100%}
+.yl{position:absolute;left:0;font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.nowl{position:absolute;top:0;font:600 11px 'Public Sans',sans-serif;letter-spacing:.1em;color:#f2b64a;padding-left:5px}
+.xl{display:flex;justify-content:space-between;font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad;margin-top:4px;padding-left:34px}
+.tip{position:absolute;top:30px;background:#0a1420;border:1px solid #3c5f7c;padding:8px 10px;font-size:11px;min-width:200px}
+.tip b{font:500 11px 'Spline Sans Mono',monospace;color:#8aa3b8;display:block;margin-bottom:4px}
+.tip div{display:flex;justify-content:space-between;gap:12px;padding:1px 0}
+.tip i{display:inline-block;width:10px;height:3px;margin-right:6px;vertical-align:middle}
+.brush{height:34px;position:relative;margin:10px 0 0 34px;border:1px solid #20384d;background:#0a1420}
+.brush svg{position:absolute;inset:0;width:100%;height:100%}
+.brush span{position:absolute;left:34%;width:42%;top:0;bottom:0;border:1.5px solid #4aa3ff;background:rgba(74,163,255,.14)}
+.src{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7f98ad;padding:5px 8px;border-bottom:1px solid #20384d}
+td{padding:6px 8px;border-bottom:1px solid #162a3b;font-size:12px}
+td.n,th.n{text-align:right;font-family:'Spline Sans Mono',monospace}
+td i{display:inline-block;width:12px;height:3px;margin-right:6px;vertical-align:middle}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.nav{display:none}}
+
+.top{height:auto;min-height:46px}
+.chip{white-space:nowrap}
+.search{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.burger{display:none;background:transparent;border:1px solid #20384d;border-radius:4px;padding:5px 8px;color:#e6eef4}
+.burger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;display:block}
+.scope{display:flex;border:1px solid #2c4a63;border-radius:4px;overflow:hidden}
+.sc{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-right:1px solid #2c4a63;padding:5px 10px;color:#7f98ad;font-size:12px;font-weight:500;white-space:nowrap}
+.sc:last-child{border-right:0}
+.sc .ck{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;position:relative;flex:none}
+.sc b{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.sc.on{background:#1f4f8f;color:#fff;font-weight:600}
+.sc.on .ck{background:#fff;border-color:#fff}
+.sc.on .ck::after{content:"";position:absolute;left:3px;top:0;width:3px;height:6px;border:solid #1f4f8f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc.on b{color:#cfe2ff}
+.sc:focus-visible,.burger:focus-visible{outline:2px solid #62a8ff;outline-offset:-2px}
+.scrim{display:none}
+@media (max-width:900px){
+.app{grid-template-columns:minmax(0,1fr)}
+.nav{display:none;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:60;overflow-y:auto}
+.nav.open{display:flex}
+.scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+.burger{display:block;order:1}
+.top{flex-wrap:wrap;padding:8px 12px;gap:8px}
+.crumb{order:2;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .chip{order:3}
+.scope{order:4;flex:1 1 100%}
+.sc{flex:1;justify-content:center;padding:6px 4px}
+.search{order:5;flex:1 1 100%;max-width:none}
+.top .seg{order:6;margin-left:0!important}
+}
+@media (max-width:700px){.tip{left:auto!important;right:6px;top:6px;min-width:0;max-width:200px}.q .f{flex-wrap:wrap}.top .seg{flex:1 1 100%}.top .seg button{flex:1}.sc .ck{display:none}}
+</style>
+</helmet>
+<div class="{{scrim}}" onClick="{{toggleMenu}}"></div>
+<div class="app">
+<nav class="{{menuCls}}" aria-label="Main">
+<div class="logo"><i></i><span>UPTIME<b>TRACE</b></span></div>
+<div class="ws"><span>Workspace · preview</span><span>▾</span></div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="14">
+<sc-if value="{{n.group}}" hint-placeholder-val="{{ false }}"><div class="grp">{{n.label}}</div></sc-if>
+<sc-if value="{{n.item}}" hint-placeholder-val="{{ true }}"><a class="{{n.cls}}" href="{{n.href}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"/></svg>{{n.label}}<sc-if value="{{n.tag}}" hint-placeholder-val="{{ false }}"><span class="tg">{{n.tag}}</span></sc-if></a></sc-if>
+</sc-for>
+</nav>
+<div class="main">
+<div class="top">
+<button class="burger" type="button" aria-label="Open menu" onClick="{{toggleMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="crumb">Infrastructure / <b>Metrics Explorer</b></div>
+<button class="search" type="button">Search hosts, metrics, incidents, or ask…   ⌘K</button>
+<div class="scope" role="group" aria-label="Data source scope"><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc" type="button" aria-pressed="false"><i class="ck"></i>REPLAY <b>2</b></button></div>
+<div class="seg" style="margin-left:auto"><button type="button">1h</button><button type="button" class="on">6h</button><button type="button">1d</button><button type="button">Custom…</button></div>
+<div class="seg"><button type="button" aria-label="Back">◀</button><button type="button" class="on" aria-label="Pause">▮▮</button><button type="button" aria-label="Forward">▶</button></div>
+<button class="chip" type="button">Alerts 3</button>
+</div>
+<div class="bar2"><h1>Metrics Explorer</h1><span class="prev">PREVIEW DATA</span><span class="src" style="margin-left:auto">scope: LIVE + SYNTHETIC · REPLAY hidden (series from replay hosts are not drawn) · preview data · API not built yet</span></div>
+<div class="pg">
+<section class="w"><div class="wb">
+<div class="q"><div class="a">a</div><div class="f">Metric <em>▾</em></div><div class="f hl">system.cpu.utilization</div><div class="f"><em>from</em> host:dev-win-01, live-lnx-02, sim-host-01</div><div class="f"><em>avg by</em> host</div><div class="f"><em>step</em> 1 min</div><div class="f">Σ</div></div>
+<div class="row"><button class="btn" type="button">+ Add query</button><button class="btn" type="button">+ Add formula</button><span style="margin-left:12px">Display: <span class="chip">Lines ▾</span></span><span>Colour: <span class="chip">By host ▾</span></span><span>Style: <span class="chip">Solid ▾</span></span><span>Compare: <span class="chip">Previous period ▾</span></span><span>Forecast: <span class="chip">Off ▾</span></span></div>
+</div></section>
+<section class="w"><div class="wh"><h2>avg:system.cpu.utilization{*} by {host}</h2><span>drag on the chart or the strip below to zoom</span></div><div class="wb">
+<div class="plot"><span class="yl" style="top:0">100%</span><span class="yl" style="top:142px">50%</span><span class="yl" style="bottom:0">0%</span>
+<svg viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
+<g stroke="#162a3b"><path d="M34 0H1000M34 75H1000M34 150H1000M34 225H1000M34 299H1000"/></g>
+<rect x="{{cx}}" y="0" width="1" height="300" fill="#8aa3b8"/>
+<sc-for list="{{lines}}" as="l" hint-placeholder-count="4"><path d="{{l.d}}" fill="none" stroke="{{l.c}}" stroke-width="{{l.w}}" stroke-dasharray="{{l.dash}}" opacity="{{l.o}}" vector-effect="non-scaling-stroke"/></sc-for>
+</svg>
+<div class="tip" style="left:calc({{tipPct}}% + 12px)"><b>{{tipTime}}</b><sc-for list="{{tipRows}}" as="t" hint-placeholder-count="3"><div><span><i style="background:{{t.c}}"></i>{{t.name}}</span><span class="src" style="font-size:11px">{{t.src}} · {{t.v}}</span></div></sc-for></div></div>
+<div class="xl"><span>08:22</span><span>09:22</span><span>10:22</span><span>11:22</span><span>12:22</span><span>13:22</span><span>14:22</span></div>
+<div class="brush"><svg viewBox="0 0 1000 34" preserveAspectRatio="none" aria-hidden="true"><path d="{{brush}}" fill="none" stroke="#8aa3b8" stroke-width="1" vector-effect="non-scaling-stroke"/></svg><span></span></div>
+</div></section>
+<section class="w"><div class="wh"><h2>Series</h2><span>6 h window · 3 of 5 hosts</span></div><div class="tw"><table>
+<thead><tr><th>Host</th><th>Source</th><th class="n">Min</th><th class="n">Avg</th><th class="n">Max</th><th class="n">Last</th><th class="n">Prev. 6 h avg</th></tr></thead>
+<tbody>
+<sc-for list="{{stats}}" as="r" hint-placeholder-count="3"><tr><td><i style="background:{{r.c}}"></i>{{r.name}}</td><td class="src">{{r.src}}</td><td class="n">{{r.min}}</td><td class="n">{{r.avg}}</td><td class="n">{{r.max}}</td><td class="n">{{r.last}}</td><td class="n">{{r.prev}}</td></tr></sc-for>
+</tbody></table></div></section>
+<div class="src">Network metrics are stored as cumulative byte counters; the API returns bytes per second and skips counter resets rather than plotting spikes.</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+function rng(s){let a=s;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function series(seed,n,base,amp,noise,drift){const r=rng(seed);const o=[];let w=0;for(let i=0;i<n;i++){w+=(r()-.5)*noise;w*=.9;const s=base+amp*Math.sin(i/(n/5))+drift*i/n+w;o.push(Math.max(2,Math.min(98,s)));}return o;}
+function pth(v,x0,x1,h,min,max){const n=v.length;let d='';for(let i=0;i<n;i++){const x=x0+(x1-x0)*i/(n-1);const y=h-(v[i]-min)/(max-min)*h;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';}return d;}
+class Component extends DCLogic {
+  constructor(props){super(props);this.state={open:false};}
+  renderVals() {
+    const nav=[
+      {item:true,label:'Overview',href:'Main.dc.html',cls:'it',d:'M3 11 12 3l9 8M5 10v10h14V10'},
+      {group:true,label:'Infrastructure'},
+      {item:true,label:'Hosts',href:'Hosts.dc.html',cls:'it',d:'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01'},
+      {item:true,label:'Metrics Explorer',href:'Metrics.dc.html',cls:'it on',d:'M4 19V5M4 19h16M8 15l4-5 3 3 5-6'},
+      {item:true,label:'Dependencies',href:'States.dc.html',cls:'it',d:'M6 6h.01M18 6h.01M12 18h.01M6 6l6 12M18 6l-6 12',tag:'soon'},
+      {group:true,label:'Detect & respond'},
+      {item:true,label:'Anomalies',href:'States.dc.html',cls:'it',d:'M3 12h4l3-8 4 16 3-8h4'},
+      {item:true,label:'Alerts & Rules',href:'States.dc.html',cls:'it',d:'M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0'},
+      {item:true,label:'Incidents',href:'States.dc.html',cls:'it',d:'M12 3 2 20h20zM12 10v5M12 18h.01'},
+      {item:true,label:'Events',href:'States.dc.html',cls:'it',d:'M5 5h14M5 10h14M5 15h9M5 20h6'},
+      {group:true,label:'Intelligence'},
+      {item:true,label:'Risk Outlook',href:'Risk.dc.html',cls:'it',d:'M4 18c4 0 4-10 8-10s4 10 8 10',tag:'EXP'},
+      {item:true,label:'Investigations',href:'Investigations.dc.html',cls:'it',d:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5'},
+      {group:true,label:'Settings'},
+      {item:true,label:'Agents',href:'States.dc.html',cls:'it',d:'M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4'},
+      {item:true,label:'Workspace & members',href:'States.dc.html',cls:'it',d:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 4-6 8-6s8 2 8 6'}
+    ];
+    const S0=series(31,120,38,14,10,10),S1=series(32,120,26,8,6,4),S2=series(33,120,55,22,13,36),S3=series(34,120,40,14,9,2);
+    const X=966,X0=34;const ci=57;const cx=(X0+X*ci/119);
+    const mins=Math.round(8*60+22+360*ci/119);const tipTime=String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+    const f=v=>Math.round(v)+'%';
+    const mm=a=>({min:f(Math.min.apply(null,a)),avg:f(a.reduce((x,y)=>x+y,0)/a.length),max:f(Math.max.apply(null,a)),last:f(a[a.length-1])});
+    const stats=[{name:'sim-host-01',src:'SYNTHETIC',c:'#ff6a55',prev:'–'},{name:'dev-win-01',src:'LIVE',c:'#4aa3ff',prev:f(S3.reduce((x,y)=>x+y,0)/S3.length)},{name:'live-lnx-02',src:'LIVE',c:'#35d0b5',prev:'–'}];
+    [S2,S0,S1].forEach((a,i)=>Object.assign(stats[i],mm(a)));
+    const tipRows=[{name:'sim-host-01',src:'SYNTHETIC',c:'#ff6a55',v:f(S2[ci])},{name:'dev-win-01',src:'LIVE',c:'#4aa3ff',v:f(S0[ci])},{name:'live-lnx-02',src:'LIVE',c:'#35d0b5',v:f(S1[ci])}];
+    const lines=[
+      {d:pth(S0,34,1000,300,0,100),c:'#4aa3ff',w:1.6,dash:'',o:1},
+      {d:pth(S1,34,1000,300,0,100),c:'#35d0b5',w:1.6,dash:'',o:1},
+      {d:pth(S2,34,1000,300,0,100),c:'#ff6a55',w:1.6,dash:'',o:1},
+      {d:pth(S3,34,1000,300,0,100),c:'#4aa3ff',w:1.2,dash:'1 4',o:.7}
+    ];
+    return {cx:cx.toFixed(1),tipPct:(cx/10).toFixed(1),tipTime,tipRows,stats,menuCls:this.state.open?'nav open':'nav',scrim:this.state.open?'scrim on':'scrim',toggleMenu:()=>this.setState({open:!this.state.open}),nav,lines,brush:pth(series(35,120,40,18,8,20),0,1000,34,0,100)};
+  }
+}
+</script>
+</body>
+</html>

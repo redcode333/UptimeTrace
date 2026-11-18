@@ -1,0 +1,37 @@
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+artifacts/
+
+# Agent credentials (hashes only, but still not for version control)
+credentials.json
+.cred-*.tmp
+
+# Build outputs
+agent/bin/
+*.exe
+node_modules/
+dist/
+.pytest_cache/
+*.bak*
+.impeccable/hook.cache.json

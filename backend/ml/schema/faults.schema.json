@@ -1,0 +1,238 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/faults.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "concurrent_with": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "conflict_end": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "conflict_footprint": {
+   "items": {
+    "enum": [
+     "cpu",
+     "mem",
+     "disk_root",
+     "disk_data",
+     "rx",
+     "tx"
+    ]
+   },
+   "type": "array"
+  },
+  "conflict_start": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "counter_reset_at": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "counter_reset_series": {
+   "items": {
+    "type": "string"
+   },
+   "type": "array"
+  },
+  "family": {
+   "enum": [
+    "mem_leak",
+    "disk_fill",
+    "cpu_runaway",
+    "net_flood",
+    "pool_exhaustion",
+    "silent_crash"
+   ]
+  },
+  "fault_id": {
+   "type": "string"
+  },
+  "footprint_class": {
+   "enum": [
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8",
+    "F9",
+    "F10"
+   ]
+  },
+  "host_id": {
+   "type": "string"
+  },
+  "impact_end": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "impact_start": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "mechanism_resource": {
+   "type": "string"
+  },
+  "member_relation": {
+   "enum": [
+    "primary",
+    "relapse",
+    null
+   ]
+  },
+  "outcome": {
+   "enum": [
+    "incident",
+    "twin"
+   ]
+  },
+  "params": {
+   "type": "object"
+  },
+  "peak_time": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "plan_group_id": {
+   "type": "string"
+  },
+  "planned_outcome": {
+   "enum": [
+    "incident",
+    "twin"
+   ]
+  },
+  "precursor_lead_s": {
+   "type": [
+    "number",
+    "null"
+   ]
+  },
+  "precursor_signal": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "precursor_start": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "precursor_start_by_signal": {
+   "type": "object"
+  },
+  "rejection_attempts": {
+   "maximum": 1000,
+   "minimum": 1,
+   "type": "integer"
+  },
+  "resolved_time": {
+   "anyOf": [
+    {
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "severity": {
+   "type": "number"
+  },
+  "silent_reason": {
+   "enum": [
+    "by_construction",
+    "sub_noise",
+    null
+   ]
+  },
+  "start": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "variant": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "fault_id",
+  "run_id",
+  "host_id",
+  "family",
+  "variant",
+  "planned_outcome",
+  "outcome",
+  "plan_group_id",
+  "params",
+  "severity",
+  "mechanism_resource",
+  "footprint_class",
+  "conflict_footprint",
+  "conflict_start",
+  "conflict_end",
+  "counter_reset_at",
+  "counter_reset_series",
+  "start",
+  "precursor_start",
+  "precursor_lead_s",
+  "precursor_signal",
+  "precursor_start_by_signal",
+  "silent_reason",
+  "peak_time",
+  "impact_start",
+  "impact_end",
+  "resolved_time",
+  "member_relation",
+  "concurrent_with",
+  "rejection_attempts"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: faults",
+ "type": "object"
+}

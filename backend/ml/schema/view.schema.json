@@ -1,0 +1,39 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/view.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "cadence_s": {
+   "enum": [
+    30,
+    60,
+    120
+   ]
+  },
+  "dataset_kind": {
+   "enum": [
+    "primary",
+    "dev"
+   ]
+  },
+  "jitter_on": {
+   "type": "boolean"
+  },
+  "latent_dt_s": {
+   "const": 30
+  },
+  "origin_offset_s": {
+   "minimum": 0,
+   "type": "integer"
+  }
+ },
+ "required": [
+  "cadence_s",
+  "latent_dt_s",
+  "jitter_on",
+  "dataset_kind",
+  "origin_offset_s"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: view",
+ "type": "object"
+}

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Risk Outlook</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#0a1420}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:#0a1420;color:#e6eef4;font:13px/1.4 'Public Sans',sans-serif}
+.nav{background:#0f1d2c;border-right:1px solid #20384d;padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.logo{font-weight:700;font-size:16px;letter-spacing:.06em;padding:4px 8px 12px;display:flex;align-items:center;gap:8px}.logo b{color:#f2b64a}
+.logo i{width:18px;height:18px;border:2px solid #e6eef4;border-radius:3px;display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:3px;top:6px;width:8px;height:2px;background:#f2b64a;transform:rotate(-30deg)}
+.ws{border:1px solid #20384d;border-radius:4px;padding:6px 8px;margin:0 0 6px;color:#a3b8c8;font-size:12px;display:flex;justify-content:space-between}
+.grp{font-weight:600;font-size:11px;letter-spacing:.14em;color:#7f98ad;padding:12px 8px 4px;text-transform:uppercase}
+.it{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:4px;color:#a3b8c8}
+.it:hover{background:#14283a}
+.it.on{background:#1b3348;color:#fff;font-weight:600}
+.it svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tg{margin-left:auto;font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px solid #f2b64a;border-radius:3px;padding:0 4px}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{height:46px;border-bottom:1px solid #20384d;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0f1d2c}
+.crumb{color:#8aa3b8;font-size:12px}.crumb b{color:#e6eef4;font-weight:600}
+.search{flex:1;max-width:420px;border:1px solid #20384d;border-radius:4px;padding:5px 10px;color:#8aa3b8;background:#0a1420;text-align:left;font-size:12px}
+.seg{display:flex;border:1px solid #20384d;border-radius:4px;overflow:hidden}
+.seg button{background:transparent;border:0;border-right:1px solid #20384d;padding:5px 9px;color:#a3b8c8;font-size:12px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#1b3348;color:#fff}
+.chip{border:1px solid #20384d;border-radius:4px;padding:5px 9px;color:#a3b8c8;font-size:12px;background:transparent}
+.pg{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.intro{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:start}
+h1{margin:0 0 6px;font-size:24px;font-weight:600}
+.intro p{margin:0;color:#a3b8c8;font-size:13px;line-height:1.55;max-width:70ch}
+.prev{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px dashed #f2b64a;padding:1px 6px;border-radius:3px;vertical-align:middle}
+.banner{border:1px dashed #a8832e;background:#14180f;padding:10px 12px;font-size:12px;color:#d6dde3;line-height:1.5}
+.banner b{color:#f2b64a;letter-spacing:.12em;font-size:11px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.colh{font-size:15px;font-weight:600;padding:2px 0}
+.w{background:#0f1d2c;border:1px solid #20384d;min-width:0;display:flex;flex-direction:column}
+.col>.w{flex:1}
+.wh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-bottom:1px solid #20384d}
+.wh h2{margin:0;font-size:12px;font-weight:600}
+.wh span{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.wb{padding:8px 10px;flex:1;display:flex;flex-direction:column}
+.plot{position:relative;flex:1;min-height:150px;margin-top:16px}
+.plot svg{position:absolute;inset:0;width:100%;height:100%}
+.yl{position:absolute;left:0;font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.nowl{position:absolute;top:-16px;font:600 11px 'Public Sans',sans-serif;letter-spacing:.1em;color:#f2b64a;padding-left:5px}
+.xl{display:flex;justify-content:space-between;font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad;margin-top:3px;padding-left:26px}
+.lg{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:#a3b8c8;margin-top:6px}
+.lg i{display:inline-block;width:10px;height:3px;margin-right:4px;vertical-align:middle}
+.src{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7f98ad;padding:5px 8px;border-bottom:1px solid #20384d}
+td{padding:6px 8px;border-bottom:1px solid #162a3b;font-size:12px}
+td.n,th.n{text-align:right;font-family:'Spline Sans Mono',monospace}
+.meter{display:inline-block;width:70px;height:7px;border:1px solid #a8832e;vertical-align:middle;margin-right:6px;position:relative}
+.meter i{position:absolute;left:0;top:0;bottom:0;background:#f2b64a;width:var(--w)}
+.meter u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#e6eef4;left:50%}
+.flag{font-weight:600;font-size:11px;letter-spacing:.08em;padding:2px 6px;border:1.5px solid var(--c);color:var(--c);display:inline-block}
+.card{font-size:12px;color:#c9d6e0;line-height:1.5}
+.kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 10px;font-size:12px;margin:0}
+.kv dt{color:#7f98ad}.kv dd{margin:0}
+@media (max-width:1200px){.cols{grid-template-columns:minmax(0,1fr)}.intro{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.nav{display:none}}
+
+.top{height:auto;min-height:46px}
+.chip{white-space:nowrap}
+.search{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.burger{display:none;background:transparent;border:1px solid #20384d;border-radius:4px;padding:5px 8px;color:#e6eef4}
+.burger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;display:block}
+.scope{display:flex;border:1px solid #2c4a63;border-radius:4px;overflow:hidden}
+.sc{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-right:1px solid #2c4a63;padding:5px 10px;color:#7f98ad;font-size:12px;font-weight:500;white-space:nowrap}
+.sc:last-child{border-right:0}
+.sc .ck{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;position:relative;flex:none}
+.sc b{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.sc.on{background:#1f4f8f;color:#fff;font-weight:600}
+.sc.on .ck{background:#fff;border-color:#fff}
+.sc.on .ck::after{content:"";position:absolute;left:3px;top:0;width:3px;height:6px;border:solid #1f4f8f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc.on b{color:#cfe2ff}
+.sc:focus-visible,.burger:focus-visible{outline:2px solid #62a8ff;outline-offset:-2px}
+.scrim{display:none}
+@media (max-width:900px){
+.app{grid-template-columns:minmax(0,1fr)}
+.nav{display:none;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:60;overflow-y:auto}
+.nav.open{display:flex}
+.scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+.burger{display:block;order:1}
+.top{flex-wrap:wrap;padding:8px 12px;gap:8px}
+.crumb{order:2;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .chip{order:3}
+.scope{order:4;flex:1 1 100%}
+.sc{flex:1;justify-content:center;padding:6px 4px}
+.search{order:5;flex:1 1 100%;max-width:none}
+.top .seg{order:6;margin-left:0!important}
+}
+@media (max-width:700px){.top .seg{flex:1 1 100%}.top .seg button{flex:1}.sc .ck{display:none}}
+</style>
+</helmet>
+<div class="{{scrim}}" onClick="{{toggleMenu}}"></div>
+<div class="app">
+<nav class="{{menuCls}}" aria-label="Main">
+<div class="logo"><i></i><span>UPTIME<b>TRACE</b></span></div>
+<div class="ws"><span>Workspace · preview</span><span>▾</span></div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="14">
+<sc-if value="{{n.group}}" hint-placeholder-val="{{ false }}"><div class="grp">{{n.label}}</div></sc-if>
+<sc-if value="{{n.item}}" hint-placeholder-val="{{ true }}"><a class="{{n.cls}}" href="{{n.href}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"/></svg>{{n.label}}<sc-if value="{{n.tag}}" hint-placeholder-val="{{ false }}"><span class="tg">{{n.tag}}</span></sc-if></a></sc-if>
+</sc-for>
+</nav>
+<div class="main">
+<div class="top">
+<button class="burger" type="button" aria-label="Open menu" onClick="{{toggleMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="crumb">Intelligence / <b>Risk Outlook</b></div>
+<button class="search" type="button">Search hosts, metrics, incidents, or ask…   ⌘K</button>
+<div class="scope" role="group" aria-label="Data source scope"><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>REPLAY <b>2</b></button></div>
+<div class="seg" style="margin-left:auto"><button type="button">6h</button><button type="button" class="on">1d</button><button type="button">7d</button></div>
+<button class="chip" type="button">Alerts 3</button>
+</div>
+<div class="pg">
+<div class="intro">
+<div><h1>Risk Outlook <span class="tg" style="margin:0">EXPERIMENTAL</span> <span class="prev">PREVIEW DATA</span></h1><p>Estimated chance of a failure within the next 30 minutes, shown beside what has actually been confirmed. Forecast bands sit to the right of NOW. A prediction is not an incident and never changes a host's state or sends an alert.</p></div>
+<div class="banner"><b>EXPERIMENTAL MODEL</b><br>Trained and checked only on simulated data. No claim is made about accuracy on real infrastructure; there has been no real-data validation yet.</div>
+</div>
+<div class="cols">
+<div class="col"><div class="colh">Risk by host</div>
+<section class="w"><div class="wh"><h2>Risk score · 30 min horizon</h2><span>forecast shaded</span></div><div class="wb">
+<div class="plot"><span class="yl" style="top:0">1.0</span><span class="yl" style="top:78px">0.5</span><span class="yl" style="bottom:0">0</span>
+<svg viewBox="0 0 400 170" preserveAspectRatio="none" aria-hidden="true"><g stroke="#162a3b"><path d="M26 0H400M26 42H400M26 85H400M26 127H400M26 169H400"/></g>
+<path d="M26 85H400" stroke="#e6eef4" stroke-width="1" stroke-dasharray="2 5" opacity=".6"/>
+<polygon points="{{band}}" fill="#f2b64a" fill-opacity=".3" stroke="#f2b64a" stroke-opacity=".7" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>
+<path d="M300 0V170" stroke="#f2b64a" stroke-dasharray="3 3"/>
+<sc-for list="{{rl}}" as="l" hint-placeholder-count="3"><path d="{{l.d}}" fill="none" stroke="{{l.c}}" stroke-width="1.4" stroke-dasharray="{{l.dash}}" vector-effect="non-scaling-stroke"/></sc-for></svg><span class="nowl" style="left:75%">NOW</span></div>
+<div class="xl"><span>08:22</span><span>11:22</span><span>14:22</span></div>
+<div class="lg"><span><i style="background:#f2b64a"></i>live-lnx-02 + outlook</span><span><i style="background:#ff6a55"></i>sim-host-01</span><span><i style="background:#4aa3ff"></i>dev-win-01</span><span>dotted = alert threshold 0.50</span></div>
+</div></section>
+<section class="w" style="flex:none"><div class="wh"><h2>Hosts by estimated risk</h2><span>model xgboost-h1800</span></div>
+<table><thead><tr><th>Host</th><th>Risk</th><th class="n">Score</th></tr></thead><tbody>
+<tr><td>sim-host-01 <span class="src">SYNTH</span></td><td><span class="meter" style="--w:91%"><i></i><u></u></span></td><td class="n">0.91</td></tr>
+<tr><td>live-lnx-02 <span class="src">LIVE</span></td><td><span class="meter" style="--w:62%"><i></i><u></u></span></td><td class="n">0.62</td></tr>
+<tr><td>dev-win-01 <span class="src">LIVE</span></td><td><span class="meter" style="--w:24%"><i></i><u></u></span></td><td class="n">0.24</td></tr>
+<tr><td>live-lnx-03 <span class="src">LIVE</span></td><td class="src">no score · agent silent</td><td class="n">–</td></tr>
+</tbody></table></section>
+</div>
+<div class="col"><div class="colh">Capacity</div>
+<section class="w"><div class="wh"><h2>Disk C: · dev-win-01</h2><span>statistical projection, not the model</span></div><div class="wb">
+<div class="plot"><span class="yl" style="top:0">100%</span><span class="yl" style="top:46%">90%</span><span class="yl" style="bottom:0">80%</span>
+<svg viewBox="0 0 400 170" preserveAspectRatio="none" aria-hidden="true"><g stroke="#162a3b"><path d="M26 0H400M26 42H400M26 85H400M26 127H400M26 169H400"/></g>
+<path d="M26 42.5H400" stroke="#e5483a" stroke-dasharray="3 3"/>
+<polygon points="{{dband}}" fill="#f2b64a" fill-opacity=".3" stroke="#f2b64a" stroke-opacity=".7" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/>
+<path d="M300 0V170" stroke="#f2b64a" stroke-dasharray="3 3"/>
+<path d="{{disk}}" fill="none" stroke="#4aa3ff" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+<path d="{{dfc}}" fill="none" stroke="#f2b64a" stroke-width="1.5" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/></svg><span class="nowl" style="left:75%">NOW</span></div>
+<div class="xl"><span>08:22</span><span>11:22</span><span>14:22</span></div>
+<div class="lg"><span><i style="background:#4aa3ff"></i>measured</span><span><i style="background:#f2b64a"></i>linear projection</span><span><i style="background:#e5483a"></i>critical rule 95%</span></div>
+</div></section>
+<section class="w"><div class="wh"><h2>Memory trend · live-lnx-02</h2><span>forecast shaded</span></div><div class="wb">
+<div class="plot"><svg viewBox="0 0 400 130" preserveAspectRatio="none" aria-hidden="true"><g stroke="#162a3b"><path d="M26 0H400M26 43H400M26 86H400M26 129H400"/></g>
+<polygon points="{{mband}}" fill="#f2b64a" fill-opacity=".3" stroke="#f2b64a" stroke-opacity=".7" stroke-dasharray="2 3" vector-effect="non-scaling-stroke"/><path d="M300 0V130" stroke="#f2b64a" stroke-dasharray="3 3"/>
+<path d="{{mem}}" fill="none" stroke="#35d0b5" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg><span class="nowl" style="left:75%">NOW</span></div>
+</div></section>
+</div>
+<div class="col"><div class="colh">Predicted vs confirmed</div>
+<section class="w"><div class="wh"><h2>Confirmed incidents vs risk above threshold</h2><span>per hour</span></div><div class="wb">
+<div class="plot"><svg viewBox="0 0 400 150" preserveAspectRatio="none" aria-hidden="true"><g stroke="#162a3b"><path d="M0 37H400M0 75H400M0 112H400"/></g>
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="24"><rect x="{{b.x}}" y="{{b.y}}" width="9" height="{{b.h}}" fill="{{b.c}}" fill-opacity="{{b.o}}" stroke="{{b.s}}" stroke-dasharray="{{b.dash}}"/></sc-for></svg></div>
+<div class="lg"><span><i style="background:#e5483a"></i>confirmed incidents</span><span><i style="border:1px dashed #f2b64a;height:8px;width:10px;background:transparent"></i>hosts above threshold (predicted)</span></div>
+<div class="src" style="margin-top:8px">Predicted bars are outlined and never stacked with confirmed ones. Accuracy of the model is not shown because it has not been measured on real data.</div>
+</div></section>
+<section class="w" style="flex:none"><div class="wh"><h2>Model card</h2><span class="tg" style="margin:0">EXP</span></div><div class="wb">
+<dl class="kv"><dt>Model</dt><dd>XGBoost baseline, 30 min</dd><dt>Trained on</dt><dd>Synthetic simulator data only</dd><dt>Threshold</dt><dd>Chosen on validation data</dd><dt>Real-data check</dt><dd>None yet</dd><dt>Feature pipeline</dt><dd>Not built in backend yet</dd></dl>
+</div></section>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1020}}'>
+function rng(s){let a=s;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function series(seed,n,base,amp,noise,drift){const r=rng(seed);const o=[];let w=0;for(let i=0;i<n;i++){w+=(r()-.5)*noise;w*=.9;const s=base+amp*Math.sin(i/(n/5))+drift*i/n+w;o.push(Math.max(2,Math.min(98,s)));}return o;}
+function pth(v,x0,x1,h,min,max){const n=v.length;let d='';for(let i=0;i<n;i++){const x=x0+(x1-x0)*i/(n-1);const y=h-(v[i]-min)/(max-min)*h;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';}return d;}
+class Component extends DCLogic {
+  constructor(props){super(props);this.state={open:false};}
+  renderVals() {
+    const nav=[
+      {item:true,label:'Overview',href:'Main.dc.html',cls:'it',d:'M3 11 12 3l9 8M5 10v10h14V10'},
+      {group:true,label:'Infrastructure'},
+      {item:true,label:'Hosts',href:'Hosts.dc.html',cls:'it',d:'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01'},
+      {item:true,label:'Metrics Explorer',href:'Metrics.dc.html',cls:'it',d:'M4 19V5M4 19h16M8 15l4-5 3 3 5-6'},
+      {item:true,label:'Dependencies',href:'States.dc.html',cls:'it',d:'M6 6h.01M18 6h.01M12 18h.01M6 6l6 12M18 6l-6 12',tag:'soon'},
+      {group:true,label:'Detect & respond'},
+      {item:true,label:'Anomalies',href:'States.dc.html',cls:'it',d:'M3 12h4l3-8 4 16 3-8h4'},
+      {item:true,label:'Alerts & Rules',href:'States.dc.html',cls:'it',d:'M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0'},
+      {item:true,label:'Incidents',href:'States.dc.html',cls:'it',d:'M12 3 2 20h20zM12 10v5M12 18h.01'},
+      {item:true,label:'Events',href:'States.dc.html',cls:'it',d:'M5 5h14M5 10h14M5 15h9M5 20h6'},
+      {group:true,label:'Intelligence'},
+      {item:true,label:'Risk Outlook',href:'Risk.dc.html',cls:'it on',d:'M4 18c4 0 4-10 8-10s4 10 8 10',tag:'EXP'},
+      {item:true,label:'Investigations',href:'Investigations.dc.html',cls:'it',d:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5'},
+      {group:true,label:'Settings'},
+      {item:true,label:'Agents',href:'States.dc.html',cls:'it',d:'M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4'},
+      {item:true,label:'Workspace & members',href:'States.dc.html',cls:'it',d:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 4-6 8-6s8 2 8 6'}
+    ];
+    const a=series(71,75,30,10,8,34);const ay=170-a[74]/100*170;
+    const rl=[
+      {d:pth(a,26,300,170,0,100)+'L350 '+(ay-16).toFixed(1)+' L400 '+(ay-26).toFixed(1),c:'#f2b64a',dash:''},
+      {d:pth(series(72,100,75,15,10,18),26,400,170,0,100),c:'#ff6a55',dash:''},
+      {d:pth(series(73,100,18,6,5,2),26,400,170,0,100),c:'#4aa3ff',dash:''}
+    ];
+    const band='300,'+ay.toFixed(1)+' 350,'+(ay-40).toFixed(1)+' 400,'+(ay-62).toFixed(1)+' 400,'+(ay+6).toFixed(1)+' 350,'+(ay+2).toFixed(1);
+    const m=series(74,75,62,5,4,20);const my=130-m[74]/100*130;
+    const mband='300,'+my.toFixed(1)+' 350,'+(my-18).toFixed(1)+' 400,'+(my-30).toFixed(1)+' 400,'+(my+4).toFixed(1)+' 350,'+(my+2).toFixed(1);
+    const dv=series(75,75,90,1,1,8);const dy=170-(dv[74]-80)/20*170;
+    const disk=pth(dv.map(v=>Math.max(80,v)),26,300,170,80,100);
+    const dfc='M300 '+dy.toFixed(1)+' L400 '+Math.max(2,dy-14).toFixed(1);
+    const dband='300,'+dy.toFixed(1)+' 400,'+Math.max(0,dy-26).toFixed(1)+' 400,'+Math.max(4,dy-2).toFixed(1);
+    const r=rng(8);const raw=[];let mx=1;for(let i=0;i<24;i++){const c=Math.round(r()*(i>16?40:12));const p=Math.round(r()*(i>12?50:14));raw.push([c,p]);mx=Math.max(mx,c,p);}
+    const k=130/mx;const bars=[];raw.forEach((q,i)=>{const x=i*16.4;if(q[0]>0)bars.push({x:x,y:150-q[0]*k,h:q[0]*k,c:'#e5483a',o:1,s:'none',dash:''});if(q[1]>0)bars.push({x:x,y:150-q[1]*k,h:q[1]*k,c:'none',o:0,s:'#f2b64a',dash:'2 2'});});
+    return {menuCls:this.state.open?'nav open':'nav',scrim:this.state.open?'scrim on':'scrim',toggleMenu:()=>this.setState({open:!this.state.open}),nav,rl,band,mband,disk:disk,dband:dband,dfc:dfc,mem:pth(m,26,300,130,0,100)+'L350 '+(my-14).toFixed(1)+' L400 '+(my-22).toFixed(1),bars};
+  }
+}
+</script>
+</body>
+</html>

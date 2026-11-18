@@ -1,0 +1,179 @@
+{
+  "_comment": "For every file in invalid/: the exact set of schema failures it must produce. path is a JSON Pointer into the payload; keyword is the JSON Schema keyword that failed. Other implementations should map their error reports to these.",
+  "fixtures": {
+    "bad-metric-name.json": [
+      {
+        "path": "/metrics/0/name",
+        "keyword": "pattern"
+      }
+    ],
+    "counter-negative-value.json": [
+      {
+        "path": "/metrics/0/value",
+        "keyword": "minimum"
+      }
+    ],
+    "cpu-wrong-unit.json": [
+      {
+        "path": "/metrics/0/unit",
+        "keyword": "const"
+      }
+    ],
+    "disk-missing-mount-label.json": [
+      {
+        "path": "/metrics/0/labels",
+        "keyword": "required"
+      }
+    ],
+    "empty-metrics.json": [
+      {
+        "path": "/metrics",
+        "keyword": "minItems"
+      }
+    ],
+    "envelope-id-not-uuid.json": [
+      {
+        "path": "/envelope_id",
+        "keyword": "pattern"
+      }
+    ],
+    "envelope-id-uppercase.json": [
+      {
+        "path": "/envelope_id",
+        "keyword": "pattern"
+      }
+    ],
+    "envelope-timestamp-month-13.json": [
+      {
+        "path": "/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "missing-envelope-id.json": [
+      {
+        "path": "",
+        "keyword": "required"
+      }
+    ],
+    "missing-host-id.json": [
+      {
+        "path": "",
+        "keyword": "required"
+      }
+    ],
+    "network-wrong-kind.json": [
+      {
+        "path": "/metrics/0/kind",
+        "keyword": "const"
+      }
+    ],
+    "percent-negative.json": [
+      {
+        "path": "/metrics/0/value",
+        "keyword": "minimum"
+      }
+    ],
+    "percent-over-100.json": [
+      {
+        "path": "/metrics/0/value",
+        "keyword": "maximum"
+      }
+    ],
+    "timestamp-april-31.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-day-zero.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-feb-29-century-non-leap.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-feb-29-non-leap-year.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-feb-30-leap-year.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-hour-24.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-leap-second.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-month-13.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-no-zone.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-offset-nonzero.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-offset-zero-not-z.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "pattern"
+      }
+    ],
+    "timestamp-trailing-newline.json": [
+      {
+        "path": "/metrics/0/timestamp",
+        "keyword": "not"
+      }
+    ],
+    "unknown-top-level-field.json": [
+      {
+        "path": "",
+        "keyword": "additionalProperties"
+      }
+    ],
+    "unsupported-schema-version.json": [
+      {
+        "path": "/schema_version",
+        "keyword": "const"
+      }
+    ],
+    "value-as-string.json": [
+      {
+        "path": "/metrics/0/value",
+        "keyword": "type"
+      }
+    ],
+    "value-overflow.json": [
+      {
+        "path": "/metrics/0/value",
+        "keyword": "maximum"
+      }
+    ]
+  }
+}

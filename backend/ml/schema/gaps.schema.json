@@ -1,0 +1,38 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/gaps.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "end": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "gap_id": {
+   "type": "string"
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "start": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "type": {
+   "enum": [
+    "agent_down",
+    "net_partition_buffered",
+    "planned_reboot_gap",
+    "panic_gap"
+   ]
+  }
+ },
+ "required": [
+  "gap_id",
+  "run_id",
+  "type",
+  "start",
+  "end"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: gaps",
+ "type": "object"
+}

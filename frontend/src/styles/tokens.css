@@ -1,0 +1,33 @@
+/* Design tokens from the approved board set (design/boards/System.dc.html). Dark-first, no light theme yet. */
+:root {
+  color-scheme: dark;
+  --ground: #0a1420;
+  --widget: #0f1d2c;
+  --widget-alt: #0c1928;
+  --raised: #14283a;
+  --selected: #1b3348;
+  --seam: #20384d;
+  --seam-faint: #162a3b;
+  --seam-strong: #2c4a63;
+  --ink: #e6eef4;
+  --ink-2: #a3b8c8;
+  --ink-3: #7f98ad;
+  --forecast: #f2b64a;   /* prediction, experimental, the one primary action */
+  --critical: #e5483a;
+  --critical-text: #ff6a55;
+  --warning: #e0951f;
+  --normal: #1f8f73;
+  --normal-text: #35d0b5;
+  --offline: #8aa3b8;
+  --scope-on: #1f4f8f;
+  --focus: #62a8ff;
+  --s1: #4aa3ff;
+  --s2: #35d0b5;
+  --s3: #ff6a55;
+  --s4: #a78bfa;
+  --font-ui: "Public Sans", system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", ui-monospace, monospace;
+  --sidebar-w: 216px;
+  --sidebar-w-collapsed: 56px;
+  --topbar-h: 46px;
+}

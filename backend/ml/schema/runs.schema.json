@@ -1,0 +1,91 @@
+{
+ "$id": "https://uptimetrace.dev/ml/schema/gt-1.0/runs.schema.json",
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "additionalProperties": false,
+ "properties": {
+  "agent_id": {
+   "type": "string"
+  },
+  "archetype": {
+   "type": "string"
+  },
+  "end_ts": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  },
+  "expected_series": {
+   "items": {
+    "enum": [
+     "cpu",
+     "mem",
+     "disk_root",
+     "disk_data",
+     "rx",
+     "tx"
+    ]
+   },
+   "maxItems": 6,
+   "minItems": 6,
+   "type": "array"
+  },
+  "host_id": {
+   "type": "string"
+  },
+  "hostname": {
+   "type": "string"
+  },
+  "profile": {
+   "type": "object"
+  },
+  "regime": {
+   "enum": [
+    "iid",
+    "ood"
+   ]
+  },
+  "run_id": {
+   "type": "string"
+  },
+  "seed_spawn_key": {
+   "items": {
+    "type": "integer"
+   },
+   "type": "array"
+  },
+  "service": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "split": {
+   "enum": [
+    "train",
+    "val",
+    "test_iid",
+    "test_ood"
+   ]
+  },
+  "start_ts": {
+   "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$",
+   "type": "string"
+  }
+ },
+ "required": [
+  "run_id",
+  "host_id",
+  "agent_id",
+  "hostname",
+  "service",
+  "archetype",
+  "split",
+  "regime",
+  "seed_spawn_key",
+  "start_ts",
+  "end_ts",
+  "expected_series",
+  "profile"
+ ],
+ "title": "UptimeTrace ground-truth sidecar gt-1.0: runs",
+ "type": "object"
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "envelope_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+  "agent_id": "agent-1",
+  "host_id": "host-1",
+  "hostname": "h1",
+  "timestamp": "2026-11-10T09:30:00Z",
+  "metrics": [ {"name":"system.cpu.utilization","kind":"gauge","value":"10","unit":"percent","timestamp":"2026-11-10T09:30:00Z"} ]
+}

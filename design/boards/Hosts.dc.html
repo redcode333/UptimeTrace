@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hosts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#0a1420}
+*{box-sizing:border-box}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:#0a1420;color:#e6eef4;font:13px/1.4 'Public Sans',sans-serif}
+.nav{background:#0f1d2c;border-right:1px solid #20384d;padding:12px 8px;display:flex;flex-direction:column;gap:1px}
+.logo{font-weight:700;font-size:16px;letter-spacing:.06em;padding:4px 8px 12px;display:flex;align-items:center;gap:8px}.logo b{color:#f2b64a}
+.logo i{width:18px;height:18px;border:2px solid #e6eef4;border-radius:3px;display:inline-block;position:relative}
+.logo i::after{content:"";position:absolute;left:3px;top:6px;width:8px;height:2px;background:#f2b64a;transform:rotate(-30deg)}
+.ws{border:1px solid #20384d;border-radius:4px;padding:6px 8px;margin:0 0 6px;color:#a3b8c8;font-size:12px;display:flex;justify-content:space-between}
+.grp{font-weight:600;font-size:11px;letter-spacing:.14em;color:#7f98ad;padding:12px 8px 4px;text-transform:uppercase}
+.it{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:4px;color:#a3b8c8}
+.it:hover{background:#14283a}
+.it.on{background:#1b3348;color:#fff;font-weight:600}
+.it svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tg{margin-left:auto;font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px solid #f2b64a;border-radius:3px;padding:0 4px}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{height:46px;border-bottom:1px solid #20384d;display:flex;align-items:center;gap:10px;padding:0 16px;background:#0f1d2c}
+.crumb{color:#8aa3b8;font-size:12px}.crumb b{color:#e6eef4;font-weight:600}
+.search{flex:1;max-width:420px;border:1px solid #20384d;border-radius:4px;padding:5px 10px;color:#8aa3b8;background:#0a1420;text-align:left;font-size:12px}
+.seg{display:flex;border:1px solid #20384d;border-radius:4px;overflow:hidden}
+.seg button{background:transparent;border:0;border-right:1px solid #20384d;padding:5px 9px;color:#a3b8c8;font-size:12px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#1b3348;color:#fff}
+.chip{border:1px solid #20384d;border-radius:4px;padding:5px 9px;color:#a3b8c8;font-size:12px;background:transparent}
+.bar2{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid #20384d}
+h1{margin:0;font-size:18px;font-weight:600;margin-right:6px}
+.prev{font:500 11px 'Spline Sans Mono',monospace;color:#f2b64a;border:1px dashed #f2b64a;padding:1px 6px;border-radius:3px}
+.src{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.body{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:0;flex:1}
+.fac{border-right:1px solid #20384d;padding:12px;display:flex;flex-direction:column;gap:12px;background:#0c1928}
+.fac input{background:#0a1420;border:1px solid #20384d;border-radius:4px;padding:6px 10px;width:100%;font-size:12px}
+.fg h2{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#a3b8c8}
+.fr{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:#c9d6e0}
+.fr i{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;flex:none}
+.fr i.k{background:#2f6fd6;border-color:#2f6fd6}
+.fr b{margin-left:auto;font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad;font-weight:500}
+.content{padding:12px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.w{background:#0f1d2c;border:1px solid #20384d;min-width:0}
+.wh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid #20384d;flex-wrap:wrap}
+.wh h2{margin:0;font-size:12px;font-weight:600}
+.wh span{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.mapw{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px;padding:10px 12px}
+.mapw svg{width:100%;height:250px;display:block}
+.pfb{border:1px dashed #f2b64a;color:#f2b64a;font:500 11px 'Spline Sans Mono',monospace;padding:4px 8px;margin-bottom:6px;line-height:1.4}
+.fnote{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad;line-height:1.4;border-bottom:1px solid #20384d;padding-bottom:8px}
+.hl{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:#a3b8c8;margin-top:6px}
+.hl i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:middle;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}
+.dist{display:flex;flex-direction:column;gap:8px}
+.dist .t{display:flex;height:16px;border:1px solid #20384d}
+.dist .t i{display:block}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#7f98ad;padding:6px 8px;border-bottom:1px solid #20384d;white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid #162a3b;font-size:12px;white-space:nowrap}
+td.n,th.n{text-align:right;font-family:'Spline Sans Mono',monospace}
+td:last-child{max-width:140px;overflow:hidden;text-overflow:ellipsis}
+td a{font-weight:600}td a:hover{text-decoration:underline}
+.flag{font-weight:600;font-size:11px;letter-spacing:.08em;padding:2px 6px;border:1.5px solid var(--c);color:var(--c);display:inline-block}
+.sp{width:90px}.sp svg{width:90px;height:22px;display:block}
+.pgn{display:flex;justify-content:space-between;padding:8px 12px;color:#a3b8c8;font-size:12px}
+.btn{background:#f2b64a;color:#0a1420;border:0;border-radius:4px;padding:6px 12px;font-weight:600;font-size:12px}
+@media (max-width:1100px){.body{grid-template-columns:minmax(0,1fr)}.fac{display:none}.mapw{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.nav{display:none}}
+
+.top{height:auto;min-height:46px}
+.chip{white-space:nowrap}
+.search{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0}
+.burger{display:none;background:transparent;border:1px solid #20384d;border-radius:4px;padding:5px 8px;color:#e6eef4}
+.burger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;display:block}
+.scope{display:flex;border:1px solid #2c4a63;border-radius:4px;overflow:hidden}
+.sc{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-right:1px solid #2c4a63;padding:5px 10px;color:#7f98ad;font-size:12px;font-weight:500;white-space:nowrap}
+.sc:last-child{border-right:0}
+.sc .ck{width:12px;height:12px;border:1.5px solid #4b6a85;border-radius:2px;display:inline-block;position:relative;flex:none}
+.sc b{font:500 11px 'Spline Sans Mono',monospace;color:#7f98ad}
+.sc.on{background:#1f4f8f;color:#fff;font-weight:600}
+.sc.on .ck{background:#fff;border-color:#fff}
+.sc.on .ck::after{content:"";position:absolute;left:3px;top:0;width:3px;height:6px;border:solid #1f4f8f;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sc.on b{color:#cfe2ff}
+.sc:focus-visible,.burger:focus-visible{outline:2px solid #62a8ff;outline-offset:-2px}
+.scrim{display:none}
+@media (max-width:900px){
+.app{grid-template-columns:minmax(0,1fr)}
+.nav{display:none;position:fixed;left:0;top:0;bottom:0;width:264px;z-index:60;overflow-y:auto}
+.nav.open{display:flex}
+.scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+.burger{display:block;order:1}
+.top{flex-wrap:wrap;padding:8px 12px;gap:8px}
+.crumb{order:2;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .chip{order:3}
+.scope{order:4;flex:1 1 100%}
+.sc{flex:1;justify-content:center;padding:6px 4px}
+.search{order:5;flex:1 1 100%;max-width:none}
+.top .seg{order:6;margin-left:0!important}
+}
+@media (max-width:700px){.top .seg{flex:1 1 100%}.top .seg button{flex:1}.sc .ck{display:none}}
+</style>
+</helmet>
+<div class="{{scrim}}" onClick="{{toggleMenu}}"></div>
+<div class="app">
+<nav class="{{menuCls}}" aria-label="Main">
+<div class="logo"><i></i><span>UPTIME<b>TRACE</b></span></div>
+<div class="ws"><span>Workspace · preview</span><span>▾</span></div>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="14">
+<sc-if value="{{n.group}}" hint-placeholder-val="{{ false }}"><div class="grp">{{n.label}}</div></sc-if>
+<sc-if value="{{n.item}}" hint-placeholder-val="{{ true }}"><a class="{{n.cls}}" href="{{n.href}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{n.d}}"/></svg>{{n.label}}<sc-if value="{{n.tag}}" hint-placeholder-val="{{ false }}"><span class="tg">{{n.tag}}</span></sc-if></a></sc-if>
+</sc-for>
+</nav>
+<div class="main">
+<div class="top">
+<button class="burger" type="button" aria-label="Open menu" onClick="{{toggleMenu}}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+<div class="crumb">Infrastructure / <b>Hosts</b></div>
+<button class="search" type="button">Search hosts, metrics, incidents, or ask…   ⌘K</button>
+<div class="scope" role="group" aria-label="Data source scope"><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>LIVE <b>3</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>SYNTHETIC <b>31</b></button><button class="sc on" type="button" aria-pressed="true"><i class="ck"></i>REPLAY <b>2</b></button></div>
+<div class="seg" style="margin-left:auto"><button type="button">1h</button><button type="button" class="on">6h</button><button type="button">1d</button><button type="button">7d</button></div>
+<button class="chip" type="button">Alerts 3</button>
+</div>
+<div class="bar2"><h1>Hosts</h1><span class="prev">PREVIEW DATA</span><span class="src" style="margin-left:auto">scope: 36 hosts (preview fleet) · LIVE connected 2 of 3 · LIVE health 1 warning, 1 normal, 1 offline</span><button class="btn" type="button">Add host</button></div>
+<div class="body">
+<aside class="fac" aria-label="Filters">
+<div class="fnote">Facets narrow the hosts already in the workspace scope (LIVE 3 · SYNTHETIC 31 · REPLAY 2). They never widen it.</div>
+<input type="text" placeholder="Search hostname or host ID" aria-label="Search hosts">
+<div class="fg"><h2>State</h2><div class="fr"><i class="k"></i>Normal<b>29</b></div><div class="fr"><i class="k"></i>Warning<b>3</b></div><div class="fr"><i class="k"></i>Critical<b>2</b></div><div class="fr"><i class="k"></i>Offline<b>2</b></div></div>
+<div class="fg"><h2>Data source</h2><div class="fr"><i class="k"></i>LIVE<b>3</b></div><div class="fr"><i class="k"></i>SYNTHETIC<b>31</b></div><div class="fr"><i class="k"></i>REPLAY<b>2</b></div></div>
+<div class="fg"><h2>Agent</h2><div class="fr"><i class="k"></i>Reporting<b>32</b></div><div class="fr"><i class="k"></i>Silent<b>2</b></div><div class="fr"><i class="k"></i>Replay<b>2</b></div></div>
+<div class="fg"><h2>OS</h2><div class="fr"><i></i>Windows 11<b>1</b></div><div class="fr"><i></i>Ubuntu 24.04<b>2</b></div><div class="fr"><i></i>Simulated Linux<b>31</b></div><div class="fr"><i></i>Dataset<b>2</b></div></div>
+<div class="fg"><h2>Outlook</h2><div class="fr"><i></i>Experimental flag<b>2</b></div><div class="fr"><i></i>No score yet<b>34</b></div></div>
+</aside>
+<div class="content">
+<section class="w"><div class="wh"><h2>Host map · PREVIEW FLEET</h2><span>colour = confirmed state · hatch / ring = source</span></div>
+<div class="mapw"><div>
+<div class="pfb">PREVIEW FLEET · 36 generated hosts, not connected infrastructure. Only the 3 white-ringed hosts stand for real agents.</div>
+<svg viewBox="6 0 226 190" preserveAspectRatio="xMidYMid meet" aria-label="Preview host map"><defs><pattern id="hp" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="5" fill="#0a1420" fill-opacity=".45"/></pattern></defs><sc-for list="{{hexes}}" as="h" hint-placeholder-count="36"><g><polygon points="{{h.pts}}" fill="{{h.fill}}" stroke="{{h.stroke}}" stroke-width="{{h.sw}}" stroke-dasharray="{{h.dash}}"><title>{{h.name}}</title></polygon><polygon points="{{h.pts}}" fill="{{h.hatch}}" stroke="none"/></g></sc-for></svg>
+<div class="hl"><span><i style="background:#1f8f73"></i>normal</span><span><i style="background:#e0951f"></i>warning</span><span><i style="background:#e5483a"></i>critical</span><span><i style="background:#4b5b6b"></i>offline</span><span>hatched SYNTHETIC · white ring LIVE · dotted ring REPLAY</span></div></div>
+<div class="dist"><div class="src">STATE DISTRIBUTION</div><div class="t"><i style="width:80.5%;background:#1f8f73"></i><i style="width:8.3%;background:#e0951f"></i><i style="width:5.6%;background:#e5483a"></i><i style="width:5.6%;background:#4b5b6b"></i></div><div class="src">29 normal · 3 warning · 2 critical · 2 offline</div>
+<div class="src" style="margin-top:6px">SOURCE MIX</div><div class="t"><i style="width:8.3%;background:#e6eef4"></i><i style="width:86.1%;background:#4aa3ff"></i><i style="width:5.6%;background:#a78bfa"></i></div><div class="src">3 live · 31 synthetic · 2 replay. Synthetic and replay hosts never count toward LIVE health totals.</div></div></div></section>
+<section class="w"><div class="wh"><h2>Host inventory</h2><span>sorted by state · 5 of 36 shown</span></div><div class="tw"><table>
+<thead><tr><th>Host</th><th>State</th><th>Source</th><th>Agent</th><th>Last seen</th><th>CPU · 6 h</th><th class="n">CPU</th><th class="n">Mem</th><th class="n">Disk</th><th>OS</th><th>Host ID</th></tr></thead>
+<tbody>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+<tr><td><a href="HostDetail.dc.html">{{r.name}}</a></td><td><span class="flag" style="--c:{{r.sc}}">{{r.state}}</span></td><td class="src">{{r.src}}</td><td>{{r.agent}}</td><td class="src">{{r.seen}}</td><td class="sp"><svg viewBox="0 0 90 22" preserveAspectRatio="none" aria-hidden="true"><path d="{{r.sp}}" fill="none" stroke="{{r.c}}" stroke-width="1.3"/></svg></td><td class="n">{{r.cpu}}</td><td class="n">{{r.mem}}</td><td class="n">{{r.dsk}}</td><td>{{r.os}}</td><td class="src">{{r.id}}</td></tr>
+</sc-for>
+</tbody></table></div>
+<div class="pgn"><span>Rows 1–5 of 36</span><span>Page 1 of 8 · 5 per page · <a href="Hosts.dc.html" class="src">Next →</a></span></div></section>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+function rng(s){let a=s;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function series(seed,n,base,amp,noise,drift){const r=rng(seed);const o=[];let w=0;for(let i=0;i<n;i++){w+=(r()-.5)*noise;w*=.9;const s=base+amp*Math.sin(i/(n/5))+drift*i/n+w;o.push(Math.max(2,Math.min(98,s)));}return o;}
+function pth(v,x0,x1,h,min,max){const n=v.length;let d='';for(let i=0;i<n;i++){const x=x0+(x1-x0)*i/(n-1);const y=h-(v[i]-min)/(max-min)*h;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';}return d;}
+class Component extends DCLogic {
+  constructor(props){super(props);this.state={open:false};}
+  renderVals() {
+    const nav=[
+      {item:true,label:'Overview',href:'Main.dc.html',cls:'it',d:'M3 11 12 3l9 8M5 10v10h14V10'},
+      {group:true,label:'Infrastructure'},
+      {item:true,label:'Hosts',href:'Hosts.dc.html',cls:'it on',d:'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01'},
+      {item:true,label:'Metrics Explorer',href:'Metrics.dc.html',cls:'it',d:'M4 19V5M4 19h16M8 15l4-5 3 3 5-6'},
+      {item:true,label:'Dependencies',href:'States.dc.html',cls:'it',d:'M6 6h.01M18 6h.01M12 18h.01M6 6l6 12M18 6l-6 12',tag:'soon'},
+      {group:true,label:'Detect & respond'},
+      {item:true,label:'Anomalies',href:'States.dc.html',cls:'it',d:'M3 12h4l3-8 4 16 3-8h4'},
+      {item:true,label:'Alerts & Rules',href:'States.dc.html',cls:'it',d:'M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0'},
+      {item:true,label:'Incidents',href:'States.dc.html',cls:'it',d:'M12 3 2 20h20zM12 10v5M12 18h.01'},
+      {item:true,label:'Events',href:'States.dc.html',cls:'it',d:'M5 5h14M5 10h14M5 15h9M5 20h6'},
+      {group:true,label:'Intelligence'},
+      {item:true,label:'Risk Outlook',href:'Risk.dc.html',cls:'it',d:'M4 18c4 0 4-10 8-10s4 10 8 10',tag:'EXP'},
+      {item:true,label:'Investigations',href:'Investigations.dc.html',cls:'it',d:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5'},
+      {group:true,label:'Settings'},
+      {item:true,label:'Agents',href:'States.dc.html',cls:'it',d:'M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4'},
+      {item:true,label:'Workspace & members',href:'States.dc.html',cls:'it',d:'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 4-6 8-6s8 2 8 6'}
+    ];
+    const st=[];for(let i=0;i<36;i++)st.push('n');st[0]='c';st[11]='c';st[7]='w';st[24]='w';st[12]='w';st[20]='o';st[30]='o';
+    const live={3:'live-lnx-02',12:'dev-win-01',20:'live-lnx-03'};const rep={5:'smd-m1-1',18:'smd-m1-2'};
+    const hexes=[];const sz=19;const w=Math.sqrt(3)*sz;let q=0;
+    for(let row=0;row<6;row++){for(let col=0;col<6;col++){const cx=14+w/2+col*w+(row%2?w/2:0);const cy=22+row*sz*1.5;const pts=[];for(let a=0;a<6;a++){const ang=Math.PI/180*(60*a-30);pts.push((cx+sz*.94*Math.cos(ang)).toFixed(1)+','+(cy+sz*.94*Math.sin(ang)).toFixed(1));}
+      const s=st[q];const fill=s=='n'?'#1f8f73':s=='w'?'#e0951f':s=='c'?'#e5483a':'#4b5b6b';const isLive=!!live[q];const isRep=!!rep[q];
+      hexes.push({pts:pts.join(' '),fill:fill,stroke:isLive?'#ffffff':(isRep?'#a3b8c8':'#0f1d2c'),sw:isLive?2:(isRep?1.5:1),dash:isRep?'2 2':'',hatch:(isLive||isRep)?'none':'url(#hp)',name:(live[q]||rep[q]||('sim-host-'+String(q+1).padStart(2,'0')))+' · '+(isLive?'LIVE':isRep?'REPLAY':'SYNTHETIC')+' · preview'});q++;}}
+    const rows=[
+      {name:'sim-host-01',id:'sim-host-01',src:'SYNTHETIC',os:'Simulated Linux',agent:'reporting',seen:'3 s',cpu:'97%',mem:'94%',dsk:'41%',state:'CRITICAL',sc:'#ff6a55',c:'#ff6a55',s:41,b:60,a:25,dr:36},
+      {name:'sim-host-12',id:'sim-host-12',src:'SYNTHETIC',os:'Simulated Linux',agent:'reporting',seen:'4 s',cpu:'88%',mem:'91%',dsk:'67%',state:'CRITICAL',sc:'#ff6a55',c:'#ff6a55',s:46,b:55,a:20,dr:30},
+      {name:'dev-win-01',id:'laptop-ur6bta5m',src:'LIVE',os:'Windows 11',agent:'reporting',seen:'12 s',cpu:'31%',mem:'89%',dsk:'98%',state:'WARNING',sc:'#e0951f',c:'#4aa3ff',s:42,b:35,a:12,dr:3},
+      {name:'sim-host-08',id:'sim-host-08',src:'SYNTHETIC',os:'Simulated Linux',agent:'reporting',seen:'2 s',cpu:'72%',mem:'80%',dsk:'44%',state:'WARNING',sc:'#e0951f',c:'#4aa3ff',s:47,b:50,a:14,dr:10},
+      {name:'live-lnx-03',id:'live-lnx-03',src:'LIVE',os:'Ubuntu 24.04',agent:'silent 14 min',seen:'14 min',cpu:'–',mem:'–',dsk:'–',state:'OFFLINE',sc:'#8aa3b8',c:'#8aa3b8',s:44,b:25,a:5,dr:-20}
+    ].map(r=>({...r,sp:pth(series(r.s,30,r.b,r.a,8,r.dr),0,90,22,0,100)}));
+    return {menuCls:this.state.open?'nav open':'nav',scrim:this.state.open?'scrim on':'scrim',toggleMenu:()=>this.setState({open:!this.state.open}),nav,hexes,rows};
+  }
+}
+</script>
+</body>
+</html>
