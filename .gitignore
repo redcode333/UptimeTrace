@@ -35,3 +35,5 @@ dist/
 .pytest_cache/
 *.bak*
 .impeccable/hook.cache.json
+# Explicit path: tool cache, rewritten on every run (untracked; the local file is kept)
+frontend/.impeccable/hook.cache.json
