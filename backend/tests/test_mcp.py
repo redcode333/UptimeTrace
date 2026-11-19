@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import uuid
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import httpx
 import pytest
@@ -220,7 +220,6 @@ async def test_missing_malformed_and_unknown_tokens_get_401(running, world):
 
 
 async def test_an_agent_ingestion_token_or_console_session_is_not_an_mcp_token(running, world, sf):
-    from app import auth
     r = await post_init(running, {"Authorization": "Bearer " + "utk_" + "B" * 43})
     assert r.status_code == 401
     r = await post_init(running, bearer())                                               # a valid Clerk session JWT

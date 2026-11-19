@@ -24,6 +24,7 @@ import secrets
 import sys
 import tempfile
 from dataclasses import dataclass
+from typing import Protocol
 from pathlib import Path
 
 KINDS = ("live", "replay", "synthetic")
@@ -83,6 +84,14 @@ def _parse_bearer(header: str | None) -> str | None:
 
 
 parse_bearer = _parse_bearer  # public alias for other credential stores (app/registry/store.py)
+
+
+class CredentialAuthenticator(Protocol):
+    """What ingestion needs from any credential source (file store, registry store)."""
+
+    def authenticate(self, authorization_header: str | None) -> Credential | None: ...
+
+    def permits(self, credential: Credential, envelope: dict) -> bool: ...
 
 
 class CredentialStore:

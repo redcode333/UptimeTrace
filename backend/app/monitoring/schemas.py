@@ -6,7 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-HealthStatus = Literal["healthy", "warning", "critical", "offline", "unknown"]
+HealthStatus = Literal["healthy", "warning", "critical", "stale", "offline", "unknown"]
+HealthCategory = Literal["healthy", "degraded", "stale", "offline", "unknown"]
 Source = Literal["live", "synthetic", "replay"]
 
 
@@ -16,10 +17,12 @@ class ReasonOut(BaseModel):
     value: float
     threshold: float
     level: Literal["warning", "critical"]
+    key: str  # stable condition identity (metric + labels); the M2 alert lifecycle deduplicates on it
 
 
 class HealthOut(BaseModel):
     status: HealthStatus
+    category: HealthCategory  # warning|critical => degraded
     reasons: list[ReasonOut]
 
 
@@ -58,7 +61,7 @@ class HostOut(BaseModel):
     first_seen: datetime
     last_seen: datetime
     last_seen_age_seconds: float
-    reporting_status: Literal["reporting", "silent", "replay"]
+    reporting_status: Literal["reporting", "stale", "silent", "replay"]
     health: HealthOut
     latest: LatestSummary
 
@@ -73,6 +76,7 @@ class RuleOut(BaseModel):
 
 
 class ThresholdsOut(BaseModel):
+    host_stale_after_seconds: float
     offline_after_seconds: float
     stale_after_seconds: float
     rules: dict[str, RuleOut]

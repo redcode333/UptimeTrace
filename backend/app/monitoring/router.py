@@ -9,17 +9,18 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import errors
 from app.errors import ErrorDetail
-from app.monitoring import health as H
 from app.monitoring import queries as Q
 from app.monitoring import service as S
 from app.monitoring.schemas import (
     FacetsOut, HostDetailOut, HostListOut, LatestMetricsOut, RuleOut, SeriesResponse, ThresholdsOut,
 )
-from app.monitoring.sources import SOURCES, classify_source
+from app.monitoring.settings import DEFAULT_CONFIG, SAMPLE_STALE_AFTER, MonitoringConfig, load as load_settings
+from app.monitoring.sources import SOURCES
+from app.registry.service import default_workspace_id
 
 METRIC_NAME = r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$"
 HOST_ID = r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
-HEALTH_VALUES = ("healthy", "warning", "critical", "offline", "unknown")
+HEALTH_VALUES = ("healthy", "warning", "critical", "stale", "offline", "unknown")
 DEFAULT_RANGE = timedelta(hours=6)
 
 
@@ -40,11 +41,12 @@ def _aware(value: datetime, field: str) -> datetime:
     return value.astimezone(UTC)
 
 
-def thresholds() -> ThresholdsOut:
+def thresholds(cfg: MonitoringConfig = DEFAULT_CONFIG) -> ThresholdsOut:
     return ThresholdsOut(
-        offline_after_seconds=H.OFFLINE_AFTER.total_seconds(),
-        stale_after_seconds=H.STALE_AFTER.total_seconds(),
-        rules={name: RuleOut(warning=w, critical=c) for name, (w, c) in H.THRESHOLDS.items()},
+        host_stale_after_seconds=cfg.stale_after.total_seconds(),
+        offline_after_seconds=cfg.offline_after.total_seconds(),
+        stale_after_seconds=SAMPLE_STALE_AFTER.total_seconds(),
+        rules={name: RuleOut(warning=r.warning, critical=r.critical) for name, r in cfg.rules.items()},
     )
 
 
@@ -53,8 +55,9 @@ def build_router(session_factory: sessionmaker[Session], clock: Callable[[], dat
 
     def load(session: Session, host_id: str | None = None, names: list[str] | None = None):
         now = clock()
+        cfg = load_settings(session, default_workspace_id(session)).config
         hosts = Q.fetch_hosts(session, host_id)
-        return now, hosts, Q.fetch_latest(session, hosts, names)
+        return now, hosts, Q.fetch_latest(session, hosts, names), cfg
 
     @router.get("/hosts", response_model=HostListOut)
     def list_hosts(
@@ -70,8 +73,8 @@ def build_router(session_factory: sessionmaker[Session], clock: Callable[[], dat
         healths = _csv(health, HEALTH_VALUES, "health")
         needle = (search or "").strip().lower() or None
         with session_factory() as session:
-            now, hosts, latest = load(session, names=S.SUMMARY_METRICS)
-        built = [S.build_host(h, latest[h.host_id], now) for h in hosts]
+            now, hosts, latest, cfg = load(session, names=S.SUMMARY_METRICS)
+        built = [S.build_host(h, latest[h.host_id], now, cfg) for h in hosts]
         if needle:
             built = [h for h in built if needle in h.host_id.lower() or needle in h.hostname.lower()]
 
@@ -98,25 +101,25 @@ def build_router(session_factory: sessionmaker[Session], clock: Callable[[], dat
         offset = (page - 1) * page_size
         return HostListOut(
             items=matched[offset: offset + page_size], page=page, page_size=page_size, total=len(matched),
-            facets=facets, thresholds=thresholds(),
+            facets=facets, thresholds=thresholds(cfg),
         )
 
     @router.get("/hosts/{host_id}", response_model=HostDetailOut)
     def get_host(host_id: str = Path(pattern=HOST_ID)):
         with session_factory() as session:
-            now, hosts, latest = load(session, host_id)
+            now, hosts, latest, cfg = load(session, host_id)
         if not hosts:
             raise errors.host_not_found(host_id)
-        return S.build_host(hosts[0], latest[host_id], now, with_metrics=True)
+        return S.build_host(hosts[0], latest[host_id], now, cfg, with_metrics=True)
 
     @router.get("/hosts/{host_id}/metrics/latest", response_model=LatestMetricsOut)
     def latest_metrics(host_id: str = Path(pattern=HOST_ID)):
         with session_factory() as session:
-            now, hosts, latest = load(session, host_id)
+            now, hosts, latest, cfg = load(session, host_id)
         if not hosts:
             raise errors.host_not_found(host_id)
         row = hosts[0]
-        built = S.build_host(row, latest[host_id], now, with_metrics=True)
+        built = S.build_host(row, latest[host_id], now, cfg, with_metrics=True)
         return LatestMetricsOut(host_id=host_id, source=built.source, last_seen=row.last_seen, metrics=built.metrics)
 
     @router.get("/hosts/{host_id}/metrics/series", response_model=SeriesResponse)

@@ -15,6 +15,7 @@ from app.auth import IDENTIFIER, NAME, TOKEN_PREFIX, CredentialError, check_scop
 from app.errors import ErrorDetail
 from app.models import AgentCredential, AuditEvent, Host, Workspace
 from app.monitoring import health as H
+from app.monitoring.settings import load as load_settings
 
 DEFAULT_WORKSPACE_SLUG = "default"
 MAX_ACTIVE_CREDENTIALS_PER_HOST = 5
@@ -29,6 +30,9 @@ def _workspace_id(session: Session) -> uuid.UUID:
     if wid is None:  # migration 0003 seeds it; its absence is a deployment error, not a client error
         raise RuntimeError("default workspace missing")
     return wid
+
+
+default_workspace_id = _workspace_id  # public name for other modules (settings, MCP token API)
 
 
 def _audit(session: Session, workspace_id: uuid.UUID, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None) -> None:
@@ -129,6 +133,7 @@ _LAST = text("""
 
 
 def registry_view(session: Session, now: datetime) -> list[RegistryRow]:
+    cfg = load_settings(session, _workspace_id(session)).config
     hosts = list(session.execute(select(Host).order_by(Host.host_id)).scalars())
     extra = {r.id: r for r in session.execute(_LAST)}
     out = []
@@ -136,9 +141,7 @@ def registry_view(session: Session, now: datetime) -> list[RegistryRow]:
         last_at, active = extra[h.id].last_at, extra[h.id].active
         if last_at is None:
             state = "awaiting_first_telemetry"
-        elif h.kind == "replay":
-            state = "replay"
-        else:
-            state = "reporting" if (now - last_at) <= H.OFFLINE_AFTER else "silent"
+        else:  # same freshness rules as host health: reporting | stale | silent (offline) | replay
+            state = H.reporting_status("replay" if h.kind == "replay" else h.kind, last_at, now, cfg)
         out.append(RegistryRow(h, last_at, active, state))
     return out

@@ -60,7 +60,7 @@ def store_envelope(session_factory: sessionmaker[Session], envelope: dict, diges
                     .returning(TelemetryEnvelope.id)
                 ).scalar_one_or_none()
                 if inserted is not None:
-                    outcome = Outcome.CREATED
+                    outcome: Outcome | None = Outcome.CREATED
                 else:
                     stored = session.execute(
                         select(TelemetryEnvelope.content_hash).where(

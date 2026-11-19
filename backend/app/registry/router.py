@@ -6,6 +6,7 @@ Responses never contain a token hash. The plaintext token appears exactly once, 
 from __future__ import annotations
 
 import uuid
+from typing import Any, cast
 from datetime import datetime
 from typing import Callable, Literal
 
@@ -39,7 +40,7 @@ class HostRegistryOut(BaseModel):
     created_at: datetime
     created_by: str
     deactivated_at: datetime | None
-    telemetry_state: Literal["awaiting_first_telemetry", "reporting", "silent", "replay"]
+    telemetry_state: Literal["awaiting_first_telemetry", "reporting", "stale", "silent", "replay"]
     last_envelope_at: datetime | None
     active_credentials: int
 
@@ -68,7 +69,7 @@ def build_registry_router(session_factory: sessionmaker[Session], clock: Callabl
     def row_out(r: S.RegistryRow) -> HostRegistryOut:
         h = r.host
         return HostRegistryOut(host_id=h.host_id, kind=h.kind, display_name=h.display_name, created_at=h.created_at,
-                               created_by=h.created_by, deactivated_at=h.deactivated_at, telemetry_state=r.telemetry_state,
+                               created_by=h.created_by, deactivated_at=h.deactivated_at, telemetry_state=cast(Any, r.telemetry_state),
                                last_envelope_at=r.last_envelope_at, active_credentials=r.active_credentials)
 
     @router.get("/hosts", response_model=list[HostRegistryOut])

@@ -1,9 +1,11 @@
 """Locally generated RS256 keys that stand in for a Clerk instance. No network, no real Clerk account."""
 from __future__ import annotations
 
+import os
 import time
 
 import jwt
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from app.clerk_auth import ClerkConfig, ClerkVerifier
@@ -17,8 +19,14 @@ _KEYS: dict[str, object] = {}
 
 
 def private_key(kid: str = "ins_key_1"):
+    # Separate processes (the E2E API server and the test runner) must share one key: the runner passes its PEM
+    # through E2E_CLERK_PRIVATE_KEY_PEM. Unset (unit tests), a fresh key is generated in-process as before.
     if kid not in _KEYS:
-        _KEYS[kid] = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        pem = os.environ.get("E2E_CLERK_PRIVATE_KEY_PEM")
+        if pem:
+            _KEYS[kid] = serialization.load_pem_private_key(pem.encode(), password=None)
+        else:
+            _KEYS[kid] = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     return _KEYS[kid]
 
 

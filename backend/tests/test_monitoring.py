@@ -79,7 +79,7 @@ async def test_empty_database_returns_empty_pages_and_zero_facets(client):
     body = r.json()
     assert body["items"] == [] and body["total"] == 0
     assert body["facets"]["source"] == {"live": 0, "synthetic": 0, "replay": 0}
-    assert body["facets"]["health"] == {"healthy": 0, "warning": 0, "critical": 0, "offline": 0, "unknown": 0}
+    assert body["facets"]["health"] == {"healthy": 0, "warning": 0, "critical": 0, "stale": 0, "offline": 0, "unknown": 0}
 
 
 async def test_unknown_host_is_404_in_the_error_envelope(client):
@@ -148,18 +148,23 @@ async def test_health_rules_and_offline_threshold(client, seed):
     seed("warn", 30, [gauge(CPU, 20, 30), gauge(MEM, 88, 30)])
     seed("crit", 30, [gauge(CPU, 97, 30), gauge(DISK, 91, 30, {"mount": "C:"})])
     seed("edge", 30, [gauge(DISK, 95, 30, {"mount": "/"})])               # exactly at the critical threshold
-    seed("quiet", 299, [gauge(CPU, 20, 299)])                              # just inside the offline limit
+    seed("quiet", 299, [gauge(CPU, 20, 299)])                              # beyond stale_after (90 s), inside offline_after (300 s)
+    seed("fresh-edge", 90, [gauge(CPU, 20, 90)])                           # exactly stale_after: still evaluated (boundary is inclusive)
+    seed("stale-edge", 91, [gauge(CPU, 99, 91)])                           # one second later: STALE, and its critical last value is NOT evaluated
     seed("gone", 301, [gauge(CPU, 99, 301)])                               # just outside, and its last value was critical
     seed("sim-gone", 3000, [gauge(CPU, 20, 3000)])
     seed("replay-old", 86400, [gauge(CPU, 99, 86400)])                     # a day-old replay: not offline by the clock
     items = by_id((await client.get("/api/v1/hosts")).json())
     status = {h: i["health"]["status"] for h, i in items.items()}
-    assert status == {"ok": "healthy", "warn": "warning", "crit": "critical", "edge": "critical", "quiet": "healthy",
-                      "gone": "offline", "sim-gone": "offline", "replay-old": "critical"}
+    assert status == {"ok": "healthy", "warn": "warning", "crit": "critical", "edge": "critical", "quiet": "stale",
+                      "fresh-edge": "healthy", "stale-edge": "stale", "gone": "offline", "sim-gone": "offline", "replay-old": "critical"}
     assert items["gone"]["reporting_status"] == "silent" and items["replay-old"]["reporting_status"] == "replay"
     reasons = {(r["metric"], r["level"]) for r in items["crit"]["health"]["reasons"]}
     assert reasons == {(CPU, "critical"), (DISK, "warning")}
     assert (await client.get("/api/v1/hosts?health=critical,offline")).json()["total"] == 5
+    assert items["quiet"]["reporting_status"] == "stale" and items["fresh-edge"]["reporting_status"] == "reporting"
+    assert {h: i["health"]["category"] for h, i in items.items() if h in ("warn", "crit", "quiet", "gone", "ok")} == {
+        "warn": "degraded", "crit": "degraded", "quiet": "stale", "gone": "offline", "ok": "healthy"}
 
 
 async def test_missing_metrics_are_unknown_not_healthy_and_never_zero(client, seed):

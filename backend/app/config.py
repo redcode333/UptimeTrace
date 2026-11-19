@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     clerk_authorized_parties: str | None = None
     uptimetrace_allowed_user_ids: str | None = None
 
+    # Periodic alert evaluation (catches hosts that stop reporting). 0 disables it; ingestion still evaluates after each envelope.
+    alert_sweep_seconds: float = 30.0
+
     # MCP interface: OFF by default. Enable only after reading docs/MCP_INTEGRATION.md (single-workspace deployments only today).
     mcp_enabled: bool = False
     mcp_public_url: str | None = None          # external base URL of this API, e.g. https://api.example.com

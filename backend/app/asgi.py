@@ -24,6 +24,7 @@ app = create_app(
     _engine,
     credentials=RegistryCredentialStore(make_session_factory(_engine), fallback=_legacy),
     mcp_server=_mcp,
+    alert_sweep_seconds=_settings.alert_sweep_seconds or None,
     # Fails closed: the read API needs CLERK_ISSUER, CLERK_AUTHORIZED_PARTIES and UPTIMETRACE_ALLOWED_USER_IDS (see .env.example).
     verifier=ClerkVerifier(ClerkConfig.from_values(
         _settings.clerk_issuer, _settings.clerk_authorized_parties, _settings.uptimetrace_allowed_user_ids)),

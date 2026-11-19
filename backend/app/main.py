@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import asyncio
 import logging
-from contextlib import asynccontextmanager
+from collections.abc import Callable
+from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable
 
 from fastapi import Depends, FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
 from fastapi.concurrency import run_in_threadpool
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import Engine, text
@@ -18,21 +19,25 @@ from sqlalchemy.exc import TimeoutError as PoolTimeoutError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import errors
-from app.auth import CredentialStore
+from app.alerts.router import build_alert_router
+from app.alerts.service import evaluate_after_ingest, sweep_all
+from app.investigation.router import build_investigation_router
+from app.auth import CredentialAuthenticator
 from app.clerk_auth import ClerkVerifier
-from app.user_auth import build_me_router, make_dependencies
 from app.config import MAX_BODY_BYTES, SCHEMA_PATH, SUPPORTED_SCHEMA_VERSIONS
 from app.db import make_session_factory
 from app.errors import ApiError, ErrorDetail
-from app.monitoring.router import build_router
-from app.registry.router import build_registry_router
-from app.mcp.router import build_mcp_token_router
 from app.ingest import request as req
 from app.ingest.fingerprint import content_hash
 from app.ingest.schema import EnvelopeSchemaValidator
 from app.ingest.semantic import validate_semantics
 from app.ingest.service import EnvelopeConflict, store_envelope
 from app.ingest.storage_limits import find_nul_characters
+from app.mcp.router import build_mcp_token_router
+from app.monitoring.router import build_router
+from app.monitoring.settings_router import build_settings_router
+from app.registry.router import build_registry_router
+from app.user_auth import build_me_router, make_dependencies
 
 log = logging.getLogger("uptimetrace")
 
@@ -49,28 +54,52 @@ class AcceptedResponse(BaseModel):
     accepted_metrics: int
 
 
+async def _alert_sweep_forever(session_factory, clock, interval_seconds: float) -> None:
+    """Periodic alert evaluation: catches time-based changes (a host going silent) that no ingestion triggers."""
+    while True:
+        await asyncio.sleep(interval_seconds)
+        try:
+            await run_in_threadpool(sweep_all, session_factory, clock())
+        except Exception as exc:  # noqa: BLE001 - keep the loop alive; the next tick retries
+            log.error("alert sweep failed: %s", type(exc).__name__)
+
+
 def create_app(
     engine: Engine,
-    credentials: CredentialStore,
+    credentials: CredentialAuthenticator,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     schema_path: Path = SCHEMA_PATH,
     max_body_bytes: int = MAX_BODY_BYTES,
     verifier: ClerkVerifier | None = None,
     mcp_server=None,
+    alert_sweep_seconds: float | None = None,
 ) -> FastAPI:
-    """`mcp_server` (a FastMCP built by app.mcp.server) is OFF unless passed: the MCP endpoint is opt-in per deployment."""
-    lifespan = None
+    """`mcp_server` (a FastMCP built by app.mcp.server) is OFF unless passed: the MCP endpoint is opt-in per deployment.
+    `alert_sweep_seconds` starts the periodic alert sweep for the life of the app; None (the default, used by tests) starts none."""
     mcp_asgi = None
     if mcp_server is not None:
         mcp_asgi = mcp_server.streamable_http_app()          # creates the session manager
 
-        @asynccontextmanager
-        async def lifespan(_: FastAPI):
-            async with mcp_server.session_manager.run():
+    session_factory = make_session_factory(engine)
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        sweep = None
+        if alert_sweep_seconds:
+            sweep = asyncio.create_task(_alert_sweep_forever(session_factory, clock, alert_sweep_seconds))
+        try:
+            if mcp_server is not None:
+                async with mcp_server.session_manager.run():
+                    yield
+            else:
                 yield
+        finally:
+            if sweep is not None:
+                sweep.cancel()
+                with suppress(asyncio.CancelledError):
+                    await sweep
 
     app = FastAPI(title="UptimeTrace ingestion", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
-    session_factory = make_session_factory(engine)
     schema_validator = EnvelopeSchemaValidator(schema_path)
 
     @app.exception_handler(ApiError)
@@ -153,7 +182,9 @@ def create_app(
         except EnvelopeConflict:
             raise errors.envelope_id_conflict(document["envelope_id"]) from None
 
-        # Reached only after store_envelope returned, i.e. after COMMIT.
+        # Reached only after store_envelope returned, i.e. after COMMIT. Alert evaluation runs after the commit and cannot
+        # fail the request: the envelope is already durable, and the periodic sweep retries anything missed.
+        await run_in_threadpool(evaluate_after_ingest, session_factory, document["host_id"], clock())
         accepted = AcceptedResponse(
             envelope_id=document["envelope_id"], accepted_metrics=len(document["metrics"])
         )
@@ -164,6 +195,9 @@ def create_app(
     app.include_router(build_router(session_factory, clock, dependencies=[Depends(authorize)]))
     app.include_router(build_registry_router(session_factory, clock, authorize))
     app.include_router(build_mcp_token_router(session_factory, clock, authorize))
+    app.include_router(build_settings_router(session_factory, clock, authorize))
+    app.include_router(build_alert_router(session_factory, clock, authorize))
+    app.include_router(build_investigation_router(session_factory, clock, authorize))
     if mcp_asgi is not None:
         app.mount("/mcp", mcp_asgi)                          # clients connect to <base>/mcp/ (bearer token required by the SDK middleware)
     app.include_router(build_me_router(verifier, authenticate))

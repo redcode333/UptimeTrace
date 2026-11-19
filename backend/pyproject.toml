@@ -17,8 +17,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-asyncio>=0.23"]
-ml = ["numpy>=1.26", "pyarrow>=21", "psutil>=5"]   # M3.1 simulator; psutil only for resource reporting
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.5", "mypy>=1.10", "pip-audit>=2.7"]
+# simulator + baseline models + external-dataset audit. psutil only for resource reporting; joblib is imported directly by
+# ml/predict.py and ml/train_baselines.py (was only present transitively via scikit-learn); scipy is imported by simulator_v2/distinct.py;
+# pandas is imported by scripts/audit_external_datasets.py (was missing from the environment).
+ml = ["numpy>=1.26", "pyarrow>=21", "psutil>=5", "scikit-learn>=1.4", "xgboost>=2", "joblib>=1.3", "scipy>=1.11", "pandas>=2.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

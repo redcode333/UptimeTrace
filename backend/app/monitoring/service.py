@@ -4,6 +4,8 @@ from __future__ import annotations
 import math
 from datetime import UTC, datetime, timedelta
 
+from typing import Any, cast
+
 from sqlalchemy.orm import Session
 
 from app import errors
@@ -12,6 +14,7 @@ from app.errors import ErrorDetail
 from app.monitoring import health as H
 from app.monitoring import queries as Q
 from app.monitoring.rates import counter_rate
+from app.monitoring.settings import DEFAULT_CONFIG, MonitoringConfig
 from app.monitoring.schemas import (
     HealthOut, HostDetailOut, HostOut, LatestSummary, MetricSampleOut, ReasonOut, SeriesOut, SeriesPointOut, SeriesResponse,
 )
@@ -40,7 +43,7 @@ def sample_out(s: Q.SampleRow, last_seen: datetime) -> MetricSampleOut:
     if s.kind == "counter" and s.previous is not None:
         rate = counter_rate(s.previous[0], float(s.previous[1]), s.observed_at, float(s.value))
     return MetricSampleOut(
-        name=s.name, kind=s.kind, unit=s.unit, labels=s.labels, value=float(s.value),
+        name=s.name, kind=cast(Any, s.kind), unit=s.unit, labels=s.labels, value=float(s.value),
         observed_at=s.observed_at, stale=(last_seen - s.observed_at) > H.STALE_AFTER, rate_per_second=rate,
     )
 
@@ -65,20 +68,20 @@ def _summary(samples: list[MetricSampleOut]) -> LatestSummary:
     )
 
 
-def build_host(row: Q.HostRow, samples: list[Q.SampleRow], now: datetime, with_metrics: bool = False):
+def build_host(row: Q.HostRow, samples: list[Q.SampleRow], now: datetime, cfg: MonitoringConfig = DEFAULT_CONFIG, with_metrics: bool = False):
     source = classify_source(row.host_id)
     outs = [sample_out(s, row.last_seen) for s in samples]
-    verdict = H.classify(source, row.last_seen, now, samples)
+    verdict = H.classify(source, row.last_seen, now, samples, cfg)
     health = HealthOut(
-        status=verdict.status,
-        reasons=[ReasonOut(metric=r.metric, labels=r.labels, value=r.value, threshold=r.threshold, level=r.level)
+        status=cast(Any, verdict.status), category=cast(Any, verdict.category),
+        reasons=[ReasonOut(metric=r.metric, labels=r.labels, value=r.value, threshold=r.threshold, level=cast(Any, r.level), key=r.key)
                  for r in verdict.reasons],
     )
-    common = dict(
+    common: dict[str, Any] = dict(
         host_id=row.host_id, hostname=row.hostname, agent_id=row.agent_id, service=row.service, source=source,
         connected_infrastructure=(source == "live"), first_seen=row.first_seen, last_seen=row.last_seen,
         last_seen_age_seconds=max(0.0, (now - row.last_seen).total_seconds()),
-        reporting_status=H.reporting_status(source, row.last_seen, now), health=health, latest=_summary(outs),
+        reporting_status=H.reporting_status(source, row.last_seen, now, cfg), health=health, latest=_summary(outs),
     )
     return HostDetailOut(**common, metrics=outs) if with_metrics else HostOut(**common)
 
@@ -148,5 +151,5 @@ def load_series(session: Session, host_id: str, metric: str, start_t: datetime, 
         kind, unit = found
         rows = Q.series(session, host_id, metric, kind, start_t, end_t, bucket)
         series = build_series(rows, kind, unit, start_t, bucket, n, agg)
-    return SeriesResponse(host_id=host_id, source=classify_source(host_id), metric=metric, kind=kind, start=start_t, end=end_t,
-                          step_seconds=bucket, agg=agg, series=series)
+    return SeriesResponse(host_id=host_id, source=cast(Any, classify_source(host_id)), metric=metric, kind=cast(Any, kind), start=start_t,
+                          end=end_t, step_seconds=bucket, agg=cast(Any, agg), series=series)

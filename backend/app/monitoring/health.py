@@ -1,33 +1,43 @@
 """Deterministic host health. Pure functions, no database and no ML.
 
-A host's health is a pure function of (source, last_seen, now, latest measurements). Nothing here reads a prediction: an
-experimental risk score must never change confirmed health, so it is not even an input.
+Inputs: (source, last_seen, now, newest sample per series, MonitoringConfig). Nothing here reads a prediction.
 
-Rules (thresholds are constants, returned to clients in every list response):
-  * offline   - not a replay host AND now - last_seen > OFFLINE_AFTER. Overrides everything else.
-  * critical  - any evaluated metric at or above its critical threshold.
-  * warning   - any evaluated metric at or above its warning threshold (and none critical).
-  * healthy   - at least one metric was evaluated and none crossed a threshold.
-  * unknown   - not offline, but no fresh cpu / memory / disk measurement exists to evaluate. Missing metrics are never
-                treated as zero, so "nothing to judge" is reported as such instead of "healthy".
-REPLAY hosts replay stored history, so silence is the normal end of a replay: they are never offline by the clock.
+Two separate questions, answered in this order:
+  1. FRESHNESS - is the data current enough to judge anything?   (age = now - last_seen, the newest envelope's timestamp)
+  2. THRESHOLDS - is there a concern in the current data?        (cfg.rules; see settings.py)
+
+Transition rules (age in seconds; stale_after < offline_after, both configurable; defaults 90 / 300). All boundaries are
+inclusive on the fresher side, so a host exactly `stale_after` old is still evaluated:
+
+    age <= stale_after                     -> evaluate thresholds:
+        no fresh cpu/memory/disk sample        -> UNKNOWN   (insufficient evidence; missing is never zero)
+        any metric >= critical                 -> CRITICAL  (category DEGRADED)
+        else any metric >= warning             -> WARNING   (category DEGRADED)
+        else                                   -> HEALTHY
+    stale_after < age <= offline_after     -> STALE         (data too old to judge; last values are NOT evaluated)
+    age > offline_after                    -> OFFLINE
+    replay hosts replay stored history, so silence is their normal end: never STALE/OFFLINE by the clock.
+A host that was registered but has never reported is UNKNOWN (see registry/service.py); an unregistered host does not exist for health.
+
+`category` is the coarse grouping used by consumers that do not care about severity:
+    healthy -> HEALTHY, warning|critical -> DEGRADED, stale -> STALE, offline -> OFFLINE, unknown -> UNKNOWN.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 
-OFFLINE_AFTER = timedelta(seconds=300)
-# A measurement older than this relative to the host's last envelope is stale and not used for classification.
-STALE_AFTER = timedelta(seconds=300)
+from app.monitoring.settings import DEFAULT_CONFIG, SAMPLE_STALE_AFTER, MonitoringConfig
 
-# metric name -> (warning threshold, critical threshold), all percent gauges
-THRESHOLDS: dict[str, tuple[float, float]] = {
-    "system.cpu.utilization": (85.0, 95.0),
-    "system.memory.utilization": (85.0, 95.0),
-    "system.disk.utilization": (90.0, 95.0),
-}
+# Kept for callers/tests that import the defaults.
+OFFLINE_AFTER = DEFAULT_CONFIG.offline_after
+STALE_AFTER = SAMPLE_STALE_AFTER          # SAMPLE staleness (relative to the host's last envelope), not host staleness
+HOST_STALE_AFTER = DEFAULT_CONFIG.stale_after
+THRESHOLDS: dict[str, tuple[float, float]] = {m: (r.warning, r.critical) for m, r in DEFAULT_CONFIG.rules.items()}
 LEVEL_ORDER = {"healthy": 0, "warning": 1, "critical": 2}
+CATEGORY = {"healthy": "healthy", "warning": "degraded", "critical": "degraded", "stale": "stale", "offline": "offline",
+            "unknown": "unknown"}
 
 
 @dataclass(frozen=True)
@@ -37,36 +47,81 @@ class Reason:
     value: float
     threshold: float
     level: str  # "warning" | "critical"
+    observed_at: datetime | None = None  # when the breaching sample was observed (alert trigger evidence)
+
+    @property
+    def key(self) -> str:
+        """Stable identity of the condition (metric + label set), independent of level or value. M2 alert dedup keys on this."""
+        return self.metric + "|" + json.dumps(self.labels, sort_keys=True, separators=(",", ":"))
 
 
 @dataclass(frozen=True)
 class Health:
-    status: str  # healthy | warning | critical | offline | unknown
+    status: str  # healthy | warning | critical | stale | offline | unknown
     reasons: list[Reason] = field(default_factory=list)
 
+    @property
+    def category(self) -> str:
+        return CATEGORY[self.status]
 
-def reporting_status(source: str, last_seen: datetime, now: datetime) -> str:
+
+def reporting_status(source: str, last_seen: datetime, now: datetime, cfg: MonitoringConfig = DEFAULT_CONFIG) -> str:
     if source == "replay":
         return "replay"
-    return "reporting" if (now - last_seen) <= OFFLINE_AFTER else "silent"
+    age = now - last_seen
+    if age > cfg.offline_after:
+        return "silent"
+    return "reporting" if age <= cfg.stale_after else "stale"
 
 
-def classify(source: str, last_seen: datetime, now: datetime, samples: list) -> Health:
-    """`samples` are objects with name, labels, value and observed_at (the newest sample per series)."""
-    if source != "replay" and (now - last_seen) > OFFLINE_AFTER:
-        return Health("offline")
+def evaluate_thresholds(last_seen: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> tuple[int, list[Reason]]:
+    """(number of metrics that could be evaluated, conditions found). Samples older than SAMPLE_STALE_AFTER are skipped, not zeroed."""
     reasons: list[Reason] = []
     evaluated = 0
     for s in samples:
-        rule = THRESHOLDS.get(s.name)
-        if rule is None or (last_seen - s.observed_at) > STALE_AFTER:
+        rule = cfg.rules.get(s.name)
+        if rule is None or (last_seen - s.observed_at) > SAMPLE_STALE_AFTER:
             continue
         evaluated += 1
-        warn, crit = rule
-        if s.value >= crit:
-            reasons.append(Reason(s.name, s.labels, s.value, crit, "critical"))
-        elif s.value >= warn:
-            reasons.append(Reason(s.name, s.labels, s.value, warn, "warning"))
+        if s.value >= rule.critical:
+            reasons.append(Reason(s.name, s.labels, s.value, rule.critical, "critical", s.observed_at))
+        elif s.value >= rule.warning:
+            reasons.append(Reason(s.name, s.labels, s.value, rule.warning, "warning", s.observed_at))
+    return evaluated, reasons
+
+
+def series_key(name: str, labels: dict) -> str:
+    """Identity of a (metric, label set) pair. Reason.key and the alert condition key both use this."""
+    return name + "|" + json.dumps(labels, sort_keys=True, separators=(",", ":"))
+
+
+def evaluated_observations(last_seen: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> dict[str, tuple[float, datetime]]:
+    """Threshold series that WERE judged in this evaluation: key -> (observed value, observed_at).
+
+    Alerts use this to decide whether a missing breach is positive evidence of recovery: a series that was not judged
+    (missing, or older than SAMPLE_STALE_AFTER) can never clear an alert, because missing telemetry is never healthy."""
+    return {series_key(s.name, s.labels): (float(s.value), s.observed_at) for s in samples
+            if cfg.rules.get(s.name) is not None and (last_seen - s.observed_at) <= SAMPLE_STALE_AFTER}
+
+
+def evaluated_samples(last_seen: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> dict[str, float]:
+    """key -> observed value for the series judged in this evaluation (see evaluated_observations)."""
+    return {key: value for key, (value, _) in evaluated_observations(last_seen, samples, cfg).items()}
+
+
+def evaluated_series(last_seen: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> set[str]:
+    return set(evaluated_samples(last_seen, samples, cfg))
+
+
+def classify(source: str, last_seen: datetime, now: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> Health:
+    """`samples` are objects with name, labels, value and observed_at (the newest sample per series)."""
+    if source != "replay":
+        age = now - last_seen
+        if age > cfg.offline_after:
+            return Health("offline")
+        if age > cfg.stale_after:
+            return Health("stale")
+    evaluated, reasons = evaluate_thresholds(last_seen, samples, cfg)
     if evaluated == 0:
         return Health("unknown")
     worst = max((LEVEL_ORDER[r.level] for r in reasons), default=0)
