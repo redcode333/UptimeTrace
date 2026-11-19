@@ -93,7 +93,7 @@ const populated = (): Inventory => ({
 describe("InfrastructurePage rendering", () => {
   it("shows grouped hosts inside their environment, region and cluster", async () => {
     const { api } = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api });
     const env = await screen.findByLabelText("Environment production");
     const region = within(env).getByLabelText("Region eu-west-1");
     const cluster = within(region).getByLabelText("Cluster api");
@@ -102,7 +102,7 @@ describe("InfrastructurePage rendering", () => {
 
   it("lists ungrouped hosts separately, marks deactivated ones, and offers no assignment for them", async () => {
     const { api } = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api });
     await screen.findByLabelText("Environment production");
     const section = screen.getByLabelText("Hosts not in a cluster");
     expect(within(section).getByText("loose-1")).toBeInTheDocument();
@@ -112,21 +112,21 @@ describe("InfrastructurePage rendering", () => {
 
   it("renders a service spanning hosts and says where it runs", async () => {
     const { api } = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api });
     const svc = await screen.findByLabelText("Service checkout");
     expect(within(svc).getByText("Payments")).toBeInTheDocument();
     expect(within(svc).getByText(/API one/)).toBeInTheDocument();
   });
 
   it("shows an empty state that links to onboarding when nothing exists yet", async () => {
-    renderApp(<InfrastructurePage />, { api: statefulApi(emptyInventory()).api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: statefulApi(emptyInventory()).api });
     expect(await screen.findByText("Nothing to organise yet")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Register a host" })).toHaveAttribute("href", "/onboarding");
   });
 
   it("shows an error state with retry when the inventory cannot be loaded", async () => {
     const api = fakeApi({ infrastructure: async () => { throw new ApiError(503, "unavailable", "x"); } } as Partial<ApiClient>);
-    renderApp(<InfrastructurePage />, { api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api });
     expect(await screen.findByRole("button", { name: /retry/i })).toBeInTheDocument();
   });
 });
@@ -134,7 +134,7 @@ describe("InfrastructurePage rendering", () => {
 describe("InfrastructurePage changes", () => {
   it("creates an environment and shows it after the server confirms", async () => {
     const fake = statefulApi(emptyInventory());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     await screen.findByText("Nothing to organise yet");
     fireEvent.change(screen.getByLabelText("environment name"), { target: { value: "staging" } });
     fireEvent.click(within(screen.getByLabelText("Create an environment")).getByRole("button", { name: "Add" }));
@@ -145,7 +145,7 @@ describe("InfrastructurePage changes", () => {
 
   it("blocks an invalid name before any request is sent", async () => {
     const fake = statefulApi(emptyInventory());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     await screen.findByText("Nothing to organise yet");
     fireEvent.change(screen.getByLabelText("environment name"), { target: { value: "   " } });
     expect(within(screen.getByLabelText("Create an environment")).getByRole("button", { name: "Add" })).toBeDisabled();
@@ -154,7 +154,7 @@ describe("InfrastructurePage changes", () => {
 
   it("assigns an ungrouped host to a cluster through the select", async () => {
     const fake = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     await screen.findByLabelText("Environment production");
     const section = screen.getByLabelText("Hosts not in a cluster");
     const create = within(screen.getByLabelText("Create a cluster")).getByRole("button", { name: "Add" });
@@ -171,7 +171,7 @@ describe("InfrastructurePage changes", () => {
 
   it("removes a host from a cluster and returns it to the ungrouped list", async () => {
     const fake = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     const env = await screen.findByLabelText("Environment production");
     fireEvent.click(within(env).getByRole("button", { name: "Remove api-1 from api" }));
     await waitFor(() => expect(fake.writes).toEqual(["removeHost:c1:api-1"]));
@@ -180,7 +180,7 @@ describe("InfrastructurePage changes", () => {
 
   it("asks for confirmation before deleting, and says hosts are kept", async () => {
     const fake = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     const env = await screen.findByLabelText("Environment production");
     fireEvent.click(within(env).getByRole("button", { name: "Delete environment production" }));
     const confirm = screen.getByRole("group", { name: "Confirm deleting environment production" });
@@ -194,7 +194,7 @@ describe("InfrastructurePage changes", () => {
 
   it("cancelling a delete sends nothing", async () => {
     const fake = statefulApi(populated());
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     const env = await screen.findByLabelText("Environment production");
     fireEvent.click(within(env).getByRole("button", { name: "Delete environment production" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
@@ -203,7 +203,7 @@ describe("InfrastructurePage changes", () => {
 
   it("shows a refused change as plain words and leaves the page as it was", async () => {
     const fake = statefulApi(populated(), new ApiError(409, "host_in_other_cluster", "x"));
-    renderApp(<InfrastructurePage />, { api: fake.api });
+    renderApp(<InfrastructurePage />, { route: "/infrastructure?view=manage", api: fake.api });
     await screen.findByLabelText("Environment production");
     const section = screen.getByLabelText("Hosts not in a cluster");
     fireEvent.change(within(section).getByLabelText("Cluster for loose-1"), { target: { value: "c1" } });

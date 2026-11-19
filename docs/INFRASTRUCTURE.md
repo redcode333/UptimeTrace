@@ -38,6 +38,21 @@ Conflict codes: `name_taken`, `already_in_cluster`, `host_in_other_cluster`, `al
 
 `/infrastructure`, linked from the Hosts page header. Not in the sidebar. Grouped hosts show under their hierarchy; hosts not in a cluster, unassigned regions and clusters, and services are listed in their own sections. Each change is confirmed by the server before the page refreshes. Deletes state what is detached and what is kept.
 
+## Topology view (read-only)
+
+`/infrastructure` opens on a **Topology** tab; **Manage** holds the editor. The topology reads the inventory, the paged host list (health, reporting, source) and the active alert list. It derives nothing else.
+
+- Containment: Environment > Region > Cluster > Host, with Hosts not in a cluster, unassigned regions and unassigned clusters shown as groups.
+- Services sit in their own column. Relationship lines join a service to each host it was assigned to in the inventory. Two hosts in the same cluster are not linked, and no dependency is inferred.
+- Host health is the backend's `health.status`. A host with no loaded monitoring record shows "no data loaded", never a health state.
+- Alert indicators appear only on hosts with an active alert.
+- Groups show counts by actual host state and their active alert count. They have no health status of their own.
+- Selecting an item shows its details; each host links to its existing Host Detail page.
+- Large hierarchies (over 60 hosts) start with clusters and host groups collapsed. Lines to a collapsed container are drawn to that container.
+- Relationship lines are drawn at widths of 720px and above; narrower screens list the hosts on each service card instead.
+
+Limits: at most 2,000 hosts (10 pages of 200) are loaded for the topology, and the alert list is capped at 200. Banners state when either is incomplete.
+
 ## Not in scope
 
 No visual topology, service discovery, dependency inference, cloud or Kubernetes integrations, OpenTelemetry, alert propagation through groups, or changes to the telemetry contract or alert evaluation.

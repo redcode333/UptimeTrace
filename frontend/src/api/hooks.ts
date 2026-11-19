@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "./context";
-import type { AlertStatusFilter, HostListParams, InvestigationRecord, IssueCredentialBody, IssueMcpTokenIn, MonitoringSettingsIn, RegisterHostBody } from "./types";
+import type { AlertStatusFilter, Host, HostListParams, InvestigationRecord, IssueCredentialBody, IssueMcpTokenIn, MonitoringSettingsIn, RegisterHostBody } from "./types";
 
 /** Who am I, and am I allowed to read telemetry? Needs only a valid session. */
 export function useMe() {
@@ -86,6 +86,31 @@ export function useSaveMonitoringSettings() {
       qc.setQueryData(["settings", "monitoring"], saved);
       return Promise.all(["hosts", "host", "alerts", "settings"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
     },
+  });
+}
+
+/**
+ * Every host's monitoring record for the topology. The API caps a page at 200, so pages are read in sequence up to a bounded
+ * number. `complete` is false when the bound is reached or the API reports more hosts than were loaded.
+ */
+export const TOPOLOGY_PAGE_SIZE = 200;
+export const TOPOLOGY_MAX_PAGES = 10;
+export function useTopologyHosts() {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["topology", "hosts"],
+    queryFn: async ({ signal }) => {
+      const items: Host[] = [];
+      let total = 0;
+      for (let page = 1; page <= TOPOLOGY_MAX_PAGES; page++) {
+        const r = await api.hosts({ page, page_size: TOPOLOGY_PAGE_SIZE }, signal);
+        items.push(...r.items);
+        total = r.total;
+        if (r.items.length === 0 || items.length >= r.total) break;
+      }
+      return { items, total };
+    },
+    refetchInterval: 15_000,
   });
 }
 

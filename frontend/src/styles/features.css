@@ -118,3 +118,44 @@
 .health-bar .stack i { display: block; min-width: 2px; }
 .caption { margin: 8px 0 0; }
 @media (max-width: 900px) { .util-grid { grid-template-columns: 1fr; } }
+
+/* Infrastructure topology (read-only map of the inventory and existing host/alert state) */
+.topo-tabs { display: flex; gap: 4px; margin: 0 0 12px; border-bottom: 1px solid var(--seam); }
+.topo-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--ink-2); padding: 8px 12px; font: inherit; cursor: pointer; }
+.topo-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--focus); }
+.topo-summary { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--ink-2); font-size: 13px; margin-bottom: 10px; }
+.topo-tally { display: flex; flex-wrap: wrap; gap: 6px; }
+.topo-chip { border: 1px solid var(--seam); border-radius: 4px; padding: 0 6px; color: var(--ink-2); }
+.topo-controls { margin-bottom: 10px; }
+.topo-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.topo-col { min-width: 0; }
+.topo-heading { font-size: 13px; color: var(--ink-2); font-weight: 600; margin: 0 0 8px; }
+.topo-tree, .topo-children, .topo-services, .topo-svc-hosts { list-style: none; margin: 0; padding: 0; }
+.topo-row { display: flex; align-items: center; gap: 6px; min-height: 34px; border-bottom: 1px solid var(--seam-faint); }
+.topo-row.sel, .topo-svc.sel { background: var(--selected); }
+.topo-toggle { width: 22px; height: 22px; flex: 0 0 22px; background: none; border: 1px solid var(--seam); color: var(--ink-2); border-radius: 4px; cursor: pointer; }
+.topo-toggle-spacer { width: 22px; flex: 0 0 22px; }
+.topo-select { background: none; border: 0; color: var(--ink); font: inherit; text-align: left; cursor: pointer; padding: 6px 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.topo-select:focus-visible, .topo-toggle:focus-visible, .topo-open:focus-visible, .topo-link-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.topo-label { overflow-wrap: anywhere; }
+.topo-kind { font-size: 11px; letter-spacing: 0.04em; color: var(--ink-3); }
+.topo-open { margin-left: auto; font-size: 12px; white-space: nowrap; color: var(--focus); }
+.topo-alert { font-size: 12px; border: 1px solid currentColor; border-radius: 4px; padding: 0 6px; white-space: nowrap; }
+.topo-alert.critical { color: var(--critical-text); }
+.topo-alert.warning { color: var(--warning); }
+.topo-svc { border: 1px solid var(--seam); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; background: var(--widget); }
+.topo-svc .topo-select { display: block; width: 100%; padding: 0; }
+.topo-svc-hosts li { padding: 3px 0; }
+.topo-link-btn { background: none; border: 0; color: var(--focus); font: inherit; cursor: pointer; padding: 0; text-align: left; }
+.topo-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.topo-edges path { fill: none; stroke: var(--seam-strong); stroke-width: 1.5; opacity: 0.8; }
+.topo-edges path.on { stroke: var(--focus); stroke-width: 2.5; opacity: 1; }
+.topo-details { margin-top: 16px; border: 1px solid var(--seam); border-radius: 8px; padding: 14px; background: var(--widget); }
+.topo-details-title { font-size: 16px; margin: 0 0 6px; }
+.topo-note { color: var(--ink-3); }
+.topo-alerts-block { margin-top: 8px; }
+.topo-details-row { margin: 6px 0; }
+@media (max-width: 720px) {
+  .topo-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .topo-edges { display: none; }
+}
