@@ -21,6 +21,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app import errors
 from app.alerts.router import build_alert_router
 from app.alerts.service import evaluate_after_ingest, sweep_all
+from app.infrastructure.router import build_infrastructure_router
 from app.investigation.router import build_investigation_router
 from app.auth import CredentialAuthenticator
 from app.clerk_auth import ClerkVerifier
@@ -198,6 +199,7 @@ def create_app(
     app.include_router(build_settings_router(session_factory, clock, authorize))
     app.include_router(build_alert_router(session_factory, clock, authorize))
     app.include_router(build_investigation_router(session_factory, clock, authorize))
+    app.include_router(build_infrastructure_router(session_factory, clock, authorize))
     if mcp_asgi is not None:
         app.mount("/mcp", mcp_asgi)                          # clients connect to <base>/mcp/ (bearer token required by the SDK middleware)
     app.include_router(build_me_router(verifier, authenticate))

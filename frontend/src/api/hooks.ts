@@ -89,6 +89,21 @@ export function useSaveMonitoringSettings() {
   });
 }
 
+/** Infrastructure inventory. Every grouping change refreshes the inventory and the host lists it affects. */
+export function useInfrastructure() {
+  const api = useApi();
+  return useQuery({ queryKey: ["infrastructure"], queryFn: ({ signal }) => api.infrastructure(signal) });
+}
+
+export function useInfrastructureMutation<TArgs, TOut>(fn: (api: ReturnType<typeof useApi>, args: TArgs) => Promise<TOut>) {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (args: TArgs) => fn(api, args),
+    onSuccess: () => Promise.all([qc.invalidateQueries({ queryKey: ["infrastructure"] }), qc.invalidateQueries({ queryKey: ["hosts"] })]),
+  });
+}
+
 /** MCP access tokens (metadata). */
 export function useMcpTokens() {
   const api = useApi();
@@ -117,9 +132,14 @@ export function useRevokeMcpToken() {
   });
 }
 
-export function useRegistryHosts() {
+/** Registry host list. `refetchInterval` lets a caller poll faster while it waits for something (e.g. first telemetry); false stops polling. */
+export function useRegistryHosts(opts: { refetchInterval?: number | false } = {}) {
   const api = useApi();
-  return useQuery({ queryKey: ["registry", "hosts"], queryFn: ({ signal }) => api.registryHosts(signal), refetchInterval: 15_000 });
+  return useQuery({
+    queryKey: ["registry", "hosts"],
+    queryFn: ({ signal }) => api.registryHosts(signal),
+    refetchInterval: opts.refetchInterval === undefined ? 15_000 : opts.refetchInterval,
+  });
 }
 
 export function useCredentials(hostId: string | null) {

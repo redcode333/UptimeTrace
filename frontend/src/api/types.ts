@@ -226,6 +226,32 @@ export interface IssueMcpTokenIn {
   expires_in_days: number;
 }
 
+// Infrastructure inventory (GET /api/v1/infrastructure). Every grouping is optional; hosts and services can stand alone.
+export interface InventoryHost {
+  host_id: string;
+  display_name: string | null;
+  kind: "live" | "synthetic" | "replay";
+  deactivated: boolean;
+}
+export interface InventoryCluster {
+  id: string;
+  name: string;
+  hosts: InventoryHost[];
+}
+export interface InventoryRegion {
+  id: string;
+  name: string;
+  clusters: InventoryCluster[];
+}
+export interface Inventory {
+  environments: { id: string; name: string; regions: InventoryRegion[] }[];
+  unassigned_regions: InventoryRegion[];
+  unassigned_clusters: InventoryCluster[];
+  ungrouped_hosts: InventoryHost[];
+  services: { id: string; name: string; description: string | null; hosts: InventoryHost[] }[];
+  unassigned_services: { id: string; name: string }[];
+}
+
 export interface AlertList {
   alerts: Alert[];
   total: number;

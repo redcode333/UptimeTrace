@@ -1,7 +1,7 @@
 /** HTTP client for the backend. No React and no Clerk import: the token source is injected so this stays testable. */
 import type {
   Alert, AlertDetail, AlertList, AlertStatusFilter, Credential, HostDetail, HostList, HostListParams, IssueCredentialBody, IssuedCredential,
-  Investigation, InvestigationRecord, IssueMcpTokenIn, IssuedMcpToken, LatestMetrics, Me, McpToken, MonitoringSettings, MonitoringSettingsIn, RegisterHostBody, RegistryHost, SeriesResponse,
+  Investigation, InvestigationRecord, Inventory, IssueMcpTokenIn, IssuedMcpToken, LatestMetrics, Me, McpToken, MonitoringSettings, MonitoringSettingsIn, RegisterHostBody, RegistryHost, SeriesResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -108,6 +108,24 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized, fetchImpl }
     // Read-only: the configured thresholds and freshness windows. Editing is not part of this client yet.
     monitoringSettings: (signal?: AbortSignal) => get<MonitoringSettings>("/api/v1/settings/monitoring", signal),
     saveMonitoringSettings: (body: MonitoringSettingsIn) => call<MonitoringSettings>("PUT", "/api/v1/settings/monitoring", body),
+    // Infrastructure inventory: grouping only. Hosts, telemetry and alerts are never changed by these calls.
+    infrastructure: (signal?: AbortSignal) => get<Inventory>("/api/v1/infrastructure", signal),
+    createEnvironment: (name: string) => call<{ id: string }>("POST", "/api/v1/infrastructure/environments", { name }),
+    updateEnvironment: (id: string, name: string) => call<{ id: string }>("PATCH", `/api/v1/infrastructure/environments/${enc(id)}`, { name }),
+    deleteEnvironment: (id: string) => call<unknown>("DELETE", `/api/v1/infrastructure/environments/${enc(id)}`),
+    createRegion: (body: { name: string; environment_id: string | null }) => call<{ id: string }>("POST", "/api/v1/infrastructure/regions", body),
+    updateRegion: (id: string, body: { name?: string; environment_id?: string | null }) => call<{ id: string }>("PATCH", `/api/v1/infrastructure/regions/${enc(id)}`, body),
+    deleteRegion: (id: string) => call<unknown>("DELETE", `/api/v1/infrastructure/regions/${enc(id)}`),
+    createCluster: (body: { name: string; region_id: string | null }) => call<{ id: string }>("POST", "/api/v1/infrastructure/clusters", body),
+    updateCluster: (id: string, body: { name?: string; region_id?: string | null }) => call<{ id: string }>("PATCH", `/api/v1/infrastructure/clusters/${enc(id)}`, body),
+    deleteCluster: (id: string) => call<unknown>("DELETE", `/api/v1/infrastructure/clusters/${enc(id)}`),
+    assignClusterHost: (clusterId: string, hostId: string) => call<unknown>("POST", `/api/v1/infrastructure/clusters/${enc(clusterId)}/hosts`, { host_id: hostId }),
+    removeClusterHost: (clusterId: string, hostId: string) => call<unknown>("DELETE", `/api/v1/infrastructure/clusters/${enc(clusterId)}/hosts/${enc(hostId)}`),
+    createService: (body: { name: string; description?: string | null }) => call<{ id: string }>("POST", "/api/v1/infrastructure/services", body),
+    updateService: (id: string, body: { name?: string; description?: string | null }) => call<{ id: string }>("PATCH", `/api/v1/infrastructure/services/${enc(id)}`, body),
+    deleteService: (id: string) => call<unknown>("DELETE", `/api/v1/infrastructure/services/${enc(id)}`),
+    linkServiceHost: (serviceId: string, hostId: string) => call<unknown>("POST", `/api/v1/infrastructure/services/${enc(serviceId)}/hosts`, { host_id: hostId }),
+    unlinkServiceHost: (serviceId: string, hostId: string) => call<unknown>("DELETE", `/api/v1/infrastructure/services/${enc(serviceId)}/hosts/${enc(hostId)}`),
     // MCP access tokens (read-only MCP server). Metadata list, one-time issue, revoke.
     mcpTokens: (signal?: AbortSignal) => get<McpToken[]>("/api/v1/registry/mcp-tokens", signal),
     issueMcpToken: (body: IssueMcpTokenIn) => call<IssuedMcpToken>("POST", "/api/v1/registry/mcp-tokens", body),

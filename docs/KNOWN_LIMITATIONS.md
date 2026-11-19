@@ -35,6 +35,13 @@ Each item is verified against the code unless marked *(from audit, unverified)*.
 * The Hosts list and the Command Center's table cells still use fixed defaults in the shared utilisation cell. Only Host Detail and the Command Center use configured limits.
 * "Never reported" is inferred from the registry state; a host can only be shown as never reported when it appears in the registry with no telemetry.
 
+## First-time onboarding (frontend)
+* Not browser-verified. The install steps have not been run on a real machine from this page.
+* No installer or package exists. Installation is a manual build from `agent/` and an environment-configured run.
+* Host registration accepts only the host id, kind and an optional display name. Environment or other metadata are not collected.
+* Onboarding completion is derived from the registry, not persisted. A host that is later silent is no longer "connected", and the page says so.
+* Workspace creation does not exist; onboarding uses the single default workspace.
+
 ## MCP
 * Off by default; **not for shared or customer deployments** until M6. Static bearer tokens only (no OAuth/discovery). Only the official SDK client has been run against it; no real third-party client and no TLS deployment was tested.
 * Three tools only; alerts, incidents, services/traces and experiments are absent because their backends are.
@@ -48,6 +55,16 @@ Each item is verified against the code unless marked *(from audit, unverified)*.
 * Hosts that have never reported appear only in `/api/v1/registry/hosts`, not in `/api/v1/hosts` (D-007); the frontend does not show them yet.
 * Series queries find late samples only up to 24 h after `end` (documented in `queries.py`).
 * Agent buffer is in-memory: telemetry is lost if the agent process or machine dies before delivery. Linux collection exists but was never run on a real Linux host.
+
+## Infrastructure inventory
+
+- Single workspace only. Workspace isolation is enforced by server-side resolution plus composite database foreign keys; this is not multi-tenancy and has not been tested against a second real tenant.
+- Grouping is manual. Nothing is discovered from agents, cloud APIs, Kubernetes or OpenTelemetry, and no dependencies are inferred.
+- No topology view, no alert propagation through groups, no group-level health or thresholds.
+- A host belongs to at most one cluster; services can span hosts and hosts can run several services.
+- Deleting a grouping keeps hosts, telemetry and alerts; the group membership itself is lost (there is no undo or history).
+- Environment and service names are unique across the workspace; region and cluster names are unique within their parent. There is no tagging or free-form labelling.
+- Frontend page verified by component tests only; no authenticated browser run.
 
 ## Missing product capabilities
 Alerts exist only as threshold and host_offline alerts (no notifications, no routing, no incident grouping). No incidents, Failure Readiness, OpenTelemetry/Jaeger, Docker Compose deployment, backup/restore procedure, retention or deletion policy.

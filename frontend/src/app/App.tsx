@@ -7,6 +7,8 @@ import { MetricsExplorerPage } from "../features/explorer/MetricsExplorerPage";
 import { AgentsPage } from "../features/agents/AgentsPage";
 import { AlertPoliciesPage } from "../features/settings/AlertPoliciesPage";
 import { IntegrationsPage } from "../features/settings/IntegrationsPage";
+import { OnboardingPage } from "../features/onboarding/OnboardingPage";
+import { InfrastructurePage } from "../features/infrastructure/InfrastructurePage";
 import { AlertsPage } from "../features/alerts/AlertsPage";
 import { InvestigationPage } from "../features/investigation/InvestigationPage";
 import { HostDetailPage } from "../features/hosts/HostDetailPage";
@@ -28,6 +30,8 @@ export function AppRoutes() {
           <Route path="settings/agents" element={<AgentsPage />} />
           <Route path="settings/alerts" element={<AlertPoliciesPage />} />
           <Route path="settings/integrations" element={<IntegrationsPage />} />
+          <Route path="onboarding" element={<OnboardingPage />} />
+          <Route path="infrastructure" element={<InfrastructurePage />} />
           <Route path="alerts" element={<AlertsPage />} />
           <Route path="alerts/:alertId" element={<InvestigationPage />} />
           {flatNav().filter((i) => i.unavailable).map((i) => (

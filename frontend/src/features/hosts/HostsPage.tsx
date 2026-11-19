@@ -48,6 +48,7 @@ export function HostsPage() {
       <PageHeader
         title="Hosts"
         subtitle={data ? `${data.total} host${data.total === 1 ? "" : "s"} match the current scope and filters` : "Host inventory"}
+        actions={<><Link className="btn" to="/infrastructure">Infrastructure</Link> <Link className="btn" to="/onboarding">Register a host</Link></>}
       />
       <div className="toolbar">
         <label className="field">

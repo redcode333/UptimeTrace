@@ -42,6 +42,8 @@ class Host(Base):
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     created_by: Mapped[str] = mapped_column(String(128), nullable=False)
     deactivated_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Optional grouping (migration 0008). Composite foreign key (workspace_id, cluster_id); detaching a cluster sets this NULL only.
+    cluster_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
 
 
 class AgentCredential(Base):
@@ -178,3 +180,56 @@ class TelemetryEnvelope(Base):
     received_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+# --- infrastructure inventory (migration 0008). Every relationship is workspace-composite; grouping is optional. ----------------
+class _Grouping(Base):
+    """Shared audit fields for inventory rows. Abstract: not mapped to a table."""
+
+    __abstract__ = True
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    updated_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+
+class Environment(_Grouping):
+    __tablename__ = "environments"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class Region(_Grouping):
+    __tablename__ = "regions"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    environment_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class Cluster(_Grouping):
+    __tablename__ = "clusters"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    region_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class Service(_Grouping):
+    __tablename__ = "services"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(64), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+
+class ServiceHost(Base):
+    """A service running on a host. Deleting either side removes only this link."""
+
+    __tablename__ = "service_hosts"
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    service_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    host_pk: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)

@@ -104,7 +104,7 @@ export function OverviewPage() {
           title="No hosts have reported yet"
           body="Hosts appear here after an agent sends its first telemetry envelope. Register a host on Agents, then start the agent with its credential."
         >
-          <Link to="/settings/agents">Register a host</Link>
+          <Link to="/onboarding">Set up your first host</Link>
         </EmptyState>
       )}
       {scopeEmpty && (

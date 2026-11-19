@@ -138,6 +138,29 @@ Page at `/settings/integrations` (nav: Settings > Integrations), `frontend/src/f
 
 Results (this session): `npx tsc --noEmit -p .` exit 0; `npx vitest run --no-file-parallelism`: 20 of 20 files, 237 of 237 tests passed. Browser verification: not performed. No MCP client other than the official SDK was run.
 
+## First-time onboarding (frontend implementation)
+
+Page at `/onboarding` (`frontend/src/features/onboarding/OnboardingPage.tsx`), with pure logic in `frontend/src/lib/onboarding.ts`. Entry points: the Command Center empty state ("Set up your first host") and a "Register a host" action on the Hosts page. A workspace with hosts is not sent through setup; it can still register another host on purpose.
+
+* Steps: register the host (host id, kind, optional display name, validated against the backend's id and kind rules); create the agent credential (shown once from component state, revocable; an existing secret is not shown again); install and configure the agent (build from `agent/` with `go build`, then environment variables; Windows verified, Linux not); verify first telemetry (polls the registry every 5 s while the panel is mounted; stops when left); review thresholds (read-only, linking to Alert Policies).
+* Completion is derived from the server, not stored: connected means the registry reports the host as reporting and an envelope has been received. A host that was once connected and is now late or silent returns to verification.
+* Progress survives interruption: the only URL state is the host id; the step is derived from the registry and credential list on every visit.
+* No backend change. No onboarding persistence exists on the server, so none is invented.
+
+Results (this session): `npx tsc --noEmit -p .` exit 0; `npx vitest run --no-file-parallelism`: 22 of 22 files, 279 of 279 tests passed. Browser verification: not performed.
+
+## Infrastructure inventory (grouping foundation)
+
+Implemented: environments, regions, clusters and services as persistent workspace rows, with hosts and services linked explicitly. Grouping is optional at every level. Migration 0008 adds the tables and a nullable `hosts.cluster_id`.
+
+- Relationships: Environment → Region (optional), Region → Cluster (optional), Cluster → Host (at most one cluster per host), Service ↔ Host (many to many).
+- API: `GET /api/v1/infrastructure` plus create, rename/move and delete for each entity, and host assign/remove, service link/unlink. Browser session required; workspace resolved on the server.
+- Deleting a grouping detaches references only. Hosts, telemetry, alerts and investigations are never deleted by these calls (tested).
+- Frontend: `/infrastructure`, linked from the Hosts header (not in the sidebar). Grouped and ungrouped rendering, create, rename, move, assign, remove, and delete with in-place confirmation.
+- Existing hosts without metadata appear as "not in a cluster"; nothing is inferred from hostnames, IPs or host IDs.
+
+Test results: backend infrastructure tests 23/23; full backend suite 651 passed (single run, disposable `uptimetrace_test` database); migration round-trip passes at head 0008; frontend `tsc --noEmit` clean; frontend full suite 303/303 (sequential run). Browser verification: not performed.
+
 ## Failures found and fixed in this session
 
 1. **First run failed at step 4 with HTTP 401** (`PUT /api/v1/settings/monitoring`). Cause: the test harness generated a separate random RSA signing key in the runner process and in the API child process, so the API could not verify the test token. Fix: `backend/tests/clerk_support.py` loads the key from `E2E_CLERK_PRIVATE_KEY_PEM` when it is set (unset = unchanged behaviour), and `run_workflow.py` generates one key per run and passes it to the child. Unit tests are unaffected.
@@ -173,6 +196,6 @@ Not verified:
 ## Next
 
 1. Browser verification of the alert, investigation and agent screens with a real session.
-2. Run the full backend suite once in a single process when memory allows (not run since the investigation slice).
+2. Browser verification of the infrastructure page with an authenticated session (not performed).
 3. Compose file for api + frontend + postgres.
 4. Incidents (not started).
