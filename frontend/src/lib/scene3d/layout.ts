@@ -9,7 +9,7 @@ import type { Vec3 } from "./types";
 /** Space reserved per host model (x, z), and gaps. */
 export const HOST_CELL: readonly [number, number] = [2.2, 2.0];
 export const GROUP_PAD = 0.7;
-export const LABEL_PAD = 0.8;
+export const LABEL_PAD = 1.0;
 export const SIBLING_GAP = 1.0;
 export const ROOT_GAP = 3.0;
 export const COLLAPSED_SIZE: readonly [number, number] = [3.4, 3.4];
@@ -21,6 +21,29 @@ export const SERVICE_SPACING = 3.4;
 export const SERVICE_DECK_HEIGHT = 4.2;
 export const SERVICE_DECK_OFFSET = 4.5;
 export const SERVICES_PER_ROW = 12;
+
+/**
+ * A container's name lies flat on its top surface, in the band its back edge reserves (GROUP_PAD + LABEL_PAD deep, above
+ * its children). Measured from the back edge, in world units.
+ */
+export const LABEL_INSET = 0.25;
+export const LABEL_TOP = 0.12;
+export const LABEL_HEIGHT = 1.1;
+
+export interface LabelBudget {
+  /** Plate-local, centred on the plate: left edge x, and the centre z of the band. */
+  left: number;
+  centreZ: number;
+  /** The most width and height the label may use, in world units. */
+  width: number;
+  height: number;
+}
+
+/** The space a container's name may use. It sits inside the band the layout reserves, never over its children. */
+export function groupLabelBudget([w, d]: readonly [number, number]): LabelBudget {
+  const top = -d / 2 + LABEL_TOP;
+  return { left: -w / 2 + LABEL_INSET, centreZ: top + LABEL_HEIGHT / 2, width: w - 2 * LABEL_INSET, height: LABEL_HEIGHT };
+}
 
 export interface Placement {
   /** Centre of the node's footprint at its base height. */

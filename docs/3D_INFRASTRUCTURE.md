@@ -71,6 +71,10 @@ Ports the current relationships use:
 
 Other declared ports (`front`, `back`, `left`, `right`) exist for future relationship types.
 
+## Container names
+
+A cluster, region, environment or unassigned group shows its name flat on its top surface, in the band its back edge reserves above its children (`LABEL_TOP`, `LABEL_HEIGHT` and `LABEL_PAD` in `lib/scene3d/layout.ts`). The name is cut short with an ellipsis when it would run past the plate, and the full name is in the tooltip and details panel. A collapsed container shows its host count on a stack placed at its front edge, so the count never covers the name. Names are drawn under health and alert overlays. `layout.test.ts` checks that each name stays on its own plate and that nested names never share a band.
+
 ## Connection anchors
 
 `resolveAnchor` (`lib/scene3d/connections.ts`) resolves a port name in this order:
@@ -107,7 +111,7 @@ All are overlays (`lib/scene3d/overlays.ts`). The model itself is never recolour
 | Ring colour and label | The host's backend `health.status`, with the same glyphs as the badges: ● healthy, ▲ warning, ■ critical, ◐ stale, ○ offline, ? unknown. A host with no loaded monitoring record is "– NO DATA LOADED", never healthy. Critical pulses fast, warning slowly. |
 | Ring pattern and tag | Data source: solid LIVE, dashed SYNTHETIC, dotted REPLAY. SYNTHETIC and REPLAY hosts always show their tag. |
 | Beam and badge | Only on a host with an active alert: severity glyph and count. The details panel lists each alert's rule, metric, value and limit, with "Open alert" to the existing investigation page (`/alerts/:id`). |
-| Group figures | "Aggregate of N hosts: critical 1 · healthy 3". A cluster, region, environment or service is never given a health state, and a host alert never marks its group as failed. |
+| Group figures | The hover tooltip and details panel give "Aggregate of N hosts: critical 1 · healthy 3" for a cluster, region or environment; the plate itself shows only its name. A cluster, region, environment or service is never given a health state, and a host alert never marks its group as failed. |
 
 The partial-coverage banners are the ones the Topology tab uses (`CoverageBanners.tsx`).
 

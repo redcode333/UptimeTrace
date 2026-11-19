@@ -13,7 +13,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { relationStyle, resolveEndpoints, type SceneConnection, type Transform } from "../../../lib/scene3d/connections";
-import { PLATE_THICKNESS, type Placement } from "../../../lib/scene3d/layout";
+import { groupLabelBudget, PLATE_THICKNESS, type LabelBudget, type Placement } from "../../../lib/scene3d/layout";
 import { instantiate } from "../../../lib/scene3d/modelAssets";
 import { healthOverlay } from "../../../lib/scene3d/overlays";
 import { registry } from "../../../lib/scene3d/registry";
@@ -329,9 +329,6 @@ function GroupNode({ e, placement, index, selected, h, reduced }: {
   useEffect(() => () => { fill.dispose(); edge.dispose(); }, [fill, edge]);
 
   const agg = e.aggregate;
-  const sub = e.collapsed
-    ? `${agg.summary} · collapsed, double-click to expand`
-    : agg.hosts === 0 ? "No hosts" : agg.summary;
   return (
     <group position={placement.position as [number, number, number]}>
       <group ref={appear}>
@@ -339,12 +336,7 @@ function GroupNode({ e, placement, index, selected, h, reduced }: {
         {dashed ? <primitive object={dashed} position={[0, thick + 0.01, 0]} /> : (
           <lineSegments geometry={unitEdges} material={edge} scale={[w, thick, d]} position={[0, thick / 2, 0]} />
         )}
-        <Label
-          text={`${s.label} · ${e.label}`}
-          height={0.75}
-          position={[-w / 2 + 0.25 + 0.375 * labelTexture(`${s.label} · ${e.label}`, { size: 34, sub, color: "#e6eef4" }).aspect, thick + 0.45, -d / 2 + 0.5]}
-          style={{ size: 34, sub, color: "#e6eef4" }}
-        />
+        <PlateLabel text={e.label} style={{ size: 40, pad: 6, color: "#e6eef4" }} budget={groupLabelBudget([w, d])} />
         {e.collapsed && <CollapsedStack hosts={agg.hosts} />}
       </group>
     </group>
@@ -353,10 +345,12 @@ function GroupNode({ e, placement, index, selected, h, reduced }: {
 
 const stackMaterial = new MeshStandardMaterial({ color: "#1b2d40", metalness: 0.5, roughness: 0.4 });
 const stackEdge = new LineBasicMaterial({ color: "#3fd6ff", transparent: true, opacity: 0.3 });
+/** Collapsed containers stand in front of the name band, so the stack and its count never cover the name. */
+const COLLAPSED_STACK_Z = 1.1;
 function CollapsedStack({ hosts }: { hosts: number }) {
   const layers = Math.min(4, Math.max(1, Math.ceil(hosts / 20)));
   return (
-    <group position={[0, PLATE_THICKNESS, 0.2]}>
+    <group position={[0, PLATE_THICKNESS, COLLAPSED_STACK_Z]}>
       {Array.from({ length: layers }, (_, i) => (
         <group key={i} position={[0, 0.2 + i * 0.42, 0]}>
           <mesh geometry={unitBox} material={stackMaterial} scale={[1.6, 0.36, 1.1]} castShadow />
@@ -511,6 +505,25 @@ function CameraRig({ scene, selected, resetToken, reduced }: { scene: Scene; sel
     c.update();
   });
   return null;
+}
+
+/**
+ * A container's name lying flat on its top surface, inside the band the layout reserves for it. Flat text cannot stack over
+ * the name of the container behind it on screen, and it never covers hosts, services or their overlays.
+ */
+function PlateLabel({ text, style, budget }: { text: string; style: LabelStyle; budget: LabelBudget }) {
+  const styleKey = JSON.stringify(style);
+  const { texture, aspect } = useMemo(() => labelTexture(text, style, { width: budget.width, height: budget.height }), [text, styleKey, budget.width, budget.height]);
+  // Drawn without depth testing: a nested container's raised plate can sit in front of its parent's name on screen, and the
+  // name must not be hidden by it. The band is empty space, so only plate surfaces are drawn over.
+  const material = useMemo(() => new MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false, toneMapped: false }), [texture]);
+  useEffect(() => () => material.dispose(), [material]);
+  const width = budget.height * aspect;
+  return (
+    <mesh position={[budget.left + width / 2, PLATE_THICKNESS + 0.01, budget.centreZ]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1} material={material}>
+      <planeGeometry args={[width, budget.height]} />
+    </mesh>
+  );
 }
 
 /* ---------- environment ---------- */
