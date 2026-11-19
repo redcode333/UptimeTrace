@@ -37,3 +37,9 @@ dist/
 .impeccable/hook.cache.json
 # Explicit path: tool cache, rewritten on every run (untracked; the local file is kept)
 frontend/.impeccable/hook.cache.json
+
+# Local coverage / type-check caches
+.coverage
+htmlcov/
+coverage/
+*.tsbuildinfo
