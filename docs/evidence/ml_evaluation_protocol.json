@@ -1,0 +1,1183 @@
+{
+ "protocol_id": "uptimetrace-ml-eval-protocol",
+ "version": "1.2",
+ "status": "final_review_amendments_B1_to_B6_applied_on_top_of_A1_to_A6_not_frozen",
+ "human_readable": "docs/ML_EVALUATION_PROTOCOL.md",
+ "human_readable_sha256_at_build": "60d6bbb74247da54f90bc6ddf5c5f3e917668efd1f09b9e2f73af52eb9b4a922",
+ "opening_sentence": "These results measure recovery of simulator-defined faults and do not demonstrate production outage-prediction accuracy.",
+ "tier_labels": [
+  "Synthetic IID",
+  "Synthetic OOD (limited initial robustness test)",
+  "Real-world operational validity: not established"
+ ],
+ "spec_basis": {
+  "spec": "UptimeTrace M3.0 simulator v2 and ground-truth specification v4.5.1",
+  "sections": [
+   13,
+   14,
+   15,
+   16
+  ],
+  "verbatim_extract": "docs/SIMULATOR_SPEC_V4_5_1_SECTIONS_13_16.md",
+  "extract_file_sha256": "1029bf99a13bf5b156a15a0c02ee21a1d43dd84d73d5f30d06f54f921bc164f1",
+  "extract_source_lines": [
+   985,
+   1162
+  ],
+  "extract_block_sha256": "3a1c1524905f0336f48a1358388dbb97cf7baa1661c3edd726cce8055e0f2fee",
+  "source_file_sha256": "a1829d0396f0a833507194e0beafa87b65204a110e93cbf068fded7674f5bf09",
+  "source_file": "UptimeTrace_M3.0_spec_v4.5.md (earlier session scratchpad)",
+  "source_title_version": "v4.5.1",
+  "copied_from_exact_source": true,
+  "other_sections_available_in_repository": false
+ },
+ "differences_from_spec": {
+  "D1": "ABRUPT/SILENT incidents are never 'detected'; spec stage 2 is a labelled diagnostic only (approved)",
+  "D2": "alerts before ABRUPT/SILENT-only windows are strict false alarms for the budget (spec: unattributed, excluded from N_FA); spec-style rate reported separately (approved, A5)",
+  "D3": "PRECURSOR incidents with no evaluable decision count as missed (currently 0)",
+  "D4": "Brier/calibration, detection delay, lead-conditional recall are new",
+  "D5": "candidate set = quantile grid + explicit no-alert and all-alert boundaries, fixed tie-breaks (spec leaves open)",
+  "D6": "operational-target training view is the separately reported secondary experiment E2 (spec lists it as required); never in headline or model selection",
+  "D7": "ABRUPT/SILENT chance baseline mandatory in the first evaluation, strictly diagnostic",
+  "D8": "no validation safety margin"
+ },
+ "task": {
+  "horizon_s": 1800,
+  "min_useful_lead_s": 120,
+  "alert_dedup_s": 900,
+  "decision_interval_s": 60,
+  "decision_offset_s": 5,
+  "decision_time": "run_start + 5 s + 60 s * j",
+  "target": "a merged incident begins in (t, t + horizon]",
+  "evaluation_unit": "merged incident (primary fault decides the group)",
+  "sensitivity_horizons_s": [
+   900,
+   3600
+  ],
+  "sensitivity_in_headline": false
+ },
+ "data": {
+  "dataset_id": "uptimetrace-m31-seed0-2723fc6789d8",
+  "labels_dir": "artifacts/labels_full",
+  "features_dir": "artifacts/features_full",
+  "forbidden_subset_dirs": [
+   "artifacts/labels",
+   "artifacts/features"
+  ],
+  "feature_version": "1.0",
+  "labeler_version": "1.0",
+  "features_used": "196 minus elapsed_s = 195, no selection",
+  "models": [
+   "rule",
+   "logreg",
+   "xgboost"
+  ],
+  "model_settings": "existing fixed settings of ml/train_baselines.py; any change is an amendment"
+ },
+ "splits": {
+  "train": {
+   "runs": 90,
+   "run_ids_sha256": "336d1af787af6aad22b10ece3b0f781ad9e1304c5e5d6895f50d85330dbb6dcd",
+   "evaluable_decision_points": 1774885,
+   "evaluable_host_days": 1232.559,
+   "calendar_host_days": 1260,
+   "exposure_fraction": 0.97822,
+   "incidents_total": 650,
+   "PRECURSOR": 455,
+   "ABRUPT": 45,
+   "SILENT": 150,
+   "unpredictable_by_design": 195,
+   "unpredictable_share": 0.3,
+   "ceiling_share_of_all_incidents_predictable": 0.7,
+   "precursor_by_family": {
+    "mem_leak": 100,
+    "disk_fill": 100,
+    "cpu_runaway": 83,
+    "net_flood": 72,
+    "pool_exhaustion": 100
+   },
+   "abrupt_by_family": {
+    "net_flood": 28,
+    "cpu_runaway": 17
+   },
+   "silent_by_family": {
+    "silent_crash": 150
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    2,
+    28,
+    28
+   ]
+  },
+  "val": {
+   "runs": 30,
+   "run_ids_sha256": "2dae95910e196fa9fd518f3a52b3aef9a8c0070e75bc78ab5eefbeefa99842d2",
+   "evaluable_decision_points": 591855,
+   "evaluable_host_days": 411.01,
+   "calendar_host_days": 420,
+   "exposure_fraction": 0.9786,
+   "incidents_total": 195,
+   "PRECURSOR": 132,
+   "ABRUPT": 18,
+   "SILENT": 45,
+   "unpredictable_by_design": 63,
+   "unpredictable_share": 0.3231,
+   "ceiling_share_of_all_incidents_predictable": 0.6769,
+   "precursor_by_family": {
+    "mem_leak": 30,
+    "disk_fill": 30,
+    "cpu_runaway": 25,
+    "net_flood": 17,
+    "pool_exhaustion": 30
+   },
+   "abrupt_by_family": {
+    "net_flood": 13,
+    "cpu_runaway": 5
+   },
+   "silent_by_family": {
+    "silent_crash": 45
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    10,
+    28,
+    28
+   ]
+  },
+  "test_iid": {
+   "runs": 40,
+   "run_ids_sha256": "0729870b85449a691b63c57bfce4dca5b058e8108bb70a2203b1e0f21999a2a5",
+   "evaluable_decision_points": 788765,
+   "evaluable_host_days": 547.753,
+   "calendar_host_days": 560,
+   "exposure_fraction": 0.97813,
+   "incidents_total": 293,
+   "PRECURSOR": 201,
+   "ABRUPT": 24,
+   "SILENT": 68,
+   "unpredictable_by_design": 92,
+   "unpredictable_share": 0.314,
+   "ceiling_share_of_all_incidents_predictable": 0.686,
+   "precursor_by_family": {
+    "mem_leak": 45,
+    "disk_fill": 45,
+    "cpu_runaway": 37,
+    "net_flood": 29,
+    "pool_exhaustion": 45
+   },
+   "abrupt_by_family": {
+    "net_flood": 16,
+    "cpu_runaway": 8
+   },
+   "silent_by_family": {
+    "silent_crash": 68
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    5,
+    28,
+    28
+   ]
+  },
+  "test_ood": {
+   "runs": 20,
+   "run_ids_sha256": "da0901bf245e90aa7cc54e7a4d11c07e32545e7c15c4c51199621d1c093bfbba",
+   "evaluable_decision_points": 393391,
+   "evaluable_host_days": 273.188,
+   "calendar_host_days": 280,
+   "exposure_fraction": 0.97567,
+   "incidents_total": 162,
+   "PRECURSOR": 111,
+   "ABRUPT": 14,
+   "SILENT": 37,
+   "unpredictable_by_design": 51,
+   "unpredictable_share": 0.3148,
+   "ceiling_share_of_all_incidents_predictable": 0.6852,
+   "precursor_by_family": {
+    "mem_leak": 25,
+    "disk_fill": 25,
+    "cpu_runaway": 19,
+    "net_flood": 17,
+    "pool_exhaustion": 25
+   },
+   "abrupt_by_family": {
+    "net_flood": 8,
+    "cpu_runaway": 6
+   },
+   "silent_by_family": {
+    "silent_crash": 37
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    21,
+    28,
+    28
+   ]
+  },
+  "test_ood_slow": {
+   "runs": 10,
+   "run_ids_sha256": "c750910947375ec2f6c101d30d344356274e97e9d9514f7924c3fb748976bf56",
+   "evaluable_decision_points": 196389,
+   "evaluable_host_days": 136.381,
+   "calendar_host_days": 140,
+   "exposure_fraction": 0.97415,
+   "incidents_total": 87,
+   "PRECURSOR": 65,
+   "ABRUPT": 6,
+   "SILENT": 16,
+   "unpredictable_by_design": 22,
+   "unpredictable_share": 0.2529,
+   "ceiling_share_of_all_incidents_predictable": 0.7471,
+   "precursor_by_family": {
+    "mem_leak": 12,
+    "disk_fill": 17,
+    "cpu_runaway": 12,
+    "net_flood": 9,
+    "pool_exhaustion": 15
+   },
+   "abrupt_by_family": {
+    "cpu_runaway": 3,
+    "net_flood": 3
+   },
+   "silent_by_family": {
+    "silent_crash": 16
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    28,
+    28,
+    28
+   ]
+  },
+  "test_ood_cache_node": {
+   "runs": 10,
+   "run_ids_sha256": "f2ee998d75ce62583958b4105128487a467bc79543ac11275077ba527b05f7c2",
+   "evaluable_decision_points": 197002,
+   "evaluable_host_days": 136.807,
+   "calendar_host_days": 140,
+   "exposure_fraction": 0.97719,
+   "incidents_total": 75,
+   "PRECURSOR": 46,
+   "ABRUPT": 8,
+   "SILENT": 21,
+   "unpredictable_by_design": 29,
+   "unpredictable_share": 0.3867,
+   "ceiling_share_of_all_incidents_predictable": 0.6133,
+   "precursor_by_family": {
+    "mem_leak": 13,
+    "disk_fill": 8,
+    "cpu_runaway": 7,
+    "net_flood": 8,
+    "pool_exhaustion": 10
+   },
+   "abrupt_by_family": {
+    "net_flood": 5,
+    "cpu_runaway": 3
+   },
+   "silent_by_family": {
+    "silent_crash": 21
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "eligible_decision_points_per_precursor_min_median_max": [
+    21,
+    28,
+    28
+   ]
+  }
+ },
+ "split_usage": {
+  "train": [
+   "fit models",
+   "fit preprocessing (imputer, scaler, class weights)",
+   "diagnostics labelled as train"
+  ],
+  "val": [
+   "threshold selection",
+   "post-hoc calibration fit",
+   "choose primary model type"
+  ],
+  "test_iid": [
+   "one frozen evaluation"
+  ],
+  "test_ood": [
+   "one frozen evaluation",
+   "reported as ood_slow and ood_cache_node subgroups and pooled"
+  ],
+  "never_pooled": [
+   "test_iid with test_ood"
+  ],
+  "test_access_before_freeze": "forbidden",
+  "training_views": {
+   "E1_default": {
+    "role": "primary",
+    "training_view": "default",
+    "positive": 1,
+    "negative": 0,
+    "unscorable": "masked",
+    "excluded": "dropped",
+    "models": [
+     "rule",
+     "logreg",
+     "xgboost"
+    ],
+    "in_headline": true,
+    "used_for_primary_model_selection": true,
+    "model_evaluations": {
+     "rule": {
+      "evaluations": 1,
+      "training_seed": null,
+      "deterministic": true
+     },
+     "logreg": {
+      "evaluations": 5,
+      "training_seeds": [
+       101,
+       102,
+       103,
+       104,
+       105
+      ]
+     },
+     "xgboost": {
+      "evaluations": 5,
+      "training_seeds": [
+       101,
+       102,
+       103,
+       104,
+       105
+      ]
+     }
+    },
+    "deterministic_models": [
+     "rule"
+    ]
+   },
+   "E2_operational_target": {
+    "role": "secondary_separately_reported",
+    "training_view": "operational_target",
+    "positive": 1,
+    "negative": 0,
+    "unscorable": 1,
+    "excluded": "dropped",
+    "models": [
+     "logreg",
+     "xgboost"
+    ],
+    "rule_not_repeated": "scores do not depend on the training view",
+    "in_headline": false,
+    "used_for_primary_model_selection": false,
+    "frozen_with_E1": true,
+    "same_procedure_and_budget_as_E1": true,
+    "comparison_with_E1": "descriptive only",
+    "model_evaluations": {
+     "logreg": {
+      "evaluations": 5,
+      "training_seeds": [
+       101,
+       102,
+       103,
+       104,
+       105
+      ]
+     },
+     "xgboost": {
+      "evaluations": 5,
+      "training_seeds": [
+       101,
+       102,
+       103,
+       104,
+       105
+      ]
+     }
+    },
+    "rule_excluded": true
+   }
+  },
+  "negative_thinning": "only on train, only for memory, recorded; never on val or test"
+ },
+ "totals": {
+  "incidents": 1300,
+  "unpredictable_by_design": 401,
+  "unpredictable_share": 0.30846,
+  "ceiling_share_of_all_incidents_predictable": 0.69154
+ },
+ "decision_point_status": {
+  "precedence": [
+   "excluded_insufficient_data",
+   "excluded_active (oracle active-incident mask: onset <= t < oracle_mask_end)",
+   "evaluable"
+  ],
+  "evaluable_classes": {
+   "positive": "O(t) has a PRECURSOR",
+   "unscorable": "O(t) non-empty without PRECURSOR",
+   "negative": "O(t) empty"
+  },
+  "O(t)": "all merged incidents with onset in (t, t+H], no exclusion filter",
+  "excluded_points": "no score, no alert, no exposure, no label, never counted as negatives",
+  "unscorable_points": "evaluable: can alert, count as exposure, masked only from the row-level primary label view",
+  "exposure": "evaluable decision points x 60 s, decision-quantised; dedup-suppressed intervals stay in exposure",
+  "preflight_guard": {
+   "abort_if_nan_in": [
+    "cpu_mean_300",
+    "mem_last",
+    "disk_root_last",
+    "disk_data_last"
+   ],
+   "audit_rows_checked": 2366740,
+   "audit_rows_with_nan": 0
+  }
+ },
+ "alert_emission": {
+  "rule": "scan evaluable decisions in time order; alert iff score >= threshold and (no previous alert or t >= previous_alert_time + 900 s)",
+  "suppressed_crossings": "counted and reported; not alerts, no credit, not false alarms",
+  "clock": "real time across excluded stretches",
+  "ties": ">= threshold alerts",
+  "score_dtype": "float64 in [0,1]",
+  "score_assertion": "scores must be finite float64 in [0,1]; NaN or out-of-range aborts the run (makes the two boundary thresholds exact)"
+ },
+ "matching": {
+  "credit_window_s": {
+   "lower": "onset - 1800",
+   "upper": "onset - 120",
+   "closed": true
+  },
+  "stage_1": "PRECURSOR incidents by increasing onset take the earliest unconsumed alert in the credit window; one alert credits at most one incident",
+  "stage_2_for_ABRUPT_SILENT": "diagnostic only; never feeds recall, precision or the budget"
+ },
+ "alert_outcomes": {
+  "hit": {
+   "recall_numerator": true,
+   "strict_false_alarm": false,
+   "spec_false_alarm": false,
+   "precision_strict_numerator": true
+  },
+  "duplicate": {
+   "recall_numerator": false,
+   "strict_false_alarm": false,
+   "spec_false_alarm": false,
+   "precision_lenient_numerator": true,
+   "definition": "not a hit; inside the credit window of a PRECURSOR incident already credited to another alert"
+  },
+  "late": {
+   "recall_numerator": false,
+   "strict_false_alarm": false,
+   "spec_false_alarm": false,
+   "precision_lenient_numerator": true,
+   "definition": "not hit/duplicate; a PRECURSOR onset lies in (t, t+H] but less than 120 s ahead"
+  },
+  "coincident_unpredictable": {
+   "recall_numerator": false,
+   "strict_false_alarm": true,
+   "spec_false_alarm": false,
+   "definition": "O(t) non-empty and contains only ABRUPT/SILENT incidents"
+  },
+  "false_alarm": {
+   "recall_numerator": false,
+   "strict_false_alarm": true,
+   "spec_false_alarm": true,
+   "definition": "O(t) empty"
+  },
+  "mixed_windows": "classified by PRECURSOR content",
+  "assertion": "an unconsumed alert inside a PRECURSOR credit window must belong to an already-detected incident",
+  "never": "an alert is never credited because an ABRUPT or SILENT incident follows"
+ },
+ "incident_outcomes": {
+  "PRECURSOR": "detected iff stage-1 matched; otherwise missed (including unevaluable)",
+  "ABRUPT_SILENT": "never detected; diagnostic 'coincidentally warned' only",
+  "mandatory_accounting_block": [
+   "N",
+   "N_P",
+   "N_A",
+   "N_S",
+   "N_U",
+   "N_U_share",
+   "unevaluable_PRECURSOR",
+   "K_detected_PRECURSOR"
+  ],
+  "headline_must_include": [
+   "Recall_P = K/N_P",
+   "predicted share of all incidents = K/N",
+   "ceiling = N_P/N"
+  ]
+ },
+ "metrics": {
+  "pooling": "ratios of sums over runs of the split/subgroup",
+  "recall_P": "K / N_P",
+  "recall_P_per_family": {
+   "families": [
+    "mem_leak",
+    "disk_fill",
+    "cpu_runaway",
+    "net_flood",
+    "pool_exhaustion"
+   ],
+   "LOW_N_below": 30,
+   "count_only_below": 10
+  },
+  "predicted_share_of_all_incidents": "K / N",
+  "precision_strict": "hits / alerts; 'N/A (zero alerts)' when alerts == 0",
+  "precision_lenient": "(hits + duplicates + late) / alerts; 'N/A (zero alerts)' when alerts == 0",
+  "false_alarms_per_evaluable_host_day_strict_budget_metric": "(false_alarm + coincident_unpredictable) / sum(E_h / 86400)",
+  "false_alarms_per_evaluable_host_day_spec": "false_alarm / sum(E_h / 86400)",
+  "false_alarms_per_calendar_host_day": "N_FA_strict / sum(C_h)",
+  "also_reported": [
+   "exposure_fraction",
+   "non_evaluable_time_by_status",
+   "alerts_per_host_day",
+   "suppressed_crossings"
+  ],
+  "false_alarm_label": "conditional on the oracle active-incident mask and the data-sufficiency exclusion; not a deployed false-alarm rate",
+  "warning_lead_time": {
+   "definition": "onset - alert_time, detected PRECURSOR only",
+   "range_s": [
+    120,
+    1800
+   ],
+   "stats": [
+    "median",
+    "p10",
+    "p90",
+    "mean"
+   ],
+   "buckets_s": [
+    [
+     120,
+     300
+    ],
+    [
+     300,
+     900
+    ],
+    [
+     900,
+     1800
+    ]
+   ],
+   "lead_conditional_recall_L_min_s": [
+    300,
+    600
+   ]
+  },
+  "detection_delay": {
+   "definition": "alert_time - precursor_start of the primary fault (oracle quantity), detected PRECURSOR only",
+   "stats": [
+    "median",
+    "p10",
+    "p90",
+    "share_negative"
+   ],
+   "censoring_aware_share_of_all_PRECURSOR_detected_within_min": [
+    5,
+    15,
+    30,
+    60,
+    120
+   ]
+  },
+  "brier": {
+   "primary_view": "evaluable rows, unscorable masked, y = positive",
+   "secondary_view": "all-incidents: unscorable y = 1",
+   "skill_reference": "constant predictor = train positive prevalence",
+   "also": [
+    "ECE over those bins",
+    "calibration-in-the-large",
+    "per-bin run-bootstrap CI"
+   ],
+   "calibrators": "raw score (primary) and val-fitted isotonic (secondary); alerts always use the raw score",
+   "reliability_bins": {
+    "source": "validation scores only (sorted raw scores of all evaluable validation decisions), per frozen model entry (rule once; logreg and xgboost per training seed and experiment)",
+    "interior_quantile_levels_pct": [
+     50,
+     80,
+     90,
+     95,
+     98,
+     99,
+     99.5,
+     99.9
+    ],
+    "boundary": "b_q = S[min(n-1, ceil(q*n))] (higher quantile, 0-based)",
+    "duplicates": "discard every boundary equal to the smallest validation score S[0] (it would create an empty first bin); then unique remaining boundaries ascending e_1 < ... < e_m; bins (-inf,e_1), [e_i,e_{i+1}), [e_m,+inf); tied levels merge, never split; no bin is empty on validation; if every boundary is discarded there is a single bin (-inf,+inf), reported",
+    "actual_bin_count": "m + 1 (at most 9), reported per model/seed together with the collapsed or discarded levels",
+    "frozen_before_test": true,
+    "same_boundaries_for": [
+     "test_iid",
+     "test_ood",
+     "ood_slow",
+     "ood_cache_node"
+    ],
+    "empty_bin_on_test": "reported with n = 0 and no estimate; boundaries never re-derived from test",
+    "isotonic": "same raw-score bins; mean predicted = mean calibrated value"
+   }
+  },
+  "pr_auc_row_level": "diagnostic only, prevalence shown, never in a headline",
+  "abrupt_silent_diagnostic": {
+   "required_in_first_evaluation": true,
+   "strictly_diagnostic": true,
+   "never_contributes_to": [
+    "Recall_P",
+    "K/N",
+    "precision",
+    "false_alarm_counts",
+    "threshold_selection",
+    "primary_model_selection"
+   ],
+   "label": "diagnostic: not prediction success",
+   "groups": [
+    "ABRUPT",
+    "SILENT"
+   ],
+   "per_family": true,
+   "observed": "proportion of incidents of the group with at least one emitted alert in [o-1800 s, o-120 s]",
+   "replicates": 1000,
+   "shift": "per run offset d_r uniform on {1..20159} decision steps (20160 per run); move each emitted alert j -> (j + d_r) mod 20160; drop alerts landing on an excluded decision; apply the circular dedup; recompute pooled proportion",
+   "report": [
+    "p_obs",
+    "mean_shifted",
+    "p_obs - mean_shifted",
+    "empirical one-sided p = (1 + #{p_r >= p_obs}) / 1001"
+   ],
+   "seed": "numpy.random.default_rng([20261202, training_seed]) for logreg/xgboost; array shape (1000, n_runs); runs in sorted run-id order; one fixed draw per training seed; the deterministic rule uses default_rng([20261202, 0])",
+   "computed_on": [
+    "validation (labelled selected on validation)",
+    "test_iid",
+    "test_ood",
+    "ood_slow",
+    "ood_cache_node"
+   ],
+   "PRECURSOR_incidents_excluded": true,
+   "never_pooled_with_PRECURSOR": true,
+   "circular_dedup": {
+    "circle_size_steps": 20160,
+    "dedup_gap_steps": 15,
+    "dedup_gap_s": 900,
+    "forward_distance": "(y - x) mod 20160",
+    "order_of_operations": [
+     "shift",
+     "drop excluded decisions",
+     "circular dedup"
+    ],
+    "algorithm": [
+     "0 or 1 alerts: keep (gap into a single alert is N)",
+     "gap into alert a = forward distance from the previous alert in circular order (last precedes first)",
+     "cut the circle at every gap >= 15 into maximal chains whose internal gaps are all < 15; a chain starts at an alert whose incoming gap is >= 15",
+     "inside each chain: keep the first alert; keep a later alert iff its forward distance from the last kept alert is >= 15 (exactly 15 keeps)",
+     "chains are independent"
+    ],
+    "properties": {
+     "rotation_equivariant": true,
+     "depends_on_linear_cut": false,
+     "example": "alerts at 20155 and 2 are 7 apart: 20155 kept, 2 dropped (a linear scan from 0 would keep 2)"
+    },
+    "precondition": "input alerts come from section 4 so consecutive alerts are >= 15 apart on the line; only the (last, first) pair can be closer on the circle; at least one gap >= 15 always exists; evaluator aborts if two or more alerts have no gap >= 15",
+    "exclusion_handling_unchanged": true
+   }
+  },
+  "model_comparison": "paired run-level bootstrap of differences; 'better' needs a 95% interval excluding 0 on Recall_P and neither model's test verdict equal to 'budget exceeded' or 'budget exceeded with confidence'",
+  "zero_alert_rule": {
+   "applies_when": "a model emits no alerts in the evaluated set",
+   "precision_strict": "N/A (zero alerts)",
+   "precision_lenient": "N/A (zero alerts)",
+   "never_substitute": [
+    0,
+    1
+   ],
+   "excluded_from": [
+    "averages",
+    "comparisons",
+    "plots"
+   ],
+   "undefined_counted_and_printed": true,
+   "stays_defined": {
+    "alerts": 0,
+    "alerts_per_host_day": 0,
+    "strict_false_alarms": 0,
+    "spec_false_alarms": 0,
+    "Recall_P": 0,
+    "K": 0,
+    "K_over_N": 0
+   },
+   "probability_metrics_still_computed": [
+    "Brier",
+    "Brier skill",
+    "reliability table",
+    "ECE",
+    "calibration-in-the-large",
+    "row-level PR-AUC"
+   ],
+   "seed_mean": "over seeds with defined precision only; print 'defined in n of 5 seeds' (rule: 'defined' or 'N/A')",
+   "bootstrap": {
+    "undefined_replicate": "resampled runs contain zero alerts",
+    "handling": "excluded from the precision percentile interval; number excluded reported",
+    "not_estimable_if_undefined_share_above": 0.05,
+    "no_alert_threshold": "every replicate undefined -> N/A"
+   }
+  }
+ },
+ "threshold_selection": {
+  "data": "validation only, evaluable decisions",
+  "budget_B_strict_false_alarms_per_evaluable_host_day": 1.0,
+  "objective": "maximise validation Recall_P among feasible candidates (FA_strict <= B)",
+  "tie_break": "highest threshold",
+  "evaluate_all_candidates": true,
+  "reason": "dedup makes the relation non-monotone; no bisection",
+  "forbidden_objectives": [
+   "F1",
+   "PR-AUC",
+   "any row-level metric"
+  ],
+  "per": [
+   "frozen model entry (rule once; logreg and xgboost per training seed and experiment)",
+   "horizon"
+  ],
+  "primary_model_type": "from E1 validation results only: highest mean-over-seeds validation Recall_P at budget; ties rule < logreg < xgboost; if every E1 model's mean validation Recall_P is 0 no primary model is named; E2 never enters; named before the freeze",
+  "all_models_reported_on_test": true,
+  "mandatory_reference_model": "rule",
+  "candidate_set": {
+   "parts": [
+    "quantile_candidates",
+    "all_alert_boundary",
+    "no_alert_boundary"
+   ],
+   "quantile_candidates": {
+    "tail_masses": {
+     "formula": "m_k = 10 ** (-1 - 4*k/1999)",
+     "k": [
+      0,
+      1999
+     ]
+    },
+    "threshold": "S[min(n-1, ceil((1 - m_k) * n))] ('higher' quantile) over the sorted evaluable validation scores S, n = len(S)",
+    "retained_unchanged": true
+   },
+   "all_alert_boundary": {
+    "threshold": 0.0,
+    "effect": "every evaluable decision meets score >= 0.0; alerts limited only by the 900 s dedup"
+   },
+   "no_alert_boundary": {
+    "threshold": "nextafter(1.0, +inf) = 1.0000000000000002",
+    "effect": "strictly above the maximum possible score; zero alerts, FA_strict = 0, Recall_P = 0",
+    "always_feasible": true
+   },
+   "deduplication": "exact float64 equality; sorted ascending; at most 2002 unique candidates; list length and SHA-256 recorded",
+   "evaluation": "every candidate, boundaries included, through the identical emission, dedup, matching and strict false-alarm pipeline on all 30 validation runs"
+  },
+  "no_alert_and_boundary_reporting": {
+   "threshold_always_exists": true,
+   "fields": {
+    "no_alert_selected": "bool per model/seed/experiment",
+    "boundary_selected": "exactly one of no_alert | all_alert | lowest_quantile | highest_quantile | none (precedence rule)",
+    "seeds_selecting_no_alert_per_model": "count for logreg and xgboost; rule shown as '1 evaluation: yes/no'",
+    "boundary_labels_also_matching": "list, informational"
+   },
+   "treatment_on_test": "evaluated as a never-alerting system (Recall_P = 0, zero alerts); calibration and Brier still computed; never dropped or hidden"
+  },
+  "boundary_label_precedence": {
+   "single_valued_field": "boundary_selected",
+   "order": [
+    "no_alert",
+    "all_alert",
+    "lowest_quantile",
+    "highest_quantile",
+    "none"
+   ],
+   "definitions": {
+    "no_alert": "theta* == nextafter(1.0, +inf)",
+    "all_alert": "theta* == 0.0",
+    "lowest_quantile": "theta* == smallest quantile-derived candidate (theta_0, tail mass 0.1)",
+    "highest_quantile": "theta* == largest quantile-derived candidate (theta_1999, tail mass 1e-5)",
+    "none": "none of the above"
+   },
+   "co_occurrence": "all_alert may equal lowest_quantile (90th-percentile score 0.0); all quantile candidates coincide for a constant scorer; no_alert never co-occurs (exceeds 1.0)",
+   "informational_field": "boundary_labels_also_matching (lower-precedence labels that also equal theta*; never used in a decision)",
+   "no_alert_selected": "true iff boundary_selected == 'no_alert'"
+  },
+  "exact_threshold_record": {
+   "stored_as": [
+    "decimal repr of the float64",
+    "IEEE hex via float.hex()"
+   ],
+   "never": [
+    "rounded",
+    "snapped",
+    "replaced by a label"
+   ]
+  },
+  "candidate_set_hash": {
+   "serialisation": "concatenation of each candidate's 8-byte little-endian IEEE-754 float64, ascending deduplicated order",
+   "hash": "SHA-256",
+   "length_recorded": true,
+   "unchanged_by_labelling": true
+  }
+ },
+ "uncertainty": {
+  "method": "run-level cluster bootstrap",
+  "replicates": 10000,
+  "seed": 20261201,
+  "interval": "95% percentile",
+  "resampling_unit": "run, within each reported group",
+  "held_fixed": [
+   "models",
+   "thresholds",
+   "calibrators"
+  ],
+  "training_seeds": [
+   101,
+   102,
+   103,
+   104,
+   105
+  ],
+  "seed_reporting": "per-seed and mean with min/max over logreg and xgboost seeds only; best seed never selected; rule evaluated once with no seed statistics",
+  "not_estimable": [
+   "generator-seed variance (one master seed)",
+   "variance of the threshold-selection procedure"
+  ],
+  "indicative_half_width_at_recall_0.5_independent_incident_approx": {
+   "val_132": 0.085,
+   "test_iid_201": 0.069,
+   "test_ood_111": 0.093
+  },
+  "chance_diagnostic_seed": 20261202,
+  "seeded_models": [
+   "logreg",
+   "xgboost"
+  ],
+  "deterministic_models": [
+   "rule"
+  ],
+  "rule_seed_statistics": null,
+  "chance_diagnostic_rule_stream_id": 0
+ },
+ "freeze_and_isolation": {
+  "order": [
+   "archive protocol hashes",
+   "train logreg and xgboost with each of the five seeds for E1 and E2; rule has no training and is evaluated once, in E1 only",
+   "select thresholds on val for every model/seed/experiment (candidate set incl. boundaries); derive reliability-bin boundaries from validation scores; fit isotonic calibrators on val; name primary model type from E1 validation only",
+   "freeze: write frozen_run.json (hashes of protocol, manifests, requirements.lock, git commit, model artifacts; 21 model entries (rule once with training_seed null + 5 seeds each of logreg and xgboost for E1 and for E2) each with exact threshold (repr and hex), candidate-set hash and length, single-valued boundary_selected with boundary_labels_also_matching, no_alert_selected, reliability-bin boundaries and actual bin count, isotonic calibrator, validation metrics; chance-diagnostic seed; training seeds; primary model type or 'none'; time of freezing; own SHA-256)",
+   "evaluate test_iid and test_ood (and subgroups) once, E1 and E2, including the chance diagnostic",
+   "report"
+  ],
+  "frozen_run_must_exist_before_any_test_file_is_opened": true,
+  "split_access_log": "written with every report",
+  "poison_file_test": "replace test files with files that raise on read and run train/select pipeline to completion",
+  "post_hoc": "anything changed after test numbers were seen is marked post-hoc and excluded from headlines",
+  "amendments": "protocol version bump and full re-run; results from different versions are not compared",
+  "nothing_in_frozen_run_derived_from_test_data": true,
+  "frozen_run_model_entries": 21
+ },
+ "report_format": {
+  "sections": [
+   "opening sentence",
+   "frozen-run summary (incl. no_alert_selected / boundary_selected flags and actual reliability bin counts)",
+   "accounting block",
+   "E1 headline table (strict false-alarm rate with spec-style rate in its own column)",
+   "operating-point generalisation table",
+   "per-family table",
+   "lead and delay tables",
+   "calibration (frozen bins)",
+   "ABRUPT/SILENT chance diagnostic (own section)",
+   "exclusion and exposure breakdown",
+   "secondary experiment E2 (own section, never in headline)",
+   "limitations"
+  ],
+  "headline_columns": [
+   "Recall_P",
+   "K/N",
+   "strict false alarms per evaluable host-day",
+   "precision strict",
+   "95% run-bootstrap intervals"
+  ],
+  "headline_groups": [
+   "val (selected on validation)",
+   "test_iid",
+   "test_ood",
+   "test_ood.ood_slow",
+   "test_ood.ood_cache_node"
+  ],
+  "forbidden_phrases": [
+   "deployed false-alarm rate",
+   "production false-alarm rate",
+   "alert suppression during incidents works"
+  ],
+  "json_report_keys": [
+   "abrupt_silent_diagnostic",
+   "accounting",
+   "boundary_labels_also_matching",
+   "boundary_selected",
+   "budget_verdict",
+   "calibration",
+   "chance_diagnostic",
+   "delay",
+   "experiment_E2",
+   "exposure",
+   "frozen_run_sha256",
+   "headline",
+   "lead",
+   "limitations",
+   "no_alert_selected",
+   "operating_point_generalisation",
+   "per_family",
+   "post_hoc",
+   "precision_undefined_flag",
+   "protocol_version",
+   "reliability_bins",
+   "split_access_log",
+   "tier_label"
+  ]
+ },
+ "limitations": {
+  "one_master_seed": true,
+  "ood_coverage_weak": "10 of 20 OOD runs are statistically identical to train; other 10 only 2.5x slower ramps",
+  "unpredictable_by_design_share": 0.30846,
+  "unpredictable_by_design_count": 401,
+  "target_is_simulator_defined_saturation_event": true,
+  "real_world_operational_validity": "not established",
+  "positive_rows_before_visible_precursor_share": 0.123,
+  "net_flood_positive_rows_before_precursor_share": 0.565,
+  "oracle_mask_conditional_false_alarms": true,
+  "telemetry_loss_unmeasured_share_of_decisions": 0.0102,
+  "run_level_separation_is_not_scenario_level_generalisation": true,
+  "rows_autocorrelated": "about 30 near-identical positive rows per incident"
+ },
+ "audit_consistency": {
+  "all_incident_totals_match_audit": true,
+  "expected_counts_file": "docs/evidence/ml_evaluation_protocol_expected_counts.json",
+  "expected_counts_sha256": "5fe0d63708d9d64cb56ba3164989d595be440720d58c265568b094c2c5c907c9",
+  "audit_json_sha256": "64de18da3de5c39057d0e142bd25a75f9e2f7e72315daad20f880ee1715d5f95"
+ },
+ "unresolved_ambiguities": [
+  "detection delay uses the latent precursor_start (oracle, not observable)",
+  "decision-grid resolution (60 s) limits sub-minute alert timing",
+  "numerical choices changeable before the freeze: bootstrap B=10000 and seed 20261201, chance-diagnostic seed 20261202, training seeds 101-105, interior reliability quantile levels",
+  "heavily tied scorers (e.g. rule) give fewer reliability bins because tied boundaries merge",
+  "the spec extract preserves only sections 13-16; the sections they cite remain only in the scratchpad source",
+  "the deterministic rule uses chance-diagnostic stream id 0, so its shifts differ from the seeded models' shifts (descriptive comparisons only)"
+ ],
+ "review": {
+  "date": "2026-11-19",
+  "result": "approved in principle; final-review amendments B1-B6 applied",
+  "freeze": "not frozen; explicit approval required before freezing or training",
+  "previous": {
+   "date": "2026-11-19",
+   "result": "approved in principle with amendments A1-A6",
+   "freeze": "not frozen; explicit approval required before freezing or training"
+  }
+ },
+ "amendments_log": {
+  "v1.0_human_readable_sha256": "004c75f27d521c6b19a602c9fb35106fc32d15802e8d61f462954710158f0b4c",
+  "v1.0_json_sha256": "547e63aa34efed6a11773bb0fb6935cd8539ea4444bde9e1ecef4e5987e196f1",
+  "expected_counts_sha256_unchanged": "5fe0d63708d9d64cb56ba3164989d595be440720d58c265568b094c2c5c907c9",
+  "A1": "threshold candidates = 2000 quantile candidates + no-alert boundary nextafter(1.0, +inf) + all-alert boundary 0.0, deduplicated, all evaluated; no-alert selection reported; infeasible outcome replaced; scores asserted in [0,1]",
+  "A2": "reliability-bin boundaries derived from validation scores only, frozen before test, shared by IID/OOD/subgroups, ties merged deterministically (boundaries equal to the minimum validation score discarded so no bin is empty), actual bin count reported",
+  "A3": "operational-target view is secondary experiment E2, separately reported, never used for primary-model selection",
+  "A4": "1000 seeded circular-shift ABRUPT/SILENT baseline mandatory in first evaluation, strictly diagnostic",
+  "A5": "strict false-alarm definition kept; spec-style rate reported separately",
+  "A6": "no validation safety margin; mechanical generalisation verdicts",
+  "v1.1_human_readable_sha256": "cd0171a8fe43c4615b437799f905120c4fb1fd7008c3d9ca2c4b3d2abbdefe05",
+  "v1.1_json_sha256": "bd14ab2a402cdabbe98686d88b2fc32e32e687f30ab09c4b79e6cd6fcca5689a",
+  "B1": "budget verdict is one ordered mutually exclusive rule: lower 95% bound > 1 -> 'budget exceeded with confidence'; else point estimate > 1 -> 'budget exceeded'; else 'budget reproduced'",
+  "B2": "rule is deterministic: evaluated once, E1 only; five training seeds apply only to logreg and xgboost; 21 frozen entries; rule uses chance-diagnostic stream id 0; no seed statistics for rule",
+  "B3": "precision is 'N/A (zero alerts)' for a model with no alerts; alerts and Recall_P stay 0; probability metrics still computed; defined aggregation and bootstrap handling",
+  "B4": "circular-shift dedup defined on the circle: cut at every gap >= 15 steps into chains, greedy inside each chain; rotation-equivariant; same 900 s interval and exclusion handling",
+  "B5": "boundary_selected single-valued by precedence no_alert > all_alert > lowest_quantile > highest_quantile > none; exact threshold (repr, hex) and candidate-set hash preserved",
+  "B6": "sections 13-16 of simulator spec v4.5.1 copied verbatim from the exact source with provenance and hashes"
+ },
+ "experiments": {
+  "E1": {
+   "role": "primary",
+   "training_view": "default",
+   "positive": 1,
+   "negative": 0,
+   "unscorable": "masked",
+   "excluded": "dropped",
+   "models": [
+    "rule",
+    "logreg",
+    "xgboost"
+   ],
+   "in_headline": true,
+   "used_for_primary_model_selection": true,
+   "model_evaluations": {
+    "rule": {
+     "evaluations": 1,
+     "training_seed": null,
+     "deterministic": true
+    },
+    "logreg": {
+     "evaluations": 5,
+     "training_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+     ]
+    },
+    "xgboost": {
+     "evaluations": 5,
+     "training_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+     ]
+    }
+   },
+   "deterministic_models": [
+    "rule"
+   ]
+  },
+  "E2": {
+   "role": "secondary_separately_reported",
+   "training_view": "operational_target",
+   "positive": 1,
+   "negative": 0,
+   "unscorable": 1,
+   "excluded": "dropped",
+   "models": [
+    "logreg",
+    "xgboost"
+   ],
+   "rule_not_repeated": "scores do not depend on the training view",
+   "in_headline": false,
+   "used_for_primary_model_selection": false,
+   "frozen_with_E1": true,
+   "same_procedure_and_budget_as_E1": true,
+   "comparison_with_E1": "descriptive only",
+   "model_evaluations": {
+    "logreg": {
+     "evaluations": 5,
+     "training_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+     ]
+    },
+    "xgboost": {
+     "evaluations": 5,
+     "training_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+     ]
+    }
+   },
+   "rule_excluded": true
+  }
+ },
+ "operating_point_generalisation": {
+  "safety_margin": null,
+  "budget_applied_to_validation_exactly": true,
+  "reselection_after_test_numbers": "forbidden",
+  "table": [
+   "strict false alarms per evaluable host-day with 95% interval",
+   "spec-style false alarms per evaluable host-day",
+   "Recall_P",
+   "K/N",
+   "alerts per host-day",
+   "validation-to-test differences"
+  ],
+  "columns": [
+   "val (selected on validation)",
+   "test_iid",
+   "test_ood",
+   "ood_slow",
+   "ood_cache_node"
+  ],
+  "verdict_rule": {
+   "ordered_first_match_wins": [
+    {
+     "if": "lower 95% bound of the test strict false-alarm rate > 1",
+     "verdict": "budget exceeded with confidence"
+    },
+    {
+     "if": "otherwise point estimate > 1",
+     "verdict": "budget exceeded"
+    },
+    {
+     "otherwise": true,
+     "verdict": "budget reproduced"
+    }
+   ],
+   "mutually_exclusive": true,
+   "exactly_one_verdict_per_split": true,
+   "lower_bound_definition": "lower end of the 95% run-level bootstrap percentile interval of the strict false-alarm rate per evaluable host-day",
+   "equality": "a lower bound exactly equal to 1 does not trigger the first rule; a point estimate exactly equal to 1 is 'budget reproduced'",
+   "note": "a lower bound > 1 implies a point estimate > 1"
+  },
+  "verdicts_change_thresholds": false
+ },
+ "resolved_by_review": [
+  "1000-shift diagnostic required (A4)",
+  "boundary label precedence (B5)",
+  "circular-shift dedup (B4)",
+  "deterministic rule baseline (B2)",
+  "no safety margin (A6)",
+  "no-alert models evaluated on test as never-alerting systems (confirmed)",
+  "operational-target view as secondary E2 (A3)",
+  "rule excluded from E2 (confirmed)",
+  "spec provenance, exact source copied (B6)",
+  "strict false-alarm definition (A5)",
+  "verdict precedence (B1)",
+  "zero-alert precision (B3)"
+ ],
+ "deterministic_rule_baseline": {
+  "model": "rule",
+  "definition": "max(cpu_mean_300, mem_last, disk_root_last, disk_data_last) / 100",
+  "evaluated_exactly_once": true,
+  "experiments": [
+   "E1"
+  ],
+  "excluded_from": [
+   "E2"
+  ],
+  "training_seeds_apply_only_to": [
+   "logreg",
+   "xgboost"
+  ],
+  "never": [
+   "five identical rule runs",
+   "artificial rule seed variability in summaries"
+  ],
+  "frozen_run_entry": {
+   "model": "rule",
+   "experiment": "E1",
+   "training_seed": null,
+   "deterministic": true,
+   "carries": [
+    "one exact threshold",
+    "one candidate-set hash and length",
+    "one boundary_selected / no_alert_selected",
+    "one set of reliability-bin boundaries",
+    "one isotonic calibrator",
+    "one validation record"
+   ]
+  },
+  "frozen_run_total_model_entries": {
+   "total": 21,
+   "E1": {
+    "rule": 1,
+    "logreg": 5,
+    "xgboost": 5
+   },
+   "E2": {
+    "logreg": 5,
+    "xgboost": 5
+   }
+  },
+  "threshold_selection": "section 8 run once on validation",
+  "reliability_bins": "derived once from the rule's validation scores",
+  "chance_diagnostic_stream": "numpy.random.default_rng([20261202, 0]); id 0 reserved for deterministic models, not a training seed; rule-versus-model comparisons in this diagnostic are descriptive",
+  "summaries": "seed mean/min/max/SD over logreg and xgboost seeds only; rule shown as one row 'deterministic, 1 evaluation' with run-level bootstrap interval only; no_alert tally shown as '1 evaluation: yes/no'",
+  "primary_model_selection": "the rule's single validation Recall_P is compared with the seed means of logreg and xgboost; tie order unchanged"
+ }
+}

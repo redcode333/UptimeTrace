@@ -1,0 +1,236 @@
+{
+ "ok": true,
+ "steps": 30,
+ "finished_at": "2026-11-19T06:55:41.256Z",
+ "environment": {
+  "database": "disposable PostgreSQL (uptimetrace_e2e, fresh)",
+  "api": "production app factory, real migrations, runtime role",
+  "telemetry": "signed ingestion through POST /api/v1/telemetry; no mocks",
+  "clerk": "local test key set (no Clerk tenant)",
+  "clock": "real clock; sweep every 2 s",
+  "monitoring": "production default thresholds; freshness defaults 90 s / 300 s, not exercised here"
+ },
+ "not_covered": [
+  "browser click-through of the investigation page (no Clerk session in this environment)",
+  "the real Go agent is not used in this script (telemetry is signed by the same credential path)"
+ ],
+ "steps_detail": [
+  {
+   "step": "migrations applied to a fresh database (alembic upgrade head)",
+   "ok": true,
+   "at": "2026-11-19T06:55:12.873Z",
+   "returncode": 0
+  },
+  {
+   "step": "schema head is 0007 (investigation evidence and records)",
+   "ok": true,
+   "at": "2026-11-19T06:55:12.878Z",
+   "head": "0007"
+  },
+  {
+   "step": "real API started (production app factory, runtime role uptimetrace_app)",
+   "ok": true,
+   "at": "2026-11-19T06:55:15.016Z",
+   "base": "http://127.0.0.1:8766"
+  },
+  {
+   "step": "host registered",
+   "ok": true,
+   "at": "2026-11-19T06:55:15.439Z",
+   "status": 201
+  },
+  {
+   "step": "credential issued (shown once)",
+   "ok": true,
+   "at": "2026-11-19T06:55:15.451Z",
+   "status": 201
+  },
+  {
+   "step": "normal telemetry ingested before the breach (3 envelopes, CPU 22%, memory 40%)",
+   "ok": true,
+   "at": "2026-11-19T06:55:24.541Z"
+  },
+  {
+   "step": "breach opened a persistent critical alert",
+   "ok": true,
+   "at": "2026-11-19T06:55:24.595Z",
+   "alert_id": "354cf4c8-d287-46bd-9ca7-3ad8544efce5",
+   "value": 97.0,
+   "threshold": 95.0
+  },
+  {
+   "step": "the continuing breach did not duplicate the alert",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.667Z",
+   "active_cpu_alerts": 1
+  },
+  {
+   "step": "investigation view opened",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.703Z",
+   "status": 200
+  },
+  {
+   "step": "exact triggering rule, metric, value and threshold retrieved",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.704Z",
+   "rule": "threshold",
+   "metric": "system.cpu.utilization",
+   "value": 97.0,
+   "threshold": 95.0,
+   "comparison": ">=",
+   "trigger_observed_at": "2026-11-19T06:55:24.041Z"
+  },
+  {
+   "step": "telemetry before and after the trigger is present in the investigation",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.704Z",
+   "populated_buckets_before": 1,
+   "populated_buckets_after": 1,
+   "window_start": "2026-11-19T06:25:24.559Z",
+   "window_end": "2026-11-19T07:25:24.559Z"
+  },
+  {
+   "step": "related alert on the same host is listed with its correlation note",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.704Z",
+   "related_total": 1,
+   "related": [
+    "system.memory.utilization"
+   ]
+  },
+  {
+   "step": "lifecycle events for the alert are present",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.704Z",
+   "events": [
+    "opened"
+   ]
+  },
+  {
+   "step": "host health is shown for the affected host",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.704Z",
+   "health": "critical"
+  },
+  {
+   "step": "alert acknowledged by the operator",
+   "ok": true,
+   "at": "2026-11-19T06:55:31.718Z"
+  },
+  {
+   "step": "normal telemetry resolved the alert by recovery (not the operator)",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.830Z"
+  },
+  {
+   "step": "recovery evidence: recovered value and the time it was observed",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.857Z",
+   "recovery": {
+    "recovered": true,
+    "resolution": "recovered",
+    "resolved_by": "system",
+    "resolved_at": "2026-11-19T06:55:31.733Z",
+    "value": 20.0,
+    "observed_at": "2026-11-19T06:55:31.218Z"
+   }
+  },
+  {
+   "step": "lifecycle timeline: opened, acknowledged, recovered",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.857Z",
+   "events": [
+    "opened",
+    "acknowledged",
+    "recovered"
+   ]
+  },
+  {
+   "step": "telemetry around the recovery sample is included",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.857Z",
+   "windows": [
+    "around_trigger",
+    "around_recovery"
+   ]
+  },
+  {
+   "step": "trigger evidence is unchanged after recovery (never overwritten)",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.857Z"
+  },
+  {
+   "step": "investigation record created",
+   "ok": true,
+   "at": "2026-11-19T06:55:40.896Z",
+   "status": 201,
+   "digest": "f1954d544c8336dc",
+   "verified": true
+  },
+  {
+   "step": "record remains available after refresh, unchanged, and reproduces from its evidence",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.171Z",
+   "record_id": "9aad30d9-0c0d-4775-bb24-fbb4e2932163",
+   "digest": "f1954d544c8336dc"
+  },
+  {
+   "step": "a second creation returns the stored record, not a new one",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.183Z"
+  },
+  {
+   "step": "record separates facts, conclusions and not-established items",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.183Z",
+   "facts": 13,
+   "conclusions": 3,
+   "not_established": 2
+  },
+  {
+   "step": "record claims no root cause",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.183Z"
+  },
+  {
+   "step": "another workspace's alert: investigation, record creation and record read are all refused",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.220Z",
+   "investigation": 404,
+   "create": 404,
+   "read": 404
+  },
+  {
+   "step": "the other workspace's alert is not in this workspace's alert list",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.235Z"
+  },
+  {
+   "step": "no record was created for the other workspace's alert",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.240Z",
+   "records": 0
+  },
+  {
+   "step": "database read-back: trigger and recovery evidence persisted on the alert row",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.244Z",
+   "row": {
+    "trigger_value": 97.0,
+    "trigger_threshold": 95.0,
+    "comparison": ">=",
+    "trigger_observed_at": "2026-11-19T06:55:24.041000+00:00",
+    "recovery_value": 20.0,
+    "recovery_observed_at": "2026-11-19T06:55:31.218000+00:00",
+    "resolution": "recovered"
+   }
+  },
+  {
+   "step": "database read-back: exactly one investigation record for the alert",
+   "ok": true,
+   "at": "2026-11-19T06:55:41.244Z",
+   "records": 1
+  }
+ ]
+}

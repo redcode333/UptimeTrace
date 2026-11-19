@@ -1,0 +1,465 @@
+{
+  "smd": {
+    "dataset": "SMD",
+    "machines": 28,
+    "dims": [
+      38
+    ],
+    "train_points": 708405,
+    "test_points": 708420,
+    "anomaly_points_test": 29444,
+    "anomaly_ratio_test": 0.0416,
+    "nan_cells": 0,
+    "constant_columns_in_train_total": 192,
+    "value_range_train_min_max_test_min_max_over_machines": [
+      0.0,
+      1.0,
+      0.0,
+      1.0
+    ],
+    "label_granularity": "point-level 0/1 per row; contiguous runs form anomaly SEGMENTS (interval-level) with a per-segment list of contributing dimensions (interpretation_label)",
+    "segments_total": 327,
+    "segment_length_min_median_max": [
+      2,
+      11,
+      3161
+    ],
+    "interpretation_lines_equal_segment_count_every_machine": false,
+    "timestamps_in_files": false,
+    "sampling_interval_in_files": null,
+    "feature_names_in_files": false,
+    "outage_or_impact_timestamps": false,
+    "per_machine": [
+      {
+        "machine": "machine-1-1",
+        "train": 28479,
+        "test": 28479,
+        "dims": 38,
+        "anomalies": 2694,
+        "segments": 8,
+        "interp_lines": 8,
+        "interp_points": 2675
+      },
+      {
+        "machine": "machine-1-2",
+        "train": 23694,
+        "test": 23694,
+        "dims": 38,
+        "anomalies": 542,
+        "segments": 10,
+        "interp_lines": 10,
+        "interp_points": 552
+      },
+      {
+        "machine": "machine-1-3",
+        "train": 23702,
+        "test": 23703,
+        "dims": 38,
+        "anomalies": 817,
+        "segments": 12,
+        "interp_lines": 11,
+        "interp_points": 816
+      },
+      {
+        "machine": "machine-1-4",
+        "train": 23706,
+        "test": 23707,
+        "dims": 38,
+        "anomalies": 720,
+        "segments": 12,
+        "interp_lines": 12,
+        "interp_points": 732
+      },
+      {
+        "machine": "machine-1-5",
+        "train": 23705,
+        "test": 23706,
+        "dims": 38,
+        "anomalies": 100,
+        "segments": 7,
+        "interp_lines": 7,
+        "interp_points": 107
+      },
+      {
+        "machine": "machine-1-6",
+        "train": 23688,
+        "test": 23689,
+        "dims": 38,
+        "anomalies": 3708,
+        "segments": 30,
+        "interp_lines": 30,
+        "interp_points": 3738
+      },
+      {
+        "machine": "machine-1-7",
+        "train": 23697,
+        "test": 23697,
+        "dims": 38,
+        "anomalies": 2398,
+        "segments": 13,
+        "interp_lines": 13,
+        "interp_points": 2411
+      },
+      {
+        "machine": "machine-1-8",
+        "train": 23698,
+        "test": 23699,
+        "dims": 38,
+        "anomalies": 763,
+        "segments": 20,
+        "interp_lines": 20,
+        "interp_points": 783
+      },
+      {
+        "machine": "machine-2-1",
+        "train": 23693,
+        "test": 23694,
+        "dims": 38,
+        "anomalies": 1170,
+        "segments": 13,
+        "interp_lines": 13,
+        "interp_points": 1183
+      },
+      {
+        "machine": "machine-2-2",
+        "train": 23699,
+        "test": 23700,
+        "dims": 38,
+        "anomalies": 2833,
+        "segments": 11,
+        "interp_lines": 11,
+        "interp_points": 2844
+      },
+      {
+        "machine": "machine-2-3",
+        "train": 23688,
+        "test": 23689,
+        "dims": 38,
+        "anomalies": 269,
+        "segments": 10,
+        "interp_lines": 10,
+        "interp_points": 288
+      },
+      {
+        "machine": "machine-2-4",
+        "train": 23689,
+        "test": 23689,
+        "dims": 38,
+        "anomalies": 1694,
+        "segments": 20,
+        "interp_lines": 20,
+        "interp_points": 1714
+      },
+      {
+        "machine": "machine-2-5",
+        "train": 23688,
+        "test": 23689,
+        "dims": 38,
+        "anomalies": 980,
+        "segments": 21,
+        "interp_lines": 21,
+        "interp_points": 1001
+      },
+      {
+        "machine": "machine-2-6",
+        "train": 28743,
+        "test": 28743,
+        "dims": 38,
+        "anomalies": 424,
+        "segments": 8,
+        "interp_lines": 8,
+        "interp_points": 432
+      },
+      {
+        "machine": "machine-2-7",
+        "train": 23696,
+        "test": 23696,
+        "dims": 38,
+        "anomalies": 417,
+        "segments": 20,
+        "interp_lines": 20,
+        "interp_points": 437
+      },
+      {
+        "machine": "machine-2-8",
+        "train": 23702,
+        "test": 23703,
+        "dims": 38,
+        "anomalies": 161,
+        "segments": 1,
+        "interp_lines": 1,
+        "interp_points": 162
+      },
+      {
+        "machine": "machine-2-9",
+        "train": 28722,
+        "test": 28722,
+        "dims": 38,
+        "anomalies": 1755,
+        "segments": 10,
+        "interp_lines": 10,
+        "interp_points": 1765
+      },
+      {
+        "machine": "machine-3-1",
+        "train": 28700,
+        "test": 28700,
+        "dims": 38,
+        "anomalies": 308,
+        "segments": 4,
+        "interp_lines": 4,
+        "interp_points": 312
+      },
+      {
+        "machine": "machine-3-10",
+        "train": 23692,
+        "test": 23693,
+        "dims": 38,
+        "anomalies": 1047,
+        "segments": 13,
+        "interp_lines": 13,
+        "interp_points": 1060
+      },
+      {
+        "machine": "machine-3-11",
+        "train": 28695,
+        "test": 28696,
+        "dims": 38,
+        "anomalies": 198,
+        "segments": 3,
+        "interp_lines": 3,
+        "interp_points": 201
+      },
+      {
+        "machine": "machine-3-2",
+        "train": 23702,
+        "test": 23703,
+        "dims": 38,
+        "anomalies": 1109,
+        "segments": 10,
+        "interp_lines": 9,
+        "interp_points": 1114
+      },
+      {
+        "machine": "machine-3-3",
+        "train": 23703,
+        "test": 23703,
+        "dims": 38,
+        "anomalies": 632,
+        "segments": 26,
+        "interp_lines": 28,
+        "interp_points": 666
+      },
+      {
+        "machine": "machine-3-4",
+        "train": 23687,
+        "test": 23687,
+        "dims": 38,
+        "anomalies": 977,
+        "segments": 8,
+        "interp_lines": 8,
+        "interp_points": 985
+      },
+      {
+        "machine": "machine-3-5",
+        "train": 23690,
+        "test": 23691,
+        "dims": 38,
+        "anomalies": 426,
+        "segments": 11,
+        "interp_lines": 11,
+        "interp_points": 437
+      },
+      {
+        "machine": "machine-3-6",
+        "train": 28726,
+        "test": 28726,
+        "dims": 38,
+        "anomalies": 1194,
+        "segments": 11,
+        "interp_lines": 11,
+        "interp_points": 1205
+      },
+      {
+        "machine": "machine-3-7",
+        "train": 28705,
+        "test": 28705,
+        "dims": 38,
+        "anomalies": 434,
+        "segments": 5,
+        "interp_lines": 5,
+        "interp_points": 439
+      },
+      {
+        "machine": "machine-3-8",
+        "train": 28703,
+        "test": 28704,
+        "dims": 38,
+        "anomalies": 1371,
+        "segments": 6,
+        "interp_lines": 6,
+        "interp_points": 1377
+      },
+      {
+        "machine": "machine-3-9",
+        "train": 28713,
+        "test": 28713,
+        "dims": 38,
+        "anomalies": 303,
+        "segments": 4,
+        "interp_lines": 4,
+        "interp_points": 307
+      }
+    ],
+    "n_files": 112,
+    "files_sha256_of_first_3": {
+      "interpretation_label\\machine-1-1.txt": "ea2b75dacb9cd140d81962203b18706e8e85d70c87dcced69746a37ba133fa48",
+      "interpretation_label\\machine-1-2.txt": "761b4b339a14d4781f34a3cd03fb3d983b01e3bece3f638fa21bb887128d3a11",
+      "interpretation_label\\machine-1-3.txt": "dbe9970c43e64445b89211f26eb13f0eccb4da869deaea298218d7c094672c8f"
+    },
+    "bytes": 485981164
+  },
+  "psm": {
+    "dataset": "PSM",
+    "columns_train": [
+      "timestamp_(min)",
+      "feature_0",
+      "feature_1",
+      "..."
+    ],
+    "n_features": 25,
+    "train_rows": 132481,
+    "test_rows": 87841,
+    "label_rows": 87841,
+    "label_alignment_ok": true,
+    "first_column_name": "timestamp_(min)",
+    "first_column_is_integer_index_or_time": true,
+    "first_column_step_min_median_max": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "nan_cells_train": 4195,
+    "nan_cells_test": 0,
+    "nan_rows_train": 2697,
+    "nan_rows_test": 0,
+    "anomaly_points_test": 24381,
+    "anomaly_ratio_test": 0.2776,
+    "segments_total": 72,
+    "segment_length_min_median_max": [
+      1,
+      5,
+      8861
+    ],
+    "label_granularity": "point-level 0/1 per row (contiguous runs = interval segments); no per-dimension attribution",
+    "feature_names_meaningful": false,
+    "sample_feature_names": [
+      "feature_0",
+      "feature_1",
+      "feature_2",
+      "feature_3"
+    ],
+    "timestamps_real": false,
+    "outage_or_impact_timestamps": false,
+    "files_sha256": {
+      "train.csv": "816e0e2a5356b3b09d356925cd9a0fe1d327e3b350e9336d26ee3e650c72e112",
+      "test.csv": "566bc50117d13f58793d830c14975c55f627cab63953265d7d6ce2dbcf2b0f80",
+      "test_label.csv": "e5b6b0c716a9b3d52e3a1b06761527811f75a218790c37b8a5e806741aeb0676"
+    },
+    "bytes": 107117850
+  },
+  "kpi": {
+    "dataset": "AIOps KPI",
+    "files": {
+      "Preliminary_dataset/train.csv": {
+        "columns": [
+          "timestamp",
+          "value",
+          "label",
+          "KPI ID"
+        ],
+        "rows": 2476315,
+        "kpi_ids": 26,
+        "sha256": "427fff1a9f310e96f8e146a640c69f3045bcdcaba6d52cacd6db91b3a6dea273",
+        "bytes": 99341767,
+        "nan_cells": 0,
+        "anomaly_ratio": 0.0216,
+        "segments_total": 933,
+        "median_sampling_seconds_min_max_over_kpis": [
+          60.0,
+          300.0
+        ]
+      },
+      "Preliminary_dataset/test.csv": {
+        "columns": [
+          "timestamp",
+          "value",
+          "KPI ID"
+        ],
+        "rows": 2345211,
+        "kpi_ids": 26,
+        "sha256": "3a857e6c8446e4a8b0ef0673766972350e680b0d3819d6dfda2904d5ab4ea7a0",
+        "bytes": 89476721,
+        "nan_cells": 0,
+        "has_labels": false
+      },
+      "Finals_dataset/phase2_train.csv.zip": {
+        "zip_members": [
+          [
+            "phase2_train.csv",
+            176109012
+          ],
+          [
+            "__MACOSX/",
+            0
+          ],
+          [
+            "__MACOSX/._phase2_train.csv",
+            490
+          ]
+        ],
+        "sha256": "5611dec5c912353427ac28f6c6481126a485b1229d0ca9692dc3462aa9116081",
+        "bytes": 16293543
+      },
+      "Finals_dataset/phase2_ground_truth.hdf.zip": {
+        "zip_members": [
+          [
+            "phase2_ground_truth.hdf",
+            100308352
+          ],
+          [
+            "__MACOSX/",
+            0
+          ],
+          [
+            "__MACOSX/._phase2_ground_truth.hdf",
+            497
+          ]
+        ],
+        "sha256": "308b0e58555ccdc71d852aa53d15be8f24d415fef599136763e3df3849e29bd2",
+        "bytes": 16254356
+      }
+    },
+    "label_granularity": "point-level 0/1 per timestamp, per KPI series (interval segments by contiguity)",
+    "feature_semantics": "single anonymised KPI value per series (univariate); no resource/host semantics in files",
+    "outage_or_impact_timestamps": false
+  },
+  "nab": {
+    "dataset": "NAB",
+    "series_files": 58,
+    "real_world_series": 47,
+    "rows_total": 365558,
+    "label_windows_total": 116,
+    "series_with_labels": 52,
+    "median_sampling_seconds_histogram": {
+      "300.0": 48,
+      "3600.0": 7,
+      "1800.0": 1,
+      "600.0": 2
+    },
+    "label_granularity": "anomaly WINDOWS (start,end timestamps) per series, not point labels",
+    "feature_semantics": "single univariate value per series from mixed domains (AWS CloudWatch, ad exchange, traffic, tweets, artificial)",
+    "outage_or_impact_timestamps": false,
+    "bytes": 9583432
+  }
+}

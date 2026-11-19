@@ -1,0 +1,368 @@
+{
+ "ok": true,
+ "steps": 34,
+ "finished_at": "2026-11-19T06:31:23.498Z",
+ "environment": {
+  "database": "disposable PostgreSQL 16 (container ut-e2e-pg, loopback), database uptimetrace_e2e",
+  "api": "production app factory via scripts/e2e/app.py, real migrations, runtime role uptimetrace_app",
+  "agent": "Go agent built from agent/ (go build ./cmd/agent) and run as a child process",
+  "clerk": "NOT the Clerk tenant: browser session tokens use the local test key set (tests/clerk_support.py)",
+  "clock": "real clock; alert sweep every 2 s; workspace stale 10 s, offline 20 s (production defaults 90 s / 300 s)"
+ },
+ "not_covered": [
+  "browser click-through (no Clerk session is available in this environment)",
+  "Clerk sign-in and allowlist in a real tenant",
+  "agent disk spool (the agent buffer is in memory)",
+  "stale/offline defaults (run used shortened windows)"
+ ],
+ "steps_detail": [
+  {
+   "step": "migrations applied to a fresh database (alembic upgrade head)",
+   "ok": true,
+   "at": "2026-11-19T06:30:01.550Z",
+   "returncode": 0
+  },
+  {
+   "step": "runtime role uptimetrace_app enabled (least privilege, as in production)",
+   "ok": true,
+   "at": "2026-11-19T06:30:01.564Z"
+  },
+  {
+   "step": "real API started on 127.0.0.1 with the production app factory",
+   "ok": true,
+   "at": "2026-11-19T06:30:03.684Z",
+   "base": "http://127.0.0.1:8765"
+  },
+  {
+   "step": "workspace monitoring settings saved (stale 10 s, offline 20 s for this run)",
+   "ok": true,
+   "at": "2026-11-19T06:30:03.995Z",
+   "status": 200
+  },
+  {
+   "step": "host registered: e2e-agent-01",
+   "ok": true,
+   "at": "2026-11-19T06:30:04.021Z",
+   "status": 201
+  },
+  {
+   "step": "credential issued for e2e-agent-01 (shown once; kept only in this process)",
+   "ok": true,
+   "at": "2026-11-19T06:30:04.065Z",
+   "status": 201,
+   "token_returned": true,
+   "cache_control": "no-store"
+  },
+  {
+   "step": "host registered: e2e-controlled-01",
+   "ok": true,
+   "at": "2026-11-19T06:30:04.081Z",
+   "status": 201
+  },
+  {
+   "step": "credential issued for e2e-controlled-01 (shown once; kept only in this process)",
+   "ok": true,
+   "at": "2026-11-19T06:30:04.092Z",
+   "status": 201,
+   "token_returned": true,
+   "cache_control": "no-store"
+  },
+  {
+   "step": "credential listing never contains the token",
+   "ok": true,
+   "at": "2026-11-19T06:30:04.102Z",
+   "count": 1
+  },
+  {
+   "step": "Go agent built from source (go build ./cmd/agent)",
+   "ok": true,
+   "at": "2026-11-19T06:30:06.982Z",
+   "returncode": 0
+  },
+  {
+   "step": "agent started with its registry credential (UPTIMETRACE_TOKEN, never a flag)",
+   "ok": true,
+   "at": "2026-11-19T06:30:07.242Z",
+   "pid": 25268
+  },
+  {
+   "step": "real telemetry reached the API and is shown for the host",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.350Z",
+   "cpu_percent": 9.4,
+   "memory_percent": 88.73,
+   "reporting": "reporting",
+   "health": "critical",
+   "last_seen_age_s": 0.1
+  },
+  {
+   "step": "telemetry persisted in PostgreSQL (rows read back with the owner role)",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.358Z",
+   "rows": 1
+  },
+  {
+   "step": "controlled host reports normal CPU (22%)",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.386Z",
+   "status": 202
+  },
+  {
+   "step": "controlled host shows as healthy while its data is fresh",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.399Z"
+  },
+  {
+   "step": "controlled breach sent: CPU 97% through the signed ingestion path",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.439Z",
+   "status": 202
+  },
+  {
+   "step": "persistent alert opened from the breach (critical, once)",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.456Z",
+   "alert_id": "e03ef275-94b4-4970-81d7-83b99a364a1e",
+   "severity": "critical",
+   "value": 97.0,
+   "threshold": 95.0
+  },
+  {
+   "step": "host health reports critical from the same data",
+   "ok": true,
+   "at": "2026-11-19T06:30:12.468Z"
+  },
+  {
+   "step": "a repeated breach does not create a duplicate alert",
+   "ok": true,
+   "at": "2026-11-19T06:30:15.518Z",
+   "alerts": 1
+  },
+  {
+   "step": "alert acknowledged by the operator",
+   "ok": true,
+   "at": "2026-11-19T06:30:15.532Z",
+   "acknowledged_by": "user_allowed_1"
+  },
+  {
+   "step": "normal telemetry restored: alert resolved by recovery (not by the operator)",
+   "ok": true,
+   "at": "2026-11-19T06:30:15.573Z",
+   "resolution": "recovered",
+   "resolved_by": "system"
+  },
+  {
+   "step": "alert timeline records opened, acknowledged and recovered",
+   "ok": true,
+   "at": "2026-11-19T06:30:15.581Z",
+   "events": [
+    "opened",
+    "acknowledged",
+    "recovered"
+   ]
+  },
+  {
+   "step": "silent host never reported as healthy",
+   "ok": true,
+   "at": "2026-11-19T06:30:35.887Z",
+   "observations": [
+    [
+     15,
+     "stale",
+     "stale"
+    ],
+    [
+     16,
+     "stale",
+     "stale"
+    ],
+    [
+     17,
+     "stale",
+     "stale"
+    ],
+    [
+     18,
+     "stale",
+     "stale"
+    ],
+    [
+     19,
+     "stale",
+     "stale"
+    ],
+    [
+     20,
+     "silent",
+     "offline"
+    ]
+   ]
+  },
+  {
+   "step": "silent host raised a persistent host_offline alert",
+   "ok": true,
+   "at": "2026-11-19T06:30:37.924Z",
+   "alert_id": "dc7c3275-0244-45ce-9ce3-123aa77dc430"
+  },
+  {
+   "step": "controlled host resumed: host_offline alert recovered",
+   "ok": true,
+   "at": "2026-11-19T06:30:37.960Z"
+  },
+  {
+   "step": "stopped agent: reporting -> stale -> offline (not healthy at any point)",
+   "ok": true,
+   "at": "2026-11-19T06:30:58.289Z",
+   "observations": [
+    [
+     13,
+     "stale",
+     "stale"
+    ],
+    [
+     14,
+     "stale",
+     "stale"
+    ],
+    [
+     15,
+     "stale",
+     "stale"
+    ],
+    [
+     16,
+     "stale",
+     "stale"
+    ],
+    [
+     17,
+     "stale",
+     "stale"
+    ],
+    [
+     18,
+     "stale",
+     "stale"
+    ],
+    [
+     19,
+     "stale",
+     "stale"
+    ],
+    [
+     20,
+     "silent",
+     "offline"
+    ]
+   ]
+  },
+  {
+   "step": "stopped agent raised a host_offline alert",
+   "ok": true,
+   "at": "2026-11-19T06:30:58.297Z"
+  },
+  {
+   "step": "restarted agent reports again: host reporting",
+   "ok": true,
+   "at": "2026-11-19T06:31:03.405Z",
+   "health": "critical",
+   "cpu_percent": 2.47
+  },
+  {
+   "step": "agent recovery resolved its host_offline alert",
+   "ok": true,
+   "at": "2026-11-19T06:31:03.415Z"
+  },
+  {
+   "step": "credential revoked from the console API",
+   "ok": true,
+   "at": "2026-11-19T06:31:03.432Z",
+   "status": 200
+  },
+  {
+   "step": "revoked credential refused on the very next request (401)",
+   "ok": true,
+   "at": "2026-11-19T06:31:03.437Z",
+   "status": 401
+  },
+  {
+   "step": "agent with a revoked credential: nothing new persisted, agent keeps running, rejection is logged",
+   "ok": true,
+   "at": "2026-11-19T06:31:23.480Z",
+   "persisted_before": 6,
+   "persisted_after": 6,
+   "agent_running": true,
+   "rejected_logged": true
+  },
+  {
+   "step": "database read-back: telemetry per host",
+   "ok": true,
+   "at": "2026-11-19T06:31:23.489Z",
+   "envelopes_per_host": {
+    "e2e-controlled-01": 5,
+    "e2e-agent-01": 6
+   }
+  },
+  {
+   "step": "database read-back: alert rows and timeline events",
+   "ok": true,
+   "at": "2026-11-19T06:31:23.490Z",
+   "alerts": [
+    [
+     "e2e-agent-01",
+     "threshold",
+     "open",
+     null,
+     "critical"
+    ],
+    [
+     "e2e-agent-01",
+     "threshold",
+     "open",
+     null,
+     "warning"
+    ],
+    [
+     "e2e-agent-01",
+     "threshold",
+     "open",
+     null,
+     "warning"
+    ],
+    [
+     "e2e-controlled-01",
+     "threshold",
+     "resolved",
+     "recovered",
+     "critical"
+    ],
+    [
+     "e2e-controlled-01",
+     "host_offline",
+     "resolved",
+     "recovered",
+     "critical"
+    ],
+    [
+     "e2e-agent-01",
+     "host_offline",
+     "resolved",
+     "recovered",
+     "critical"
+    ],
+    [
+     "e2e-controlled-01",
+     "host_offline",
+     "open",
+     null,
+     "critical"
+    ]
+   ],
+   "events": {
+    "acknowledged": 1,
+    "opened": 7,
+    "recovered": 3
+   }
+  }
+ ]
+}

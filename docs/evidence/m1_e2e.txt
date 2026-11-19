@@ -1,0 +1,32 @@
+run at 2026-11-18T16:51:12.401038+00:00
+[PASS] database created, migrations applied to head, app role is the least-privilege uptimetrace_app
+API (uvicorn, real HTTP) listening on http://127.0.0.1:54830
+agent built from ./agent -> agent.exe
+[PASS] freshness limits configured via the settings API (stale 10 s, offline 25 s)
+[PASS] host registered; state is awaiting_first_telemetry
+[PASS] a registered host that never reported does not appear healthy (no telemetry record)
+[PASS] credential issued; plaintext token returned once, no-store
+[PASS] token is not recoverable from any later API response
+[PASS] real agent authenticated and its telemetry became visible through the read API
+[PASS] last_seen advances while the agent runs  (2026-11-18T16:50:06.989193Z -> 2026-11-18T16:50:10.990127Z)
+[PASS] host is reporting with a real health verdict  (status=critical category=degraded)
+[PASS] cpu, memory and disk measurements are present  ({"cpu_percent": 17.98, "memory_percent": 90.62, "disk_percent_max": 99.68})
+[PASS] metric history is queryable  (1 populated points)
+[PASS] registry shows the host reporting with 1 active credential
+[PASS] envelopes persisted against exactly the registered host and agent  (rows=5 host=e2e-host-1 agent=agent-e2e-host-1)
+[PASS] credential revoked through the API
+[PASS] no envelope is accepted after revocation (row count frozen while the agent keeps sending)  (before=5 at-revoke=5 +4s=5)
+[PASS] the revoked token is rejected with 401 on a direct request
+[PASS] the agent itself logged 401 rejections and never logged its token
+[PASS] API process was never restarted (same server instance)
+[PASS] second credential works: host is reporting again
+transition timeline (s after agent stopped, status, age): 0.0s critical age=0.0; 3.1s critical age=3.1; 6.1s critical age=6.1; 9.1s critical age=9.1; 12.2s stale age=12.2; 15.2s stale age=15.2; 18.3s stale age=18.3; 21.3s stale age=21.3; 24.4s stale age=24.4
+[PASS] stopped agent transitions to STALE and then OFFLINE  (critical -> stale -> offline)
+[PASS] offline host reports no stale concerns and reporting_status=silent
+[PASS] valid credential is accepted while the database is up
+[PASS] database down: ingestion answers 503, nothing is accepted  (status=503)
+[PASS] /health reports degraded while the database is down
+[PASS] database down: an unknown token is never accepted
+[PASS] database restarted
+[PASS] after the database returns, the same credential is accepted again without restarting the API
+RESULT: ALL CHECKS PASSED

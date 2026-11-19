@@ -1,0 +1,230 @@
+{
+ "dataset_id": "uptimetrace-m31-seed0-2723fc6789d8",
+ "horizon_s": 1800,
+ "min_useful_lead_s": 120,
+ "decision_interval_s": 60,
+ "splits": {
+  "train": {
+   "runs": 90,
+   "run_ids_sha256": "336d1af787af6aad22b10ece3b0f781ad9e1304c5e5d6895f50d85330dbb6dcd",
+   "evaluable_decision_points": 1774885,
+   "evaluable_host_days": 1232.559,
+   "calendar_host_days": 1260,
+   "exposure_fraction": 0.97822,
+   "incidents_total": 650,
+   "PRECURSOR": 455,
+   "ABRUPT": 45,
+   "SILENT": 150,
+   "unpredictable_by_design": 195,
+   "unpredictable_share": 0.3,
+   "ceiling_share_of_all_incidents_predictable": 0.7,
+   "precursor_by_family": {
+    "mem_leak": 100,
+    "disk_fill": 100,
+    "cpu_runaway": 83,
+    "net_flood": 72,
+    "pool_exhaustion": 100
+   },
+   "abrupt_by_family": {
+    "net_flood": 28,
+    "cpu_runaway": 17
+   },
+   "silent_by_family": {
+    "silent_crash": 150
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    2,
+    28,
+    28
+   ]
+  },
+  "val": {
+   "runs": 30,
+   "run_ids_sha256": "2dae95910e196fa9fd518f3a52b3aef9a8c0070e75bc78ab5eefbeefa99842d2",
+   "evaluable_decision_points": 591855,
+   "evaluable_host_days": 411.01,
+   "calendar_host_days": 420,
+   "exposure_fraction": 0.9786,
+   "incidents_total": 195,
+   "PRECURSOR": 132,
+   "ABRUPT": 18,
+   "SILENT": 45,
+   "unpredictable_by_design": 63,
+   "unpredictable_share": 0.3231,
+   "ceiling_share_of_all_incidents_predictable": 0.6769,
+   "precursor_by_family": {
+    "mem_leak": 30,
+    "disk_fill": 30,
+    "cpu_runaway": 25,
+    "net_flood": 17,
+    "pool_exhaustion": 30
+   },
+   "abrupt_by_family": {
+    "net_flood": 13,
+    "cpu_runaway": 5
+   },
+   "silent_by_family": {
+    "silent_crash": 45
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    10,
+    28,
+    28
+   ]
+  },
+  "test_iid": {
+   "runs": 40,
+   "run_ids_sha256": "0729870b85449a691b63c57bfce4dca5b058e8108bb70a2203b1e0f21999a2a5",
+   "evaluable_decision_points": 788765,
+   "evaluable_host_days": 547.753,
+   "calendar_host_days": 560,
+   "exposure_fraction": 0.97813,
+   "incidents_total": 293,
+   "PRECURSOR": 201,
+   "ABRUPT": 24,
+   "SILENT": 68,
+   "unpredictable_by_design": 92,
+   "unpredictable_share": 0.314,
+   "ceiling_share_of_all_incidents_predictable": 0.686,
+   "precursor_by_family": {
+    "mem_leak": 45,
+    "disk_fill": 45,
+    "cpu_runaway": 37,
+    "net_flood": 29,
+    "pool_exhaustion": 45
+   },
+   "abrupt_by_family": {
+    "net_flood": 16,
+    "cpu_runaway": 8
+   },
+   "silent_by_family": {
+    "silent_crash": 68
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    5,
+    28,
+    28
+   ]
+  },
+  "test_ood": {
+   "runs": 20,
+   "run_ids_sha256": "da0901bf245e90aa7cc54e7a4d11c07e32545e7c15c4c51199621d1c093bfbba",
+   "evaluable_decision_points": 393391,
+   "evaluable_host_days": 273.188,
+   "calendar_host_days": 280,
+   "exposure_fraction": 0.97567,
+   "incidents_total": 162,
+   "PRECURSOR": 111,
+   "ABRUPT": 14,
+   "SILENT": 37,
+   "unpredictable_by_design": 51,
+   "unpredictable_share": 0.3148,
+   "ceiling_share_of_all_incidents_predictable": 0.6852,
+   "precursor_by_family": {
+    "mem_leak": 25,
+    "disk_fill": 25,
+    "cpu_runaway": 19,
+    "net_flood": 17,
+    "pool_exhaustion": 25
+   },
+   "abrupt_by_family": {
+    "net_flood": 8,
+    "cpu_runaway": 6
+   },
+   "silent_by_family": {
+    "silent_crash": 37
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    21,
+    28,
+    28
+   ]
+  },
+  "test_ood_slow": {
+   "runs": 10,
+   "run_ids_sha256": "c750910947375ec2f6c101d30d344356274e97e9d9514f7924c3fb748976bf56",
+   "evaluable_decision_points": 196389,
+   "evaluable_host_days": 136.381,
+   "calendar_host_days": 140,
+   "exposure_fraction": 0.97415,
+   "incidents_total": 87,
+   "PRECURSOR": 65,
+   "ABRUPT": 6,
+   "SILENT": 16,
+   "unpredictable_by_design": 22,
+   "unpredictable_share": 0.2529,
+   "ceiling_share_of_all_incidents_predictable": 0.7471,
+   "precursor_by_family": {
+    "mem_leak": 12,
+    "disk_fill": 17,
+    "cpu_runaway": 12,
+    "net_flood": 9,
+    "pool_exhaustion": 15
+   },
+   "abrupt_by_family": {
+    "cpu_runaway": 3,
+    "net_flood": 3
+   },
+   "silent_by_family": {
+    "silent_crash": 16
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    28,
+    28,
+    28
+   ]
+  },
+  "test_ood_cache_node": {
+   "runs": 10,
+   "run_ids_sha256": "f2ee998d75ce62583958b4105128487a467bc79543ac11275077ba527b05f7c2",
+   "evaluable_decision_points": 197002,
+   "evaluable_host_days": 136.807,
+   "calendar_host_days": 140,
+   "exposure_fraction": 0.97719,
+   "incidents_total": 75,
+   "PRECURSOR": 46,
+   "ABRUPT": 8,
+   "SILENT": 21,
+   "unpredictable_by_design": 29,
+   "unpredictable_share": 0.3867,
+   "ceiling_share_of_all_incidents_predictable": 0.6133,
+   "precursor_by_family": {
+    "mem_leak": 13,
+    "disk_fill": 8,
+    "cpu_runaway": 7,
+    "net_flood": 8,
+    "pool_exhaustion": 10
+   },
+   "abrupt_by_family": {
+    "net_flood": 5,
+    "cpu_runaway": 3
+   },
+   "silent_by_family": {
+    "silent_crash": 21
+   },
+   "precursor_without_eligible_scored_decision": 0,
+   "precursor_without_eligible_scored_decision_by_family": {},
+   "eligible_decision_points_per_precursor_min_median_max": [
+    21,
+    28,
+    28
+   ]
+  }
+ },
+ "membership_sha256_of_all_run_ids_by_split": {
+  "train": "336d1af787af6aad22b10ece3b0f781ad9e1304c5e5d6895f50d85330dbb6dcd",
+  "val": "2dae95910e196fa9fd518f3a52b3aef9a8c0070e75bc78ab5eefbeefa99842d2",
+  "test_iid": "0729870b85449a691b63c57bfce4dca5b058e8108bb70a2203b1e0f21999a2a5",
+  "test_ood": "da0901bf245e90aa7cc54e7a4d11c07e32545e7c15c4c51199621d1c093bfbba"
+ }
+}

@@ -1,0 +1,3022 @@
+{
+ "python": "3.12.4",
+ "numpy": "2.5.5",
+ "pyarrow": "26.0.1",
+ "scipy": "1.18.1",
+ "audit_script": "scripts/audit_synthetic_dataset.py",
+ "dataset_id": "uptimetrace-m31-seed0-2723fc6789d8",
+ "sampling_seed": 20261119,
+ "data_root_used_for_external_comparison": "D:\\UptimeTrace-ML\\external-data",
+ "read_only": true,
+ "trains_models": false,
+ "inventory": {
+  "dataset_files": {
+   "manifest.json": {
+    "bytes": 28598,
+    "sha256": "9e844876ae1fdf2a9f599da2a00c20becd7538aea3818415c94c52229d25b4c8"
+   },
+   "protocol.json": {
+    "bytes": 6834,
+    "sha256": "b576dd49393431c16013f64363164851d408bcc47e8283166fe87d04e9b8010c"
+   },
+   "view.json": {
+    "bytes": 117,
+    "sha256": "302211c087245035377102b34335155673cd8e9a2c55d5ea2b86a7426147aa75"
+   },
+   "runs.jsonl": {
+    "bytes": 331721,
+    "sha256": "da135f41785b0709ef7588dba75680048eba5d5fbd74d041de2bf68449ab8083"
+   },
+   "faults.jsonl": {
+    "bytes": 2607958,
+    "sha256": "d402aae21277c41059c002a6b9930b664756468b928e6c9bd327fa4f01230dff"
+   },
+   "incidents.jsonl": {
+    "bytes": 924963,
+    "sha256": "79723c15309a738083b6bf21637f67f58b1f7521c74a66588ffa8b58f13146b9"
+   },
+   "benign_episodes.jsonl": {
+    "bytes": 3332278,
+    "sha256": "7f52b3dfd0d84e74c1d2744b275d93e34b125a485ebcbc1e542d08b87540e159"
+   },
+   "gaps.jsonl": {
+    "bytes": 207422,
+    "sha256": "e8b81925435711b217bd98d6661a5e1146618c653dc4aaee75fe077fb678874c"
+   },
+   "view_gaps.jsonl": {
+    "bytes": 57346,
+    "sha256": "9e4360846ee9f4d808875c5fa90207cc4c84b570a29e87d830344de326f26a85"
+   }
+  },
+  "observations": {
+   "files": 180,
+   "runs_in_runs_jsonl": 180,
+   "missing_run_files": [],
+   "extra_files": [],
+   "rows_total": 21645047,
+   "bytes": 288951299,
+   "combined_sha256_of_file_hashes": "ac3b87414180f8f4cf1c16c551ef7acbfed26c0bc0c8fbf80efbe390ed6f5b42",
+   "rows_per_run_min_median_max": [
+    119401,
+    120279,
+    120734
+   ]
+  },
+  "manifest_checks": {
+   "protocol_hash_matches": true,
+   "observations_total_equals_parquet_rows": true,
+   "validation_block": {
+    "envelopes_checked": 3607532,
+    "envelopes_total": 3607532,
+    "observations_checked": 21645047,
+    "observations_total": 21645047,
+    "schema_failures": 0,
+    "semantic_failures": 0,
+    "footprint_violations": 0
+   },
+   "manifest_counts_per_split": {
+    "test_iid": 40,
+    "test_ood": 20,
+    "train": 90,
+    "val": 30
+   },
+   "actual_runs_per_split": {
+    "train": 90,
+    "val": 30,
+    "test_iid": 40,
+    "test_ood": 20
+   },
+   "expected_split_runs_in_protocol": {
+    "test_iid": 40,
+    "test_ood": 20,
+    "train": 90,
+    "val": 30
+   },
+   "code_hash_in_manifest": "8cbe01cc84ac2cf280f3ffcd5334afede67892a20f0dcd4f5326928bc00e0201",
+   "code_hash_of_current_simulator_source": "67ebaf19adb2a355b036cbad5ae0b8b19afea2ae75fd56cd731547af4ab166db",
+   "simulator_source_unchanged_since_generation": false,
+   "simulator_files_modified_after_dataset_generation": [
+    "distinct.py"
+   ],
+   "code_hash_note": "hash differs from the manifest; only the files listed above are newer than the dataset. If that is a post-hoc audit helper the generator is unchanged, but this cannot be proven without the old file contents (single git commit)"
+  },
+  "documented_claims_vs_actual": {
+   "runs": {
+    "documented": 180,
+    "actual": 180
+   },
+   "split_90_30_40_20": {
+    "documented": {
+     "train": 90,
+     "val": 30,
+     "test_iid": 40,
+     "test_ood": 20
+    },
+    "actual": {
+     "train": 90,
+     "val": 30,
+     "test_iid": 40,
+     "test_ood": 20
+    }
+   },
+   "faults": {
+    "documented": 2429,
+    "actual": 2429
+   },
+   "merged_incidents": {
+    "documented": 1300,
+    "actual": 1300
+   },
+   "benign_episodes": {
+    "documented": 12794,
+    "actual": 12794
+   },
+   "gaps": {
+    "documented": 1465,
+    "actual": 1465
+   }
+  },
+  "seed1_dataset": {
+   "exists": true,
+   "observation_files": 108,
+   "top_level_files": [],
+   "verdict": "partial: observations only, no manifest/runs/faults/incidents, so it cannot be labelled or used"
+  },
+  "labels_full": {
+   "files": 540,
+   "expected_files_runs_x_3_horizons": 540,
+   "hash_mismatches": 0,
+   "labeler_version": "1.0",
+   "config": {
+    "cadence_s": 60,
+    "decision_offset_s": 5.0,
+    "delta_s": 60,
+    "horizons_s": [
+     900,
+     1800,
+     3600
+    ],
+    "origin": "run_start",
+    "primary_horizon_s": 1800
+   },
+   "source_protocol_hash_matches": true,
+   "source_code_hash_matches_dataset": true
+  },
+  "features_full": {
+   "files": 180,
+   "expected_files": 180,
+   "hash_mismatches": 0,
+   "n_features": 196,
+   "rows_per_split": {
+    "test_iid": 788765,
+    "test_ood": 393391,
+    "train": 1774885,
+    "val": 591855
+   },
+   "feature_version": "1.0"
+  },
+  "subset_artifacts_labels_features": {
+   "runs": [
+    "r0000",
+    "r0040",
+    "r0095",
+    "r0125",
+    "r0157",
+    "r0170",
+    "r0177"
+   ],
+   "splits_of_these_runs": {
+    "train": 2,
+    "val": 1,
+    "test_iid": 2,
+    "test_ood": 2
+   },
+   "note": "artifacts/labels and artifacts/features are the 7-run development subset"
+  },
+  "saved_models": {
+   "dir": "artifacts/models/uptimetrace-m31-seed0-2723fc6789d8/h1800",
+   "files": [
+    "logreg/model.joblib",
+    "logreg/schema.json",
+    "report.json",
+    "report.md",
+    "rule/schema.json",
+    "xgboost/model.json",
+    "xgboost/schema.json"
+   ],
+   "report_status": "PRELIMINARY - development subset only; not evidence of generalisation or production readiness",
+   "train_runs": 2,
+   "val_runs": 1,
+   "train_positive_windows": 10,
+   "val_positive_windows": 2,
+   "train_positive_rows": 300,
+   "val_positive_rows": 60,
+   "test_splits_used": false,
+   "report_has_alert_statistics": false,
+   "val": {
+    "rule": {
+     "threshold": 0.7662000060081482,
+     "precision": 0.009,
+     "recall": 0.4667,
+     "f1": 0.0176,
+     "pr_auc": 0.0074,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 16578,
+      "fp": 3085,
+      "fn": 32,
+      "tp": 28
+     },
+     "false_positives": 3085,
+     "false_negatives": 32,
+     "positives": 60,
+     "negatives": 19663
+    },
+    "logreg": {
+     "threshold": 0.9999747443535514,
+     "precision": 0.0322,
+     "recall": 0.5667,
+     "f1": 0.0609,
+     "pr_auc": 0.0239,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 18640,
+      "fp": 1023,
+      "fn": 26,
+      "tp": 34
+     },
+     "false_positives": 1023,
+     "false_negatives": 26,
+     "positives": 60,
+     "negatives": 19663
+    },
+    "xgboost": {
+     "threshold": 0.9054353833198547,
+     "precision": 0.0061,
+     "recall": 0.9167,
+     "f1": 0.012,
+     "pr_auc": 0.0045,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 10639,
+      "fp": 9024,
+      "fn": 5,
+      "tp": 55
+     },
+     "false_positives": 9024,
+     "false_negatives": 5,
+     "positives": 60,
+     "negatives": 19663
+    }
+   },
+   "train_pr_auc_at_val_threshold": {
+    "rule": 0.0466,
+    "logreg": 0.1785,
+    "xgboost": 1.0
+   }
+  }
+ },
+ "simulator_and_incidents": {
+  "faults_by_split_family_role_outcome": [
+   {
+    "split": "test_iid",
+    "family": "cpu_runaway",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "cpu_runaway",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 6
+   },
+   {
+    "split": "test_iid",
+    "family": "cpu_runaway",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "disk_fill",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "disk_fill",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "mem_leak",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "mem_leak",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "net_flood",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "net_flood",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 12
+   },
+   {
+    "split": "test_iid",
+    "family": "net_flood",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "pool_exhaustion",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "pool_exhaustion",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "silent_crash",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 68
+   },
+   {
+    "split": "test_iid",
+    "family": "silent_crash",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 11
+   },
+   {
+    "split": "test_ood",
+    "family": "cpu_runaway",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "cpu_runaway",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 3
+   },
+   {
+    "split": "test_ood",
+    "family": "cpu_runaway",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "disk_fill",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "disk_fill",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "mem_leak",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "mem_leak",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "net_flood",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "net_flood",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 6
+   },
+   {
+    "split": "test_ood",
+    "family": "net_flood",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "pool_exhaustion",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "pool_exhaustion",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "silent_crash",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 37
+   },
+   {
+    "split": "test_ood",
+    "family": "silent_crash",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 7
+   },
+   {
+    "split": "train",
+    "family": "cpu_runaway",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "cpu_runaway",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 21
+   },
+   {
+    "split": "train",
+    "family": "cpu_runaway",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "disk_fill",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "disk_fill",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "mem_leak",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "mem_leak",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "net_flood",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "net_flood",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 21
+   },
+   {
+    "split": "train",
+    "family": "net_flood",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "pool_exhaustion",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "pool_exhaustion",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "silent_crash",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 150
+   },
+   {
+    "split": "train",
+    "family": "silent_crash",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 23
+   },
+   {
+    "split": "val",
+    "family": "cpu_runaway",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "cpu_runaway",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 4
+   },
+   {
+    "split": "val",
+    "family": "cpu_runaway",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "disk_fill",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "disk_fill",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "mem_leak",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "mem_leak",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "net_flood",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "net_flood",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 6
+   },
+   {
+    "split": "val",
+    "family": "net_flood",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "pool_exhaustion",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "pool_exhaustion",
+    "role": "twin",
+    "outcome": "twin",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "silent_crash",
+    "role": "primary",
+    "outcome": "incident",
+    "n": 45
+   },
+   {
+    "split": "val",
+    "family": "silent_crash",
+    "role": "relapse",
+    "outcome": "incident",
+    "n": 9
+   }
+  ],
+  "primary_quota_check": {
+   "mismatches": [],
+   "cells_checked": 24
+  },
+  "planned_vs_simulated_outcome_mismatch": 0,
+  "twins": {
+   "n": 1000,
+   "by_family": {
+    "cpu_runaway": 200,
+    "disk_fill": 200,
+    "mem_leak": 200,
+    "pool_exhaustion": 200,
+    "net_flood": 200
+   },
+   "twins_with_impact_start": 0,
+   "families_without_twins": [
+    "silent_crash"
+   ]
+  },
+  "faults_without_incident": {
+   "answer": "yes: twins (non-incident faults with the same mechanism) exist for the five precursor families only",
+   "count": 1000
+  },
+  "timestamp_consistency_violations": {},
+  "timestamp_consistency_checks_run": [
+   "start<=conflict_end within run",
+   "start<=impact_start<impact_end<=conflict_end",
+   "impact duration >= 120 s",
+   "precursor_start<=impact_start",
+   "precursor_lead_s == impact_start - precursor_start",
+   "silent_crash impact begins at fault start",
+   "twin has no impact",
+   "twin resolved within window"
+  ],
+  "merged_incident_rederivation": {
+   "incidents_compared": 1300,
+   "mismatches_by_field": {},
+   "all_equal": true
+  },
+  "incidents_overlapping_previous_oracle_mask": 0,
+  "incidents_by_split_family_group": [
+   {
+    "split": "test_iid",
+    "family": "cpu_runaway",
+    "group": "ABRUPT",
+    "n": 8
+   },
+   {
+    "split": "test_iid",
+    "family": "cpu_runaway",
+    "group": "PRECURSOR",
+    "n": 37
+   },
+   {
+    "split": "test_iid",
+    "family": "disk_fill",
+    "group": "PRECURSOR",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "mem_leak",
+    "group": "PRECURSOR",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "net_flood",
+    "group": "ABRUPT",
+    "n": 16
+   },
+   {
+    "split": "test_iid",
+    "family": "net_flood",
+    "group": "PRECURSOR",
+    "n": 29
+   },
+   {
+    "split": "test_iid",
+    "family": "pool_exhaustion",
+    "group": "PRECURSOR",
+    "n": 45
+   },
+   {
+    "split": "test_iid",
+    "family": "silent_crash",
+    "group": "SILENT",
+    "n": 68
+   },
+   {
+    "split": "test_ood",
+    "family": "cpu_runaway",
+    "group": "ABRUPT",
+    "n": 6
+   },
+   {
+    "split": "test_ood",
+    "family": "cpu_runaway",
+    "group": "PRECURSOR",
+    "n": 19
+   },
+   {
+    "split": "test_ood",
+    "family": "disk_fill",
+    "group": "PRECURSOR",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "mem_leak",
+    "group": "PRECURSOR",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "net_flood",
+    "group": "ABRUPT",
+    "n": 8
+   },
+   {
+    "split": "test_ood",
+    "family": "net_flood",
+    "group": "PRECURSOR",
+    "n": 17
+   },
+   {
+    "split": "test_ood",
+    "family": "pool_exhaustion",
+    "group": "PRECURSOR",
+    "n": 25
+   },
+   {
+    "split": "test_ood",
+    "family": "silent_crash",
+    "group": "SILENT",
+    "n": 37
+   },
+   {
+    "split": "train",
+    "family": "cpu_runaway",
+    "group": "ABRUPT",
+    "n": 17
+   },
+   {
+    "split": "train",
+    "family": "cpu_runaway",
+    "group": "PRECURSOR",
+    "n": 83
+   },
+   {
+    "split": "train",
+    "family": "disk_fill",
+    "group": "PRECURSOR",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "mem_leak",
+    "group": "PRECURSOR",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "net_flood",
+    "group": "ABRUPT",
+    "n": 28
+   },
+   {
+    "split": "train",
+    "family": "net_flood",
+    "group": "PRECURSOR",
+    "n": 72
+   },
+   {
+    "split": "train",
+    "family": "pool_exhaustion",
+    "group": "PRECURSOR",
+    "n": 100
+   },
+   {
+    "split": "train",
+    "family": "silent_crash",
+    "group": "SILENT",
+    "n": 150
+   },
+   {
+    "split": "val",
+    "family": "cpu_runaway",
+    "group": "ABRUPT",
+    "n": 5
+   },
+   {
+    "split": "val",
+    "family": "cpu_runaway",
+    "group": "PRECURSOR",
+    "n": 25
+   },
+   {
+    "split": "val",
+    "family": "disk_fill",
+    "group": "PRECURSOR",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "mem_leak",
+    "group": "PRECURSOR",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "net_flood",
+    "group": "ABRUPT",
+    "n": 13
+   },
+   {
+    "split": "val",
+    "family": "net_flood",
+    "group": "PRECURSOR",
+    "n": 17
+   },
+   {
+    "split": "val",
+    "family": "pool_exhaustion",
+    "group": "PRECURSOR",
+    "n": 30
+   },
+   {
+    "split": "val",
+    "family": "silent_crash",
+    "group": "SILENT",
+    "n": 45
+   }
+  ],
+  "incidents_per_split": {
+   "train": {
+    "incidents": 650,
+    "PRECURSOR": 455,
+    "ABRUPT": 45,
+    "SILENT": 150,
+    "share_not_predictable_by_design": 0.3
+   },
+   "val": {
+    "incidents": 195,
+    "PRECURSOR": 132,
+    "ABRUPT": 18,
+    "SILENT": 45,
+    "share_not_predictable_by_design": 0.323
+   },
+   "test_iid": {
+    "incidents": 293,
+    "PRECURSOR": 201,
+    "ABRUPT": 24,
+    "SILENT": 68,
+    "share_not_predictable_by_design": 0.314
+   },
+   "test_ood": {
+    "incidents": 162,
+    "PRECURSOR": 111,
+    "ABRUPT": 14,
+    "SILENT": 37,
+    "share_not_predictable_by_design": 0.315
+   }
+  },
+  "precursor_lead_s_by_family": {
+   "cpu_runaway": {
+    "n": 164,
+    "min": 150.0,
+    "p10": 720.0,
+    "p50": 6780.0,
+    "p90": 92691.0,
+    "max": 978210.0
+   },
+   "disk_fill": {
+    "n": 200,
+    "min": 1080.0,
+    "p10": 2127.0,
+    "p50": 8115.0,
+    "p90": 24117.0,
+    "max": 84450.0
+   },
+   "mem_leak": {
+    "n": 200,
+    "min": 450.0,
+    "p10": 1161.0,
+    "p50": 4470.0,
+    "p90": 14226.0,
+    "max": 48240.0
+   },
+   "net_flood": {
+    "n": 135,
+    "min": 120.0,
+    "p10": 240.0,
+    "p50": 750.0,
+    "p90": 1338.0,
+    "max": 9870.0
+   },
+   "pool_exhaustion": {
+    "n": 200,
+    "min": 1050.0,
+    "p10": 2880.0,
+    "p50": 8535.0,
+    "p90": 21660.0,
+    "max": 54900.0
+   }
+  },
+  "precursor_lead_share_ge_1800s": {
+   "cpu_runaway": 0.713,
+   "disk_fill": 0.95,
+   "mem_leak": 0.78,
+   "net_flood": 0.044,
+   "pool_exhaustion": 0.975
+  },
+  "silent_incident_reasons": {
+   "silent_crash:by_construction": 300
+  },
+  "silent_crash_subtypes": {
+   "process_crash": 201,
+   "dependency_outage": 100,
+   "kernel_panic": 49
+  },
+  "concurrency": {
+   "faults_overlapping_another": 155,
+   "share_of_faults": 0.064,
+   "overlap_pairs_by_role": {
+    "primary+twin": 36,
+    "twin+primary": 25,
+    "twin+relapse": 1,
+    "twin+twin": 22
+   },
+   "max_concurrent_per_fault": 3
+  },
+  "parameter_variability_incident_primaries": {
+   "cpu_runaway": {
+    "n": 200,
+    "variants": {
+     "step": 72,
+     "ramp": 128
+    },
+    "numeric_params": {
+     "A": {
+      "n": 200,
+      "min": 0.255,
+      "p10": 0.46,
+      "p50": 1.04,
+      "p90": 1.481,
+      "max": 1.598,
+      "cv": 0.363
+     },
+     "A_abs": {
+      "n": 200,
+      "min": 16.018,
+      "p10": 32.605,
+      "p50": 74.468,
+      "p90": 114.488,
+      "max": 132.249,
+      "cv": 0.394
+     },
+     "R_steps": {
+      "n": 200,
+      "min": 6.0,
+      "p10": 11.0,
+      "p50": 24.0,
+      "p90": 51.0,
+      "max": 118.0,
+      "cv": 0.596
+     },
+     "mu_tx": {
+      "n": 200,
+      "min": 0.304,
+      "p10": 0.338,
+      "p50": 0.508,
+      "p90": 0.667,
+      "max": 0.697,
+      "cv": 0.239
+     },
+     "ramp_steps": {
+      "n": 200,
+      "min": 1.0,
+      "p10": 1.0,
+      "p50": 32.5,
+      "p90": 105.0,
+      "max": 283.0,
+      "cv": 1.109
+     },
+     "rho_crit": {
+      "n": 200,
+      "min": 0.97,
+      "p10": 0.979,
+      "p50": 1.025,
+      "p90": 1.087,
+      "max": 1.099,
+      "cv": 0.038
+     }
+    }
+   },
+   "disk_fill": {
+    "n": 200,
+    "variants": {
+     "load_coupled": 83,
+     "stepwise": 48,
+     "steady": 69
+    },
+    "numeric_params": {
+     "D_min": {
+      "n": 200,
+      "min": 30.479,
+      "p10": 44.127,
+      "p50": 164.095,
+      "p90": 462.568,
+      "max": 1443.4,
+      "cv": 0.95
+     },
+     "R_steps": {
+      "n": 200,
+      "min": 10.0,
+      "p10": 18.0,
+      "p50": 38.0,
+      "p90": 85.0,
+      "max": 285.0,
+      "cv": 0.771
+     },
+     "U0": {
+      "n": 200,
+      "min": 20.704,
+      "p10": 34.088,
+      "p50": 56.558,
+      "p90": 74.635,
+      "max": 86.33,
+      "cv": 0.272
+     },
+     "reserved_r": {
+      "n": 200,
+      "min": 0.5,
+      "p10": 1.089,
+      "p50": 2.94,
+      "p90": 4.479,
+      "max": 4.991,
+      "cv": 0.44
+     },
+     "w0": {
+      "n": 200,
+      "min": 0.016,
+      "p10": 0.077,
+      "p50": 0.249,
+      "p90": 0.978,
+      "max": 2.142,
+      "cv": 1.006
+     }
+    }
+   },
+   "mem_leak": {
+    "n": 200,
+    "variants": {
+     "oom": 178,
+     "oom_panic": 22
+    },
+    "numeric_params": {
+     "D_min": {
+      "n": 200,
+      "min": 15.109,
+      "p10": 22.033,
+      "p50": 94.373,
+      "p90": 273.675,
+      "max": 892.916,
+      "cv": 0.988
+     },
+     "M0": {
+      "n": 200,
+      "min": 25.699,
+      "p10": 32.616,
+      "p50": 52.737,
+      "p90": 71.073,
+      "max": 83.537,
+      "cv": 0.278
+     },
+     "R_steps": {
+      "n": 200,
+      "min": 4.0,
+      "p10": 5.0,
+      "p50": 11.5,
+      "p90": 27.0,
+      "max": 65.0,
+      "cv": 0.683
+     },
+     "kappa": {
+      "n": 200,
+      "min": 0.054,
+      "p10": 0.146,
+      "p50": 0.52,
+      "p90": 1.856,
+      "max": 3.861,
+      "cv": 0.948
+     },
+     "oom_delay_steps": {
+      "n": 200,
+      "min": 1.0,
+      "p10": 1.0,
+      "p50": 2.0,
+      "p90": 5.0,
+      "max": 10.0,
+      "cv": 0.707
+     },
+     "r_m": {
+      "n": 200,
+      "min": 0.303,
+      "p10": 0.327,
+      "p50": 0.454,
+      "p90": 0.565,
+      "max": 0.599,
+      "cv": 0.193
+     },
+     "theta": {
+      "n": 200,
+      "min": 93.001,
+      "p10": 93.469,
+      "p50": 96.388,
+      "p90": 98.787,
+      "max": 99.492,
+      "cv": 0.02
+     }
+    }
+   },
+   "net_flood": {
+    "n": 200,
+    "variants": {
+     "flash": 131,
+     "step": 69
+    },
+    "numeric_params": {
+     "U_cap": {
+      "n": 200,
+      "min": 3697705.188,
+      "p10": 15630867.404,
+      "p50": 118750000.0,
+      "p90": 1187500000.0,
+      "max": 1187500000.0,
+      "cv": 1.309
+     },
+     "a_net": {
+      "n": 200,
+      "min": 2.031,
+      "p10": 3.822,
+      "p50": 9.225,
+      "p90": 13.639,
+      "max": 14.971,
+      "cv": 0.398
+     },
+     "decay_steps": {
+      "n": 200,
+      "min": 11.0,
+      "p10": 23.0,
+      "p50": 67.0,
+      "p90": 115.1,
+      "max": 292.0,
+      "cv": 0.654
+     },
+     "hold_steps": {
+      "n": 200,
+      "min": 10.0,
+      "p10": 10.0,
+      "p50": 35.0,
+      "p90": 128.2,
+      "max": 321.0,
+      "cv": 1.074
+     },
+     "m_p": {
+      "n": 200,
+      "min": 4.184,
+      "p10": 11.417,
+      "p50": 25.017,
+      "p90": 37.07,
+      "max": 39.958,
+      "cv": 0.375
+     },
+     "mu_tx": {
+      "n": 200,
+      "min": 0.502,
+      "p10": 0.542,
+      "p50": 0.693,
+      "p90": 0.853,
+      "max": 0.898,
+      "cv": 0.163
+     },
+     "phi_crit": {
+      "n": 200,
+      "min": 0.851,
+      "p10": 0.867,
+      "p50": 0.925,
+      "p90": 0.983,
+      "max": 1.0,
+      "cv": 0.045
+     },
+     "rho_resp": {
+      "n": 200,
+      "min": 0.1,
+      "p10": 0.141,
+      "p50": 0.36,
+      "p90": 0.535,
+      "max": 0.597,
+      "cv": 0.435
+     },
+     "rise_steps": {
+      "n": 200,
+      "min": 1.0,
+      "p10": 1.0,
+      "p50": 18.5,
+      "p90": 47.0,
+      "max": 115.0,
+      "cv": 0.932
+     }
+    }
+   },
+   "pool_exhaustion": {
+    "n": 200,
+    "variants": {
+     "pool": 200
+    },
+    "numeric_params": {
+     "D_min": {
+      "n": 200,
+      "min": 60.137,
+      "p10": 75.543,
+      "p50": 201.735,
+      "p90": 406.365,
+      "max": 1095.985,
+      "cv": 0.643
+     },
+     "R_steps": {
+      "n": 200,
+      "min": 4.0,
+      "p10": 8.0,
+      "p50": 17.0,
+      "p90": 38.2,
+      "max": 72.0,
+      "cv": 0.628
+     },
+     "a_cpu": {
+      "n": 200,
+      "min": 8.37,
+      "p10": 9.203,
+      "p50": 15.717,
+      "p90": 23.253,
+      "max": 24.983,
+      "cv": 0.31
+     },
+     "a_mem": {
+      "n": 200,
+      "min": 8.022,
+      "p10": 10.423,
+      "p50": 16.138,
+      "p90": 22.561,
+      "max": 24.834,
+      "cv": 0.279
+     },
+     "c_net": {
+      "n": 200,
+      "min": -0.497,
+      "p10": -0.452,
+      "p50": -0.154,
+      "p90": 0.413,
+      "max": 0.499,
+      "cv": 6.339
+     }
+    }
+   },
+   "silent_crash": {
+    "n": 300,
+    "variants": {
+     "process_crash": 170,
+     "dependency_outage": 87,
+     "kernel_panic": 43
+    },
+    "numeric_params": {
+     "R_steps": {
+      "n": 300,
+      "min": 4.0,
+      "p10": 4.0,
+      "p50": 12.0,
+      "p90": 41.1,
+      "max": 167.0,
+      "cv": 1.108
+     },
+     "r_m": {
+      "n": 170,
+      "min": 0.3,
+      "p10": 0.333,
+      "p50": 0.442,
+      "p90": 0.571,
+      "max": 0.597,
+      "cv": 0.188
+     }
+    }
+   }
+  },
+  "benign_episode_types": {
+   "types": [
+    "cron_batch",
+    "deploy_shift",
+    "log_rotation",
+    "nightly_backup",
+    "planned_reboot",
+    "transient_blip"
+   ],
+   "per_run_day_by_split": {
+    "train": {
+     "cron_batch": 3.517,
+     "deploy_shift": 0.128,
+     "log_rotation": 0.071,
+     "nightly_backup": 1.0,
+     "planned_reboot": 0.05,
+     "transient_blip": 0.297
+    },
+    "val": {
+     "cron_batch": 3.505,
+     "deploy_shift": 0.133,
+     "log_rotation": 0.071,
+     "nightly_backup": 1.002,
+     "planned_reboot": 0.067,
+     "transient_blip": 0.288
+    },
+    "test_iid": {
+     "cron_batch": 3.534,
+     "deploy_shift": 0.154,
+     "log_rotation": 0.071,
+     "nightly_backup": 1.002,
+     "planned_reboot": 0.041,
+     "transient_blip": 0.311
+    },
+    "test_ood": {
+     "cron_batch": 3.518,
+     "deploy_shift": 0.125,
+     "log_rotation": 0.071,
+     "nightly_backup": 1.004,
+     "planned_reboot": 0.057,
+     "transient_blip": 0.311
+    }
+   }
+  },
+  "telemetry_gaps": {
+   "types": [
+    "agent_down",
+    "net_partition_buffered",
+    "panic_gap",
+    "planned_reboot_gap"
+   ],
+   "per_run_by_split": {
+    "train": {
+     "agent_down": 4.233,
+     "net_partition_buffered": 2.678,
+     "panic_gap": 0.4,
+     "planned_reboot_gap": 0.7
+    },
+    "val": {
+     "agent_down": 4.5,
+     "net_partition_buffered": 2.733,
+     "panic_gap": 0.3,
+     "planned_reboot_gap": 0.933
+    },
+    "test_iid": {
+     "agent_down": 4.3,
+     "net_partition_buffered": 2.45,
+     "panic_gap": 0.5,
+     "planned_reboot_gap": 0.575
+    },
+    "test_ood": {
+     "agent_down": 4.85,
+     "net_partition_buffered": 2.9,
+     "panic_gap": 0.3,
+     "planned_reboot_gap": 0.8
+    }
+   },
+   "share_of_run_time_by_split": {
+    "train": {
+     "agent_down": 0.00333,
+     "net_partition_buffered": 0.00212,
+     "panic_gap": 0.0002,
+     "planned_reboot_gap": 0.00017
+    },
+    "val": {
+     "agent_down": 0.0039,
+     "net_partition_buffered": 0.00213,
+     "panic_gap": 0.00017,
+     "planned_reboot_gap": 0.00024
+    },
+    "test_iid": {
+     "agent_down": 0.00341,
+     "net_partition_buffered": 0.00188,
+     "panic_gap": 0.00027,
+     "planned_reboot_gap": 0.00014
+    },
+    "test_ood": {
+     "agent_down": 0.00392,
+     "net_partition_buffered": 0.00247,
+     "panic_gap": 0.0002,
+     "planned_reboot_gap": 0.00018
+    }
+   },
+   "random_observation_omission_probability": 0.002,
+   "gap_starts_correlated_with_fault_windows": {
+    "non_fault_gap_starts": 1394,
+    "inside_a_fault_window": 130,
+    "share": 0.0933,
+    "share_of_run_time_inside_any_fault_window": 0.1117,
+    "reading": "if gaps were independent of faults the two shares would be about equal"
+   }
+  }
+ },
+ "labels": {
+  "horizons_s": [
+   900,
+   1800,
+   3600
+  ],
+  "decision_timestamps_differ_from_independent_grid_runs": 0,
+  "independent_label_rederivation": {
+   "900": {
+    "rows": 3628800,
+    "scored_by_labeler": 3548896,
+    "active_mask_scored_but_mine_active": 0,
+    "labeler_excluded_active_but_mine_not_active": 0,
+    "labeler_active_excluded_but_mine_inactive_or_missing": 0,
+    "n_in_window_mismatch": 0,
+    "class_mismatch": 0,
+    "target_mismatch": 0
+   },
+   "1800": {
+    "rows": 3628800,
+    "scored_by_labeler": 3548896,
+    "active_mask_scored_but_mine_active": 0,
+    "labeler_excluded_active_but_mine_not_active": 0,
+    "labeler_active_excluded_but_mine_inactive_or_missing": 0,
+    "n_in_window_mismatch": 0,
+    "class_mismatch": 0,
+    "target_mismatch": 0
+   },
+   "3600": {
+    "rows": 3628800,
+    "scored_by_labeler": 3548896,
+    "active_mask_scored_but_mine_active": 0,
+    "labeler_excluded_active_but_mine_not_active": 0,
+    "labeler_active_excluded_but_mine_inactive_or_missing": 0,
+    "n_in_window_mismatch": 0,
+    "class_mismatch": 0,
+    "target_mismatch": 0
+   }
+  },
+  "independent_label_rederivation_all_equal": true,
+  "per_split_label_counts": {
+   "900": {
+    "train": {
+     "rows": 1814400,
+     "negative": 1765396,
+     "positive": 6779,
+     "excluded_insufficient": 18043,
+     "excluded_active": 21472,
+     "unscorable": 2710
+    },
+    "val": {
+     "rows": 604800,
+     "negative": 589057,
+     "unscorable": 841,
+     "positive": 1957,
+     "excluded_insufficient": 6506,
+     "excluded_active": 6439
+    },
+    "test_iid": {
+     "rows": 806400,
+     "negative": 784498,
+     "unscorable": 1275,
+     "positive": 2992,
+     "excluded_insufficient": 7870,
+     "excluded_active": 9765
+    },
+    "test_ood": {
+     "rows": 403200,
+     "negative": 391046,
+     "positive": 1665,
+     "unscorable": 680,
+     "excluded_insufficient": 4471,
+     "excluded_active": 5338
+    }
+   },
+   "1800": {
+    "train": {
+     "rows": 1814400,
+     "negative": 1756024,
+     "positive": 13450,
+     "excluded_insufficient": 18043,
+     "excluded_active": 21472,
+     "unscorable": 5411
+    },
+    "val": {
+     "rows": 604800,
+     "negative": 586263,
+     "unscorable": 1695,
+     "positive": 3897,
+     "excluded_insufficient": 6506,
+     "excluded_active": 6439
+    },
+    "test_iid": {
+     "rows": 806400,
+     "negative": 780291,
+     "unscorable": 2523,
+     "positive": 5951,
+     "excluded_insufficient": 7870,
+     "excluded_active": 9765
+    },
+    "test_ood": {
+     "rows": 403200,
+     "negative": 388719,
+     "positive": 3323,
+     "unscorable": 1349,
+     "excluded_insufficient": 4471,
+     "excluded_active": 5338
+    }
+   },
+   "3600": {
+    "train": {
+     "rows": 1814400,
+     "negative": 1737415,
+     "positive": 26695,
+     "excluded_insufficient": 18043,
+     "excluded_active": 21472,
+     "unscorable": 10775
+    },
+    "val": {
+     "rows": 604800,
+     "negative": 580767,
+     "unscorable": 3400,
+     "positive": 7688,
+     "excluded_insufficient": 6506,
+     "excluded_active": 6439
+    },
+    "test_iid": {
+     "rows": 806400,
+     "negative": 771914,
+     "unscorable": 5023,
+     "positive": 11828,
+     "excluded_insufficient": 7870,
+     "excluded_active": 9765
+    },
+    "test_ood": {
+     "rows": 403200,
+     "negative": 384167,
+     "positive": 6588,
+     "unscorable": 2636,
+     "excluded_insufficient": 4471,
+     "excluded_active": 5338
+    }
+   }
+  },
+  "prevalence_h1800_among_scored": {
+   "train": 0.00758,
+   "val": 0.00658,
+   "test_iid": 0.00754,
+   "test_ood": 0.00845
+  },
+  "boundary_convention_testable": {
+   "min_abs_seconds_between_onset_and_decision_time_sampled": 5.0,
+   "note": "incident onsets lie on the 30 s grid and decision times on a 5 s offset of a 60 s grid, so an onset can never equal t or t+H: the (t, t+H] boundary convention cannot affect any label in this dataset"
+  },
+  "positive_rows_h1800_by_family": {
+   "cpu_runaway": {
+    "rows": 4781,
+    "rows_where_latent_precursor_already_started": 4244,
+    "share_started": 0.888
+   },
+   "disk_fill": {
+    "rows": 5981,
+    "rows_where_latent_precursor_already_started": 5927,
+    "share_started": 0.991
+   },
+   "mem_leak": {
+    "rows": 5916,
+    "rows_where_latent_precursor_already_started": 5485,
+    "share_started": 0.927
+   },
+   "net_flood": {
+    "rows": 3956,
+    "rows_where_latent_precursor_already_started": 1719,
+    "share_started": 0.435
+   },
+   "pool_exhaustion": {
+    "rows": 5987,
+    "rows_where_latent_precursor_already_started": 5959,
+    "share_started": 0.995
+   }
+  },
+  "positive_rows_precursor_already_started_overall": 0.877,
+  "negative_rows_h1800": {
+   "scored_negative_rows": 3511297,
+   "inside_a_twin_fault_window": 135859,
+   "twin_share": 0.0387,
+   "after_precursor_started_but_incident_more_than_1800s_away": 185624,
+   "hidden_precursor_share": 0.0529
+  },
+  "insufficient_data_rows_h1800": {
+   "rows_not_in_active_incident": 35549,
+   "of_which_within_1800s_before_an_onset": 259,
+   "share_near_onset": 0.0073,
+   "baseline_share_of_non_active_rows_within_1800s_before_an_onset": 0.0106
+  },
+  "independent_insufficient_data_check_sample": {
+   "r0000": {
+    "rows_compared": 2843,
+    "mine_insufficient": 36,
+    "labeler_insufficient": 36,
+    "disagreements": 0
+   },
+   "r0001": {
+    "rows_compared": 2844,
+    "mine_insufficient": 28,
+    "labeler_insufficient": 28,
+    "disagreements": 0
+   },
+   "r0002": {
+    "rows_compared": 2841,
+    "mine_insufficient": 30,
+    "labeler_insufficient": 30,
+    "disagreements": 0
+   }
+  }
+ },
+ "precursor_visibility_in_observed_telemetry": {
+  "sampled_precursor_incidents": 150,
+  "signals_checked": [
+   "mem",
+   "disk_root",
+   "disk_data",
+   "cpu"
+  ],
+  "statistic": "|mean(last 10 min before onset) - mean(60-120 min before onset)| / profile noise floor sigma_marg",
+  "share_ge_3_sigma": 0.753,
+  "median_abs_z": 6.33,
+  "by_family": {
+   "cpu_runaway": {
+    "n": 30,
+    "share_ge_3_sigma": 0.6,
+    "median_abs_z": 6.76
+   },
+   "disk_fill": {
+    "n": 43,
+    "share_ge_3_sigma": 0.744,
+    "median_abs_z": 7.6
+   },
+   "mem_leak": {
+    "n": 46,
+    "share_ge_3_sigma": 0.891,
+    "median_abs_z": 7.7
+   },
+   "pool_exhaustion": {
+    "n": 31,
+    "share_ge_3_sigma": 0.71,
+    "median_abs_z": 4.84
+   }
+  }
+ },
+ "incident_definition_observed_levels": {
+  "mem_leak": {
+   "n": 59,
+   "observed_level_5min_before_onset": {
+    "n": 59,
+    "min": 77.81,
+    "p10": 87.851,
+    "p50": 94.192,
+    "p90": 99.345,
+    "max": 100.0
+   },
+   "saturation_threshold_of_the_fault": {
+    "n": 59,
+    "min": 93.068,
+    "p10": 93.577,
+    "p50": 95.922,
+    "p90": 98.69,
+    "max": 99.456
+   },
+   "median_gap_threshold_minus_observed": 2.22
+  },
+  "disk_fill": {
+   "n": 61,
+   "observed_level_5min_before_onset": {
+    "n": 61,
+    "min": 80.988,
+    "p10": 91.87,
+    "p50": 96.552,
+    "p90": 99.206,
+    "max": 100.0
+   },
+   "saturation_threshold_of_the_fault": {
+    "n": 61,
+    "min": 95.09,
+    "p10": 95.552,
+    "p50": 97.49,
+    "p90": 99.142,
+    "max": 99.5
+   },
+   "median_gap_threshold_minus_observed": 0.88
+  },
+  "reading": "mem_leak incidents begin when memory reaches theta in [93, 99.5] %; disk_fill when usage reaches 100 - r with r in [0.5, 5] %; cpu_runaway when utilisation/capacity >= rho_crit in [0.97, 1.10] for 150 s; net_flood when rx >= 0.85-1.0 x a capacity cap for 150 s; pool_exhaustion when the hidden pool reaches 1.0. An 'outage' is therefore a saturation event defined by the simulator, not an externally observed failure."
+ },
+ "label_examples_reconstructed_from_raw_events": [
+  {
+   "example": "PRECURSOR incident (mem_leak)",
+   "run": "r0000",
+   "split": "train",
+   "target_incident": {
+    "fault_id": "r0000-f014",
+    "family": "mem_leak",
+    "group_from_fault_record": "PRECURSOR",
+    "precursor_lead_s": 9060,
+    "precursor_signal": "mem",
+    "fault_start": "2024-01-27T15:37:30.000000Z",
+    "precursor_start": "2024-01-27T16:12:30.000000Z",
+    "impact_start(onset)": "2024-01-27 18:43:30",
+    "impact_end(recovery)": "2024-01-27 18:57:00",
+    "cooldown_end": "2024-01-27 19:12:00",
+    "oracle_mask_end": "2024-01-27 19:12:00"
+   },
+   "decision_points": [
+    {
+     "decision_time": "2024-01-27 17:58:05",
+     "seconds_to_target_onset": 2725.0,
+     "independent_label": "negative",
+     "stored_label": {
+      "scored": true,
+      "label_class": "negative",
+      "target": 0,
+      "exclusion": null,
+      "n_incidents_in_window": 0,
+      "next_onset_s": 2725.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-01-27 17:57:59",
+       "last_env_ts": "2024-01-27 17:57:59",
+       "last_value": 78.16,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-01-27 17:57:59",
+       "last_env_ts": "2024-01-27 17:57:59",
+       "last_value": 34.31,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-01-27 17:57:59",
+       "last_env_ts": "2024-01-27 17:57:59",
+       "last_value": 76.24,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-01-27 18:23:05",
+     "seconds_to_target_onset": 1225.0,
+     "independent_label": "positive",
+     "stored_label": {
+      "scored": true,
+      "label_class": "positive",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 1225.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-01-27 18:22:58",
+       "last_env_ts": "2024-01-27 18:22:58",
+       "last_value": 78.7,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-01-27 18:22:58",
+       "last_env_ts": "2024-01-27 18:22:58",
+       "last_value": 29.41,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-01-27 18:22:58",
+       "last_env_ts": "2024-01-27 18:22:58",
+       "last_value": 83.71,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-01-27 18:40:05",
+     "seconds_to_target_onset": 205.0,
+     "independent_label": "positive",
+     "stored_label": {
+      "scored": true,
+      "label_class": "positive",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 205.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-01-27 18:39:58",
+       "last_env_ts": "2024-01-27 18:39:58",
+       "last_value": 86.18,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-01-27 18:39:58",
+       "last_env_ts": "2024-01-27 18:39:58",
+       "last_value": 36.14,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-01-27 18:39:58",
+       "last_env_ts": "2024-01-27 18:39:58",
+       "last_value": 76.09,
+       "future_obs_after_t_exist": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "example": "ABRUPT incident (net_flood)",
+   "run": "r0005",
+   "split": "train",
+   "target_incident": {
+    "fault_id": "r0005-f004",
+    "family": "net_flood",
+    "group_from_fault_record": "ABRUPT",
+    "precursor_lead_s": 60,
+    "precursor_signal": "rx",
+    "fault_start": "2024-10-02T00:24:00.000000Z",
+    "precursor_start": "2024-10-02T00:24:30.000000Z",
+    "impact_start(onset)": "2024-10-02 00:25:30",
+    "impact_end(recovery)": "2024-10-02 01:57:00",
+    "cooldown_end": "2024-10-02 02:12:00",
+    "oracle_mask_end": "2024-10-02 02:12:00"
+   },
+   "decision_points": [
+    {
+     "decision_time": "2024-10-01 23:39:35",
+     "seconds_to_target_onset": 2755.0,
+     "independent_label": "negative",
+     "stored_label": {
+      "scored": true,
+      "label_class": "negative",
+      "target": 0,
+      "exclusion": null,
+      "n_incidents_in_window": 0,
+      "next_onset_s": 2755.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-10-01 23:39:30",
+       "last_env_ts": "2024-10-01 23:39:30",
+       "last_value": 64.94,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-10-01 23:39:30",
+       "last_env_ts": "2024-10-01 23:39:30",
+       "last_value": 13.72,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-10-01 23:39:30",
+       "last_env_ts": "2024-10-01 23:39:30",
+       "last_value": 62.56,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-10-02 00:04:35",
+     "seconds_to_target_onset": 1255.0,
+     "independent_label": "unscorable",
+     "stored_label": {
+      "scored": true,
+      "label_class": "unscorable",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 1255.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-10-02 00:04:30",
+       "last_env_ts": "2024-10-02 00:04:30",
+       "last_value": 71.0,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-10-02 00:04:30",
+       "last_env_ts": "2024-10-02 00:04:30",
+       "last_value": 13.77,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-10-02 00:04:30",
+       "last_env_ts": "2024-10-02 00:04:30",
+       "last_value": 61.87,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-10-02 00:21:35",
+     "seconds_to_target_onset": 235.0,
+     "independent_label": "unscorable",
+     "stored_label": {
+      "scored": true,
+      "label_class": "unscorable",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 235.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-10-02 00:21:30",
+       "last_env_ts": "2024-10-02 00:21:30",
+       "last_value": 62.52,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-10-02 00:21:30",
+       "last_env_ts": "2024-10-02 00:21:30",
+       "last_value": 14.17,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-10-02 00:21:30",
+       "last_env_ts": "2024-10-02 00:21:30",
+       "last_value": 65.43,
+       "future_obs_after_t_exist": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "example": "SILENT incident (silent_crash)",
+   "run": "r0002",
+   "split": "train",
+   "target_incident": {
+    "fault_id": "r0002-f006",
+    "family": "silent_crash",
+    "group_from_fault_record": "SILENT",
+    "precursor_lead_s": null,
+    "precursor_signal": null,
+    "fault_start": "2024-03-31T10:02:00.000000Z",
+    "precursor_start": null,
+    "impact_start(onset)": "2024-03-31 10:02:00",
+    "impact_end(recovery)": "2024-03-31 11:25:30",
+    "cooldown_end": "2024-03-31 11:40:30",
+    "oracle_mask_end": "2024-03-31 11:40:30"
+   },
+   "decision_points": [
+    {
+     "decision_time": "2024-03-31 09:16:35",
+     "seconds_to_target_onset": 2725.0,
+     "independent_label": "negative",
+     "stored_label": {
+      "scored": true,
+      "label_class": "negative",
+      "target": 0,
+      "exclusion": null,
+      "n_incidents_in_window": 0,
+      "next_onset_s": 2725.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-03-31 09:16:28",
+       "last_env_ts": "2024-03-31 09:16:29",
+       "last_value": 28.18,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-03-31 09:16:28",
+       "last_env_ts": "2024-03-31 09:16:29",
+       "last_value": 22.15,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-03-31 09:16:28",
+       "last_env_ts": "2024-03-31 09:16:29",
+       "last_value": 60.84,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-03-31 09:41:35",
+     "seconds_to_target_onset": 1225.0,
+     "independent_label": "unscorable",
+     "stored_label": {
+      "scored": true,
+      "label_class": "unscorable",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 1225.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-03-31 09:41:29",
+       "last_env_ts": "2024-03-31 09:41:29",
+       "last_value": 32.6,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-03-31 09:41:29",
+       "last_env_ts": "2024-03-31 09:41:29",
+       "last_value": 20.93,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-03-31 09:41:29",
+       "last_env_ts": "2024-03-31 09:41:29",
+       "last_value": 72.12,
+       "future_obs_after_t_exist": true
+      }
+     }
+    },
+    {
+     "decision_time": "2024-03-31 09:58:35",
+     "seconds_to_target_onset": 205.0,
+     "independent_label": "unscorable",
+     "stored_label": {
+      "scored": true,
+      "label_class": "unscorable",
+      "target": 1,
+      "exclusion": null,
+      "n_incidents_in_window": 1,
+      "next_onset_s": 205.0
+     },
+     "feature_cutoff": "observations with obs_ts <= t and envelope ts <= t",
+     "latest_observation_used": {
+      "mem": {
+       "last_obs_ts": "2024-03-31 09:58:29",
+       "last_env_ts": "2024-03-31 09:58:29",
+       "last_value": 30.32,
+       "future_obs_after_t_exist": true
+      },
+      "cpu": {
+       "last_obs_ts": "2024-03-31 09:58:29",
+       "last_env_ts": "2024-03-31 09:58:29",
+       "last_value": 27.01,
+       "future_obs_after_t_exist": true
+      },
+      "disk_root": {
+       "last_obs_ts": "2024-03-31 09:58:29",
+       "last_env_ts": "2024-03-31 09:58:29",
+       "last_value": 71.8,
+       "future_obs_after_t_exist": true
+      }
+     }
+    }
+   ]
+  },
+  {
+   "example": "twin fault (hard negative: same mechanism, no incident)",
+   "run": "r0000",
+   "split": "train",
+   "twin": {
+    "fault_id": "r0000-f010",
+    "start": "2024-01-24T09:46:00.000000Z",
+    "peak_time": "2024-01-24T10:37:00.000000Z",
+    "resolved_time": "2024-01-24T10:44:30.000000Z",
+    "conflict_end": "2024-01-24T10:59:30.000000Z",
+    "params_peak_pct": 92.11293389153701,
+    "theta_pct": 95.30404750332316
+   },
+   "decision_points": [
+    {
+     "decision_time": "2024-01-24 10:36:05",
+     "latest_mem_value": 83.99,
+     "incidents_in_next_1800s": 0,
+     "independent_label": "negative",
+     "stored_label": {
+      "scored": true,
+      "label_class": "negative",
+      "target": 0,
+      "exclusion": null,
+      "n_incidents_in_window": 0,
+      "next_onset_s": 165985.0
+     }
+    }
+   ]
+  }
+ ],
+ "splits": {
+  "identity": {
+   "runs": 180,
+   "duplicate_run_ids": 0,
+   "duplicate_host_ids": 0,
+   "duplicate_hostnames": 0,
+   "duplicate_agent_ids": 0,
+   "runs_per_host": "exactly 1: host_id = 'sim-<run_id>', so run-level separation IS host-level separation by construction",
+   "duplicate_run_start_epoch": 0
+  },
+  "archetype_by_split": {
+   "train": {
+    "database": 23,
+    "queue_consumer": 22,
+    "web_api": 22,
+    "worker_batch": 23
+   },
+   "val": {
+    "database": 8,
+    "queue_consumer": 7,
+    "web_api": 8,
+    "worker_batch": 7
+   },
+   "test_iid": {
+    "database": 10,
+    "queue_consumer": 10,
+    "web_api": 10,
+    "worker_batch": 10
+   },
+   "test_ood": {
+    "cache_node": 10,
+    "database+slow": 2,
+    "queue_consumer+slow": 3,
+    "web_api+slow": 2,
+    "worker_batch+slow": 3
+   }
+  },
+  "host_profile_distribution_tests": {
+   "note": "two-sample KS p-values; small p = distributions differ",
+   "per_parameter": {
+    "cpu_base": {
+     "train_vs_val_ks_p": 0.074,
+     "train_vs_test_iid_ks_p": 0.709,
+     "train_vs_test_ood_ks_p": 0.135,
+     "cache_node_vs_other_ks_p": 0.456
+    },
+    "mem_base": {
+     "train_vs_val_ks_p": 0.798,
+     "train_vs_test_iid_ks_p": 0.561,
+     "train_vs_test_ood_ks_p": 0.121,
+     "cache_node_vs_other_ks_p": 0.067
+    },
+    "disk_root_base": {
+     "train_vs_val_ks_p": 0.536,
+     "train_vs_test_iid_ks_p": 0.216,
+     "train_vs_test_ood_ks_p": 0.061,
+     "cache_node_vs_other_ks_p": 0.727
+    },
+    "disk_data_base": {
+     "train_vs_val_ks_p": 0.31,
+     "train_vs_test_iid_ks_p": 0.244,
+     "train_vs_test_ood_ks_p": 0.55,
+     "cache_node_vs_other_ks_p": 0.089
+    },
+    "s_cpu": {
+     "train_vs_val_ks_p": 0.932,
+     "train_vs_test_iid_ks_p": 0.845,
+     "train_vs_test_ood_ks_p": 0.135,
+     "cache_node_vs_other_ks_p": 0.867
+    },
+    "s_mem": {
+     "train_vs_val_ks_p": 0.377,
+     "train_vs_test_iid_ks_p": 0.756,
+     "train_vs_test_ood_ks_p": 0.963,
+     "cache_node_vs_other_ks_p": 0.841
+    },
+    "a1": {
+     "train_vs_val_ks_p": 0.624,
+     "train_vs_test_iid_ks_p": 0.513,
+     "train_vs_test_ood_ks_p": 0.048,
+     "cache_node_vs_other_ks_p": 0.286
+    },
+    "a2": {
+     "train_vs_val_ks_p": 0.713,
+     "train_vs_test_iid_ks_p": 0.052,
+     "train_vs_test_ood_ks_p": 0.902,
+     "cache_node_vs_other_ks_p": 0.666
+    },
+    "sigma_ou": {
+     "train_vs_val_ks_p": 0.003,
+     "train_vs_test_iid_ks_p": 0.128,
+     "train_vs_test_ood_ks_p": 0.992,
+     "cache_node_vs_other_ks_p": 0.429
+    },
+    "burst_rate_per_day": {
+     "train_vs_val_ks_p": 0.453,
+     "train_vs_test_iid_ks_p": 0.168,
+     "train_vs_test_ood_ks_p": 0.702,
+     "cache_node_vs_other_ks_p": 0.89
+    },
+    "heap_drift": {
+     "train_vs_val_ks_p": 0.972,
+     "train_vs_test_iid_ks_p": 0.981,
+     "train_vs_test_ood_ks_p": 0.874,
+     "cache_node_vs_other_ks_p": 0.727
+    },
+    "root_growth": {
+     "train_vs_val_ks_p": 0.056,
+     "train_vs_test_iid_ks_p": 0.61,
+     "train_vs_test_ood_ks_p": 0.55,
+     "cache_node_vs_other_ks_p": 0.574
+    },
+    "data_growth": {
+     "train_vs_val_ks_p": 0.624,
+     "train_vs_test_iid_ks_p": 0.23,
+     "train_vs_test_ood_ks_p": 0.069,
+     "cache_node_vs_other_ks_p": 0.098
+    },
+    "weekend_factor": {
+     "train_vs_val_ks_p": 0.536,
+     "train_vs_test_iid_ks_p": 0.932,
+     "train_vs_test_ood_ks_p": 0.926,
+     "cache_node_vs_other_ks_p": 0.402
+    },
+    "phi1": {
+     "train_vs_val_ks_p": 0.873,
+     "train_vs_test_iid_ks_p": 0.684,
+     "train_vs_test_ood_ks_p": 0.477,
+     "cache_node_vs_other_ks_p": 0.089
+    }
+   },
+   "parameters_where_cache_node_differs_p_lt_0.05": [],
+   "parameters_where_test_ood_differs_from_train_p_lt_0.05": [
+    "a1"
+   ]
+  },
+  "profile_nearest_neighbour_distance": {
+   "within_train_median": 3.251,
+   "test_iid_to_train_mean": 3.076,
+   "test_ood_to_train_mean": 3.064,
+   "min_any_test_to_train": 2.189,
+   "reading": "if test hosts were copies of train hosts the distance would be ~0; similar mean distances mean test is drawn from the SAME distribution"
+  },
+  "fault_parameter_comparison": {
+   "mem_leak.D_min": {
+    "param": "D_min",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 15.146,
+     "p10": 20.302,
+     "p50": 85.687,
+     "p90": 255.886,
+     "max": 349.369
+    },
+    "val_ks_p": 0.278,
+    "test_iid_ks_p": 0.648,
+    "ood_slow_runs": {
+     "n": 12,
+     "min": 38.634,
+     "p10": 47.019,
+     "p50": 184.533,
+     "p90": 728.331,
+     "max": 892.916
+    },
+    "ood_cache_node_runs": {
+     "n": 13,
+     "min": 29.184,
+     "p10": 37.621,
+     "p50": 134.06,
+     "p90": 251.913,
+     "max": 283.448
+    },
+    "ood_slow_ks_p": 0.0215,
+    "ood_cache_node_ks_p": 0.188,
+    "ood_slow_share_above_train_max": 0.333
+   },
+   "disk_fill.D_min": {
+    "param": "D_min",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 30.479,
+     "p10": 44.669,
+     "p50": 164.451,
+     "p90": 451.487,
+     "max": 583.484
+    },
+    "val_ks_p": 0.228,
+    "test_iid_ks_p": 0.801,
+    "ood_slow_runs": {
+     "n": 17,
+     "min": 83.085,
+     "p10": 92.682,
+     "p50": 292.685,
+     "p90": 1319.007,
+     "max": 1443.4
+    },
+    "ood_cache_node_runs": {
+     "n": 8,
+     "min": 32.428,
+     "p10": 43.458,
+     "p50": 140.919,
+     "p90": 324.771,
+     "max": 585.842
+    },
+    "ood_slow_ks_p": 0.0961,
+    "ood_cache_node_ks_p": 0.546,
+    "ood_slow_share_above_train_max": 0.294
+   },
+   "pool_exhaustion.D_min": {
+    "param": "D_min",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 60.137,
+     "p10": 75.192,
+     "p50": 170.891,
+     "p90": 404.155,
+     "max": 475.692
+    },
+    "val_ks_p": 0.139,
+    "test_iid_ks_p": 0.855,
+    "ood_slow_runs": {
+     "n": 15,
+     "min": 185.258,
+     "p10": 211.751,
+     "p50": 338.524,
+     "p90": 802.958,
+     "max": 1095.985
+    },
+    "ood_cache_node_runs": {
+     "n": 10,
+     "min": 82.064,
+     "p10": 132.062,
+     "p50": 219.544,
+     "p90": 292.444,
+     "max": 321.857
+    },
+    "ood_slow_ks_p": 0.0005,
+    "ood_cache_node_ks_p": 0.333,
+    "ood_slow_share_above_train_max": 0.2
+   },
+   "cpu_runaway.A": {
+    "param": "A",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 0.26,
+     "p10": 0.432,
+     "p50": 1.009,
+     "p90": 1.493,
+     "max": 1.598
+    },
+    "val_ks_p": 0.598,
+    "test_iid_ks_p": 0.638,
+    "ood_slow_runs": {
+     "n": 15,
+     "min": 0.531,
+     "p10": 0.657,
+     "p50": 1.254,
+     "p90": 1.452,
+     "max": 1.531
+    },
+    "ood_cache_node_runs": {
+     "n": 10,
+     "min": 0.461,
+     "p10": 0.742,
+     "p50": 1.302,
+     "p90": 1.498,
+     "max": 1.539
+    },
+    "ood_slow_ks_p": 0.3812,
+    "ood_cache_node_ks_p": 0.333,
+    "ood_slow_share_above_train_max": 0.0
+   },
+   "cpu_runaway.ramp_steps": {
+    "param": "ramp_steps",
+    "variant_filter": "ramp",
+    "train": {
+     "n": 63,
+     "min": 9.0,
+     "p10": 21.6,
+     "p50": 65.0,
+     "p90": 107.2,
+     "max": 119.0
+    },
+    "val_ks_p": 0.097,
+    "test_iid_ks_p": 0.955,
+    "ood_slow_runs": {
+     "n": 11,
+     "min": 13.0,
+     "p10": 23.0,
+     "p50": 95.0,
+     "p90": 269.0,
+     "max": 283.0
+    },
+    "ood_cache_node_runs": {
+     "n": 5,
+     "min": 15.0,
+     "p10": 42.6,
+     "p50": 96.0,
+     "p90": 105.0,
+     "max": 105.0
+    },
+    "ood_slow_ks_p": 0.0268,
+    "ood_cache_node_ks_p": 0.167,
+    "ood_slow_share_above_train_max": 0.455
+   },
+   "net_flood.m_p": {
+    "param": "m_p",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 4.184,
+     "p10": 11.417,
+     "p50": 25.017,
+     "p90": 36.71,
+     "max": 39.639
+    },
+    "val_ks_p": 0.095,
+    "test_iid_ks_p": 0.246,
+    "ood_slow_runs": {
+     "n": 12,
+     "min": 8.029,
+     "p10": 11.251,
+     "p50": 23.328,
+     "p90": 35.81,
+     "max": 37.419
+    },
+    "ood_cache_node_runs": {
+     "n": 13,
+     "min": 7.6,
+     "p10": 15.536,
+     "p50": 33.934,
+     "p90": 37.5,
+     "max": 38.181
+    },
+    "ood_slow_ks_p": 0.3811,
+    "ood_cache_node_ks_p": 0.07,
+    "ood_slow_share_above_train_max": 0.0
+   },
+   "net_flood.decay_steps": {
+    "param": "decay_steps",
+    "variant_filter": null,
+    "train": {
+     "n": 100,
+     "min": 11.0,
+     "p10": 23.9,
+     "p50": 59.0,
+     "p90": 107.3,
+     "max": 119.0
+    },
+    "val_ks_p": 0.355,
+    "test_iid_ks_p": 0.762,
+    "ood_slow_runs": {
+     "n": 12,
+     "min": 79.0,
+     "p10": 125.7,
+     "p50": 192.0,
+     "p90": 278.1,
+     "max": 292.0
+    },
+    "ood_cache_node_runs": {
+     "n": 13,
+     "min": 13.0,
+     "p10": 23.8,
+     "p50": 59.0,
+     "p90": 79.8,
+     "max": 91.0
+    },
+    "ood_slow_ks_p": 0.0,
+    "ood_cache_node_ks_p": 0.258,
+    "ood_slow_share_above_train_max": 0.917
+   }
+  },
+  "ood_composition": {
+   "slow_known_archetype_runs": 10,
+   "cache_node_runs": 10,
+   "reading": "cache_node runs share every profile and fault distribution with train (see KS p-values): they are a new LABEL, not a new regime; only the slow-ramp runs are genuinely different, and only in how fast the same mechanisms develop"
+  }
+ },
+ "features": {
+  "n_features": 196,
+  "duplicate_rows_on_six_level_features": {
+   "cross_split_duplicates": 0,
+   "within_split_duplicates": 2727,
+   "rows_with_all_six_present": 3548894,
+   "note": "rounded to 4 decimals; exact duplicates across splits would indicate copied telemetry"
+  },
+  "rule_feature_nan_in_scored_train_val_rows": {
+   "rows": 2366740,
+   "rows_with_any_nan_in_cpu_mean_300_mem_last_disk_*_last": 0
+  },
+  "sample_for_feature_stats": {
+   "train_runs": [
+    "r0003",
+    "r0004",
+    "r0005",
+    "r0019",
+    "r0037",
+    "r0044",
+    "r0046",
+    "r0064",
+    "r0072",
+    "r0073",
+    "r0083",
+    "r0089"
+   ],
+   "rows": 47434,
+   "note": "every 5th scored row of 12 train runs; train split only"
+  },
+  "no_variance_features": [
+   "cpu_missing_300",
+   "cpu_missing_900",
+   "cpu_missing_3600",
+   "mem_missing_300",
+   "mem_missing_900",
+   "mem_missing_3600",
+   "disk_root_missing_300",
+   "disk_root_missing_900",
+   "disk_root_missing_3600",
+   "disk_data_missing_300",
+   "disk_data_missing_900",
+   "disk_data_missing_3600",
+   "rx_missing_300",
+   "rx_rate_std_300",
+   "rx_rate_slope_300",
+   "rx_resets_300",
+   "rx_missing_900",
+   "rx_missing_3600",
+   "tx_missing_300",
+   "tx_rate_std_300",
+   "tx_rate_slope_300",
+   "tx_resets_300",
+   "tx_missing_900",
+   "tx_missing_3600",
+   "n_series_stale"
+  ],
+  "near_constant_features_le_3_distinct_values": [
+   "cpu_n_300",
+   "mem_n_300",
+   "disk_root_n_300",
+   "disk_data_n_300",
+   "rx_resets_900",
+   "rx_resets_3600",
+   "tx_pairs_300",
+   "tx_resets_900",
+   "tx_resets_3600"
+  ],
+  "features_all_nan_in_sample": [
+   "rx_rate_std_300",
+   "rx_rate_slope_300",
+   "tx_rate_std_300",
+   "tx_rate_slope_300"
+  ],
+  "nan_share_by_feature_top": {
+   "rx_rate_std_300": 1.0,
+   "rx_rate_slope_300": 1.0,
+   "tx_rate_std_300": 1.0,
+   "tx_rate_slope_300": 1.0,
+   "disk_data_std_300": 0.012,
+   "disk_data_slope_300": 0.012,
+   "mem_std_300": 0.011,
+   "mem_slope_300": 0.011,
+   "disk_root_std_300": 0.011,
+   "disk_root_slope_300": 0.011,
+   "cpu_std_300": 0.011,
+   "cpu_slope_300": 0.011
+  },
+  "feature_pairs_abs_corr_gt_0.999": {
+   "count": 36,
+   "examples": [
+    [
+     "cpu_cov_300",
+     "mem_cov_300",
+     1.0
+    ],
+    [
+     "cpu_cov_300",
+     "disk_root_cov_300",
+     1.0
+    ],
+    [
+     "cpu_cov_300",
+     "disk_data_cov_300",
+     1.0
+    ],
+    [
+     "cpu_cov_300",
+     "tx_cov_300",
+     1.0
+    ],
+    [
+     "cpu_cov_900",
+     "mem_cov_900",
+     1.0
+    ],
+    [
+     "cpu_cov_900",
+     "disk_data_cov_900",
+     1.0
+    ],
+    [
+     "cpu_cov_3600",
+     "mem_cov_3600",
+     0.9999
+    ],
+    [
+     "cpu_cov_3600",
+     "disk_root_cov_3600",
+     0.9995
+    ],
+    [
+     "cpu_cov_3600",
+     "disk_data_cov_3600",
+     1.0
+    ],
+    [
+     "cpu_cov_3600",
+     "rx_cov_3600",
+     0.9992
+    ],
+    [
+     "cpu_cov_3600",
+     "tx_cov_3600",
+     0.9995
+    ],
+    [
+     "mem_cov_300",
+     "disk_root_cov_300",
+     1.0
+    ],
+    [
+     "mem_cov_300",
+     "disk_data_cov_300",
+     1.0
+    ],
+    [
+     "mem_cov_300",
+     "tx_cov_300",
+     1.0
+    ],
+    [
+     "mem_cov_900",
+     "disk_data_cov_900",
+     1.0
+    ]
+   ]
+  },
+  "redundant_features_abs_corr_gt_0.98_with_an_earlier_feature": {
+   "count": 52,
+   "of": 171
+  },
+  "univariate_auc_train_sample": {
+   "positive_rows": 278,
+   "negative_rows": 46982,
+   "note": "descriptive rank AUC of single features on 12 train runs; no model fitted",
+   "top_by_abs_distance_from_0.5": {
+    "mem_last": 0.768,
+    "mem_min_300": 0.768,
+    "mem_mean_300": 0.766,
+    "mem_max_300": 0.763,
+    "mem_min_900": 0.759,
+    "mem_mean_900": 0.758,
+    "mem_max_900": 0.751,
+    "mem_max_3600": 0.731,
+    "mem_mean_3600": 0.721,
+    "mem_slope_3600": 0.709,
+    "mem_min_3600": 0.708,
+    "mem_delta_3600": 0.703
+   },
+   "features_with_auc_gt_0.9_or_lt_0.1": []
+  },
+  "feature_availability_assessment": {
+   "uses_ids_timestamps_or_labels": false,
+   "evidence": "feature registry = 196 names, all derived from the six metric series (checked against features_manifest.json); elapsed_s is the only run-position feature and is excluded at training",
+   "run_position_features_present_in_matrix": [
+    "elapsed_s"
+   ],
+   "freshness_features": [
+    "cpu_age_s",
+    "cpu_cadence_s",
+    "mem_age_s",
+    "mem_cadence_s",
+    "disk_root_age_s",
+    "disk_root_cadence_s",
+    "..."
+   ]
+  },
+  "asof_independent_recomputation": {
+   "rows_checked": 160,
+   "feature_comparisons": 640,
+   "mismatches": 0,
+   "per_feature_mismatch": {},
+   "max_abs_diff": 0.0,
+   "comparisons_where_ignoring_the_envelope_rule_would_change_the_value": 0,
+   "features": [
+    "cpu_mean_300",
+    "mem_max_900",
+    "disk_root_last",
+    "rx_rate_mean_300"
+   ]
+  }
+ },
+ "missing_as_zero": {
+  "code_locations": [
+   "backend/ml/predict.py: RiskModel._rule uses np.nan_to_num(arr[:, idx], nan=0.0) / 100.0 then max()",
+   "backend/ml/predict.py: predict_risk ends with np.nan_to_num(risk, nan=0.0, ...)",
+   "backend/ml/train_baselines.py: rule scorer lambda uses np.nan_to_num(X[:, ridx], nan=0.0).max(axis=1) / 100.0",
+   "logreg: SimpleImputer(strategy='median') fitted on train: missing is treated as a typical value, not as high or unknown risk"
+  ],
+  "insufficient_data_by_split_h1800": {
+   "train": {
+    "decisions": 1814400,
+    "excluded_insufficient": 18043,
+    "share": 0.0099
+   },
+   "val": {
+    "decisions": 604800,
+    "excluded_insufficient": 6506,
+    "share": 0.0108
+   },
+   "test_iid": {
+    "decisions": 806400,
+    "excluded_insufficient": 7870,
+    "share": 0.0098
+   },
+   "test_ood": {
+    "decisions": 403200,
+    "excluded_insufficient": 4471,
+    "share": 0.0111
+   }
+  },
+  "reasons": {
+   "total_decisions": 3628800,
+   "excluded_insufficient_data": 36890,
+   "by_reason_top": {
+    "coverage:rx:300": 25307,
+    "coverage:cpu:300": 25297,
+    "coverage:disk_root:300": 25289,
+    "coverage:disk_data:300": 25286,
+    "coverage:mem:300": 25285,
+    "coverage:tx:300": 25284,
+    "freshness:cpu": 22333,
+    "freshness:disk_root": 22331,
+    "freshness:disk_data": 22328,
+    "freshness:mem": 22327
+   }
+  },
+  "why_it_is_latent_in_current_metrics": "Rows whose latest observation is stale or whose window coverage is low are removed as 'insufficient_data' BEFORE features are built, so in every scored train/val row cpu_mean_300, mem_last and disk_*_last are present (verified: see rule_feature_nan_in_scored_train_val_rows). The NaN->0 path is therefore never exercised by the reported metrics; it only acts at inference time when telemetry is stale or absent."
+ },
+ "realism": {
+  "scope": "only structural statistics that SMD/PSM actually support; no feature mapping is made",
+  "synthetic_percent_series": {
+   "cpu": {
+    "acf_lag1_median": 0.945,
+    "acf_lag60_median": 0.297,
+    "acf_lag1440_median": 0.132,
+    "share_consecutive_equal": 0.0036,
+    "distinct_values_per_1000_obs": 206.4
+   },
+   "mem": {
+    "acf_lag1_median": 0.937,
+    "acf_lag60_median": 0.484,
+    "acf_lag1440_median": 0.123,
+    "share_consecutive_equal": 0.0019,
+    "distinct_values_per_1000_obs": 157.2
+   },
+   "disk_root": {
+    "acf_lag1_median": 0.872,
+    "acf_lag60_median": 0.333,
+    "acf_lag1440_median": 0.147,
+    "share_consecutive_equal": 0.003,
+    "distinct_values_per_1000_obs": 102.9
+   },
+   "disk_data": {
+    "acf_lag1_median": 0.877,
+    "acf_lag60_median": 0.317,
+    "acf_lag1440_median": 0.182,
+    "share_consecutive_equal": 0.0023,
+    "distinct_values_per_1000_obs": 137.3
+   }
+  },
+  "synthetic_cross_series_median_abs_corr_cpu_mem_disk_root": 0.107,
+  "smd_train_first_10_machines_non_constant_dims": {
+   "n_series": 322,
+   "acf_lag1_median": 0.842,
+   "acf_lag60_median": 0.544,
+   "share_consecutive_equal_median": 0.051,
+   "distinct_per_1000_median": 20.3,
+   "note": "SMD sampling interval is not in the files, so lag 60 is 60 rows, not 60 minutes; no diurnal lag is tested"
+  },
+  "psm_train_all_non_constant_features": {
+   "n_series": 25,
+   "acf_lag1_median": 0.985,
+   "acf_lag60_median": 0.853,
+   "acf_lag1440_median": 0.745,
+   "share_consecutive_equal_median": 0.0005,
+   "note": "PSM row index steps by 1 (minute per the column name; not wall-clock), so lag 1440 is one nominal day"
+  },
+  "levels_of_realism": {
+   "structural_validity": {
+    "evaluable": true,
+    "evidence": "schema validation 0 failures, accounting and footprint checks in the manifest, independent re-derivation in this audit"
+   },
+   "statistical_similarity": {
+    "evaluable": "marginally",
+    "limit": "SMD/PSM have no named metrics, units or real timestamps; only generic smoothness/discreteness can be compared, and a match proves nothing about realism"
+   },
+   "temporal_realism": {
+    "evaluable": "partially",
+    "limit": "lag-k autocorrelation can be compared; diurnal/weekly structure only in PSM and only if its index is truly minutes; incident timing cannot"
+   },
+   "causal_realism": {
+    "evaluable": false,
+    "limit": "no dataset available to us records resource state before real outages; precursor-to-outage mechanisms are the simulator author's assumptions"
+   },
+   "real_world_predictive_validity": {
+    "evaluable": false,
+    "limit": "needs real incident records with impact times; none exist in the repository or the external sets"
+   }
+  }
+ },
+ "evaluation_methodology": {
+  "code_checks": {
+   "splits_requested_for_fitting_or_selection": "train, val only (SPLITS_USED = ('train', 'val'); load_view asserts split in SPLITS_USED)",
+   "SPLITS_USED_literal_present": true,
+   "imputer_and_scaler_fit_on_train_only": true,
+   "threshold_chosen_on_validation": true,
+   "threshold_objective": "maximum F1 on validation rows (not tied to the 1 false alarm / host-day budget in protocol.json)",
+   "hyperparameter_search": "none (fixed XGBoost/LogReg settings)",
+   "seeds": "single SEED = 7; no repeats",
+   "rows_used_for_training": "positive+negative rows only; unscorable (ABRUPT/SILENT-only) windows dropped; optional negative thinning (--negative-stride)",
+   "false_alarm_definition": "alert is false iff n_in_window == 0, i.e. an alert before ANY incident incl. ABRUPT/SILENT counts as correct",
+   "exposure_denominator": "scored rows x 60 s (incl. unscorable rows)",
+   "incident_level_recall_or_lead_time": "not computed (alert_stats docstring: 'not the full match-1 event evaluation')",
+   "calibration": "not assessed (no reliability curve, Brier or ECE anywhere in train_baselines.py)",
+   "metric_level": "row (decision-point) level PR-AUC/precision/recall/F1 on adjacent 60 s rows that are near-duplicates; ~30 positive rows per incident"
+  },
+  "saved_model_artifacts": {
+   "dir": "artifacts/models/uptimetrace-m31-seed0-2723fc6789d8/h1800",
+   "files": [
+    "logreg/model.joblib",
+    "logreg/schema.json",
+    "report.json",
+    "report.md",
+    "rule/schema.json",
+    "xgboost/model.json",
+    "xgboost/schema.json"
+   ],
+   "report_status": "PRELIMINARY - development subset only; not evidence of generalisation or production readiness",
+   "train_runs": 2,
+   "val_runs": 1,
+   "train_positive_windows": 10,
+   "val_positive_windows": 2,
+   "train_positive_rows": 300,
+   "val_positive_rows": 60,
+   "test_splits_used": false,
+   "report_has_alert_statistics": false,
+   "val": {
+    "rule": {
+     "threshold": 0.7662000060081482,
+     "precision": 0.009,
+     "recall": 0.4667,
+     "f1": 0.0176,
+     "pr_auc": 0.0074,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 16578,
+      "fp": 3085,
+      "fn": 32,
+      "tp": 28
+     },
+     "false_positives": 3085,
+     "false_negatives": 32,
+     "positives": 60,
+     "negatives": 19663
+    },
+    "logreg": {
+     "threshold": 0.9999747443535514,
+     "precision": 0.0322,
+     "recall": 0.5667,
+     "f1": 0.0609,
+     "pr_auc": 0.0239,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 18640,
+      "fp": 1023,
+      "fn": 26,
+      "tp": 34
+     },
+     "false_positives": 1023,
+     "false_negatives": 26,
+     "positives": 60,
+     "negatives": 19663
+    },
+    "xgboost": {
+     "threshold": 0.9054353833198547,
+     "precision": 0.0061,
+     "recall": 0.9167,
+     "f1": 0.012,
+     "pr_auc": 0.0045,
+     "prevalence": 0.00304,
+     "confusion": {
+      "tn": 10639,
+      "fp": 9024,
+      "fn": 5,
+      "tp": 55
+     },
+     "false_positives": 9024,
+     "false_negatives": 5,
+     "positives": 60,
+     "negatives": 19663
+    }
+   },
+   "train_pr_auc_at_val_threshold": {
+    "rule": 0.0466,
+    "logreg": 0.1785,
+    "xgboost": 1.0
+   }
+  },
+  "statistical_power_of_what_was_reported": {
+   "val_runs_used": 1,
+   "val_precursor_incident_windows_used": 2,
+   "train_runs_used": 2,
+   "train_positive_windows_used": 10,
+   "full_val_split": {
+    "runs": 30,
+    "incidents": 195,
+    "PRECURSOR": 132
+   },
+   "full_train_split": {
+    "runs": 90,
+    "incidents": 650,
+    "PRECURSOR": 455
+   },
+   "share_of_train_runs_used": 0.022,
+   "share_of_val_runs_used": 0.033,
+   "val_recall_ci_95_if_both_windows_found": "Wilson 95% [0.34, 1.00] for p=1.0 over n=2",
+   "val_recall_ci_95_if_full_val_precursor_set": "recall 0.8 over n=132 incidents: Wilson 95% [0.72, 0.86] for p=0.8 over n=132"
+  },
+  "precursor_incidents_available_per_split": {
+   "train": 455,
+   "val": 132,
+   "test_iid": 201,
+   "test_ood": 111
+  }
+ }
+}
