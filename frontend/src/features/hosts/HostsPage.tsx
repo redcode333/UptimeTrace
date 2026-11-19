@@ -12,7 +12,7 @@ import { applyHostsView, HEALTHS, PAGE_SIZE, parseHostsView } from "../../lib/ho
 import { scopeFilter, useScope } from "../../lib/scope";
 import { globalSearch } from "../../lib/timeRange";
 
-const REPORTING: Record<Host["reporting_status"], string> = { reporting: "Reporting", silent: "Silent", replay: "Replay (not live)" };
+const REPORTING: Record<Host["reporting_status"], string> = { reporting: "Reporting", stale: "Stale", silent: "Silent", replay: "Replay (not live)" };
 
 export function HostsPage() {
   const [params, setParams] = useSearchParams();

@@ -1,7 +1,7 @@
 /** URL <-> inventory filter state for the Hosts page. Source scope is NOT here: it is the global control (lib/scope). */
 import type { HealthStatus } from "../api/types";
 
-export const HEALTHS: readonly HealthStatus[] = ["healthy", "warning", "critical", "offline", "unknown"];
+export const HEALTHS: readonly HealthStatus[] = ["healthy", "warning", "critical", "stale", "offline", "unknown"];
 export const PAGE_SIZE = 25;
 
 export interface HostsView {

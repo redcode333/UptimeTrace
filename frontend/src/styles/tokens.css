@@ -15,7 +15,7 @@
   --forecast: #f2b64a;   /* prediction, experimental, the one primary action */
   --critical: #e5483a;
   --critical-text: #ff6a55;
-  --warning: #e0951f;
+  --warning: #e9b8ff;  /* confirmed warning: pale violet (design decision D-13). Amber is reserved for forecast and experimental states. */
   --normal: #1f8f73;
   --normal-text: #35d0b5;
   --offline: #8aa3b8;

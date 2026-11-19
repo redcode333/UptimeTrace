@@ -4,6 +4,11 @@ import { RequireAuth } from "../auth/RequireAuth";
 import { AppShell } from "../components/shell/AppShell";
 import { flatNav } from "../components/shell/nav";
 import { MetricsExplorerPage } from "../features/explorer/MetricsExplorerPage";
+import { AgentsPage } from "../features/agents/AgentsPage";
+import { AlertPoliciesPage } from "../features/settings/AlertPoliciesPage";
+import { IntegrationsPage } from "../features/settings/IntegrationsPage";
+import { AlertsPage } from "../features/alerts/AlertsPage";
+import { InvestigationPage } from "../features/investigation/InvestigationPage";
 import { HostDetailPage } from "../features/hosts/HostDetailPage";
 import { HostsPage } from "../features/hosts/HostsPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
@@ -20,6 +25,11 @@ export function AppRoutes() {
           <Route path="hosts" element={<HostsPage />} />
           <Route path="hosts/:hostId" element={<HostDetailPage />} />
           <Route path="metrics" element={<MetricsExplorerPage />} />
+          <Route path="settings/agents" element={<AgentsPage />} />
+          <Route path="settings/alerts" element={<AlertPoliciesPage />} />
+          <Route path="settings/integrations" element={<IntegrationsPage />} />
+          <Route path="alerts" element={<AlertsPage />} />
+          <Route path="alerts/:alertId" element={<InvestigationPage />} />
           {flatNav().filter((i) => i.unavailable).map((i) => (
             <Route key={i.path} path={i.path.slice(1)} element={<UnavailablePage />} />
           ))}

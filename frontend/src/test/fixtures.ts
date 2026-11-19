@@ -4,15 +4,15 @@ import type { Host, HostDetail, HostList, LatestMetrics, MetricSample, SeriesRes
 export const host = (over: Partial<Host> & { host_id: string }): Host => ({
   hostname: over.host_id, agent_id: "agent-1", service: null, source: "live", connected_infrastructure: true,
   first_seen: "2026-11-01T00:00:00Z", last_seen: "2026-11-13T10:00:00Z", last_seen_age_seconds: 20, reporting_status: "reporting",
-  health: { status: "healthy", reasons: [] },
+  health: { status: "healthy", category: "healthy", reasons: [] },
   latest: { cpu_percent: 10, memory_percent: 20, disk_percent_max: 30, disk_mount_max: "C:", network_rx_bytes_per_second: null, network_tx_bytes_per_second: null },
   ...over,
 });
 
 export const hostList = (items: Host[], over: Partial<HostList> = {}): HostList => ({
   items, page: 1, page_size: 25, total: items.length,
-  facets: { source: { live: items.length, synthetic: 0, replay: 0 }, health: { healthy: items.length, warning: 0, critical: 0, offline: 0, unknown: 0 } },
-  thresholds: { offline_after_seconds: 300, stale_after_seconds: 300, rules: {} },
+  facets: { source: { live: items.length, synthetic: 0, replay: 0 }, health: { healthy: items.length, warning: 0, critical: 0, stale: 0, offline: 0, unknown: 0 } },
+  thresholds: { host_stale_after_seconds: 90, offline_after_seconds: 300, stale_after_seconds: 300, rules: {} },
   ...over,
 });
 

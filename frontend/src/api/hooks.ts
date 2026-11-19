@@ -1,6 +1,6 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "./context";
-import type { HostListParams } from "./types";
+import type { AlertStatusFilter, HostListParams, InvestigationRecord, IssueCredentialBody, IssueMcpTokenIn, MonitoringSettingsIn, RegisterHostBody } from "./types";
 
 /** Who am I, and am I allowed to read telemetry? Needs only a valid session. */
 export function useMe() {
@@ -27,13 +27,14 @@ import { rangeWindow, type RangeId } from "../lib/timeRange";
 import type { Agg } from "../lib/metrics";
 
 /** Host inventory. A new query key per filter set; react-query aborts the superseded request, so a slow old response can never replace a newer one. */
-export function useHostList(params: HostListParams, opts: { refetchInterval?: number | false } = {}) {
+export function useHostList(params: HostListParams, opts: { refetchInterval?: number | false; enabled?: boolean } = {}) {
   const api = useApi();
   return useQuery({
     queryKey: ["hosts", params],
     queryFn: ({ signal }) => api.hosts(params, signal),
     placeholderData: keepPreviousData,
     refetchInterval: opts.refetchInterval ?? 15_000,
+    enabled: opts.enabled ?? true,
   });
 }
 
@@ -58,5 +59,148 @@ export function useSeries(hostId: string | undefined, metric: string, range: Ran
     // No keepPreviousData: a different host or metric must never show the previous selection's chart while loading.
     refetchInterval: 60_000,
     retry: false,
+  });
+}
+
+/** Registered hosts (including ones that have never reported). */
+/** Configured monitoring thresholds. Read-only; cached for a minute. */
+export function useMonitoringSettings() {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["settings", "monitoring"],
+    queryFn: ({ signal }) => api.monitoringSettings(signal),
+    staleTime: 60_000,
+  });
+}
+
+/**
+ * Save the thresholds and freshness windows. The cache is updated and dependent queries refreshed only after the server
+ * accepts the write. A stale version is refused by the server (409) and nothing is overwritten.
+ */
+export function useSaveMonitoringSettings() {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: MonitoringSettingsIn) => api.saveMonitoringSettings(body),
+    onSuccess: (saved) => {
+      qc.setQueryData(["settings", "monitoring"], saved);
+      return Promise.all(["hosts", "host", "alerts", "settings"].map((key) => qc.invalidateQueries({ queryKey: [key] })));
+    },
+  });
+}
+
+/** MCP access tokens (metadata). */
+export function useMcpTokens() {
+  const api = useApi();
+  return useQuery({ queryKey: ["mcp", "tokens"], queryFn: ({ signal }) => api.mcpTokens(signal) });
+}
+
+/**
+ * Issue a token. The raw token is returned to the caller only; it is not written to the query cache, so it is not kept in
+ * any shared state. The list is refreshed after the server confirms the issue.
+ */
+export function useIssueMcpToken() {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: IssueMcpTokenIn) => api.issueMcpToken(body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mcp", "tokens"] }),
+  });
+}
+
+export function useRevokeMcpToken() {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.revokeMcpToken(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mcp", "tokens"] }),
+  });
+}
+
+export function useRegistryHosts() {
+  const api = useApi();
+  return useQuery({ queryKey: ["registry", "hosts"], queryFn: ({ signal }) => api.registryHosts(signal), refetchInterval: 15_000 });
+}
+
+export function useCredentials(hostId: string | null) {
+  const api = useApi();
+  return useQuery({ queryKey: ["registry", "credentials", hostId], enabled: !!hostId, queryFn: ({ signal }) => api.credentials(hostId!, signal) });
+}
+
+/** Mutations refresh the registry and fleet queries. The issued token lives only in the mutation result held by the caller. */
+export function useRegistryMutations() {
+  const api = useApi();
+  const qc = useQueryClient();
+  const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ["registry"] }), qc.invalidateQueries({ queryKey: ["hosts"] })]);
+  return {
+    register: useMutation({ mutationFn: (b: RegisterHostBody) => api.registerHost(b), onSuccess: refresh }),
+    issue: useMutation({ mutationFn: (v: { hostId: string; body: IssueCredentialBody }) => api.issueCredential(v.hostId, v.body), onSuccess: refresh }),
+    revoke: useMutation({ mutationFn: (v: { hostId: string; credentialId: string }) => api.revokeCredential(v.hostId, v.credentialId), onSuccess: refresh }),
+  };
+}
+
+/** Alerts for the console. Refreshed every 15 s so a recovery or a new breach shows without a reload. */
+export function useAlerts(status: AlertStatusFilter, limit?: number, hostId?: string) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["alerts", status, limit ?? null, hostId ?? null],
+    queryFn: ({ signal }) => api.alerts(status, signal, limit, hostId),
+    placeholderData: keepPreviousData,
+    refetchInterval: 15_000,
+  });
+}
+
+/** Detail (with the timeline) is loaded only for the row that is expanded. */
+export function useAlert(id: string | null) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["alert", id],
+    enabled: !!id,
+    queryFn: ({ signal }) => api.alert(id!, signal),
+    refetchInterval: 15_000,
+    retry: false,
+  });
+}
+
+/** Acknowledge or resolve. Both refresh every alert query, so the list and any open timeline agree with the server. */
+export function useAlertMutations() {
+  const api = useApi();
+  const qc = useQueryClient();
+  const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ["alerts"] }), qc.invalidateQueries({ queryKey: ["alert"] })]);
+  return {
+    acknowledge: useMutation({ mutationFn: (id: string) => api.acknowledgeAlert(id), onSuccess: refresh }),
+    resolve: useMutation({ mutationFn: (id: string) => api.resolveAlert(id), onSuccess: refresh }),
+  };
+}
+
+/** The investigation view for one alert. Refreshed so a recovery that lands while the page is open shows without a reload. */
+export function useInvestigation(id: string | undefined, windowMinutes: number) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["investigation", id, windowMinutes],
+    queryFn: ({ signal }) => api.investigation(id!, { window_minutes: windowMinutes }, signal),
+    enabled: !!id,
+    refetchInterval: 15_000,
+  });
+}
+
+/** The persisted record. A 404 (none created yet) is an answer, not a failure, so it is not retried. */
+export function useInvestigationReport(id: string | undefined) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["investigation-report", id],
+    queryFn: ({ signal }) => api.investigationReport(id!, signal),
+    enabled: !!id,
+    retry: false,
+  });
+}
+
+/** Creates the record once. The server returns the stored record on later calls, so this is safe to repeat. */
+export function useCreateInvestigationReport(id: string) {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.createInvestigationReport(id),
+    onSuccess: (record: InvestigationRecord) => qc.setQueryData(["investigation-report", id], record),
   });
 }

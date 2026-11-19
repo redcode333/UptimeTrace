@@ -1,14 +1,15 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../api/client";
+import type { Alert, AlertList, AlertStatusFilter, MetricSample } from "../../api/types";
 import { fakeApi, renderApp } from "../../test/harness";
 import { detail, host, latestOf, sample, seriesOf } from "../../test/fixtures";
 import { HostDetailPage } from "./HostDetailPage";
 
 const h = host({
   host_id: "web-1", hostname: "WEB-1", service: "checkout",
-  health: { status: "warning", reasons: [{ metric: "system.memory.utilization", labels: {}, value: 88, threshold: 85, level: "warning" }] },
+  health: { status: "warning", category: "degraded", reasons: [{ metric: "system.memory.utilization", labels: {}, value: 88, threshold: 85, level: "warning", key: "system.memory.utilization|{}" }] },
 });
 const view = (
   <Routes><Route path="/hosts/:hostId" element={<HostDetailPage />} /></Routes>
@@ -86,6 +87,219 @@ describe("Host detail", () => {
 
   it("shows a not-found error", async () => {
     renderApp(view, { api: api({ host: async () => { throw new ApiError(404, "host_not_found", "Host not found"); } }), route: "/hosts/nope" });
+    expect(await screen.findByText("Not found")).toBeInTheDocument();
+  });
+});
+
+// ----------------------------------------------------------------------------------- operational state, thresholds and alerts
+
+const RULES = {
+  "system.cpu.utilization": { warning: 80, critical: 90 },
+  "system.memory.utilization": { warning: 85, critical: 95 },
+  "system.disk.utilization": { warning: 90, critical: 95 },
+};
+const settingsDoc = (rules: typeof RULES = RULES) => ({
+  config: { freshness: { stale_after_seconds: 90, offline_after_seconds: 300 }, rules },
+  defaults: { freshness: { stale_after_seconds: 90, offline_after_seconds: 300 }, rules: RULES },
+  version: 1, updated_at: null, updated_by: null,
+});
+const MIN = 60_000;
+const at = (ms: number) => new Date(Date.now() - ms).toISOString();
+
+const alertRow = (over: Partial<Alert> & { id: string }): Alert => ({
+  host_id: "web-1", condition_key: "system.cpu.utilization|{}", rule: "threshold", metric: "system.cpu.utilization", labels: {},
+  severity: "critical", state: "open", value: 97, threshold: 95, opened_at: at(10 * MIN), last_evaluated_at: at(MIN),
+  acknowledged_at: null, acknowledged_by: null, resolved_at: null, resolved_by: null, resolution: null, ...over,
+});
+
+/** The alert list fake: records every request so tests can prove the host filter was sent. */
+function alertsFake(rows: Alert[], opts: { total?: number; calls?: unknown[][]; fail?: unknown; pending?: boolean } = {}) {
+  return async (status?: AlertStatusFilter, _s?: AbortSignal, limit?: number, hostId?: string): Promise<AlertList> => {
+    opts.calls?.push([status, limit, hostId]);
+    if (opts.pending) return new Promise<AlertList>(() => {});
+    if (opts.fail) throw opts.fail;
+    const scoped = rows.filter((r) => r.host_id === hostId);
+    return { alerts: scoped.slice(0, limit ?? 100), total: opts.total ?? scoped.length };
+  };
+}
+
+const latestFor = (samples: MetricSample[]) => async () => latestOf(h, samples);
+const utilClasses = (root: HTMLElement) => Array.from(root.querySelectorAll(".util-bar i")).map((el) => el.className);
+
+describe("Host detail: configured utilisation thresholds", () => {
+  it("colours each metric by its configured limit, not by fixed cut-offs (82% CPU is warning under an 80% limit)", async () => {
+    renderApp(view, {
+      api: api({
+        latest: latestFor([
+          sample({ name: "system.cpu.utilization", value: 82 }),
+          sample({ name: "system.memory.utilization", value: 90 }),
+          sample({ name: "system.disk.utilization", labels: { mount: "C:" }, value: 96 }),
+        ]),
+        monitoringSettings: async () => settingsDoc(),
+      }),
+      route: "/hosts/web-1",
+    });
+    const cur = await screen.findByLabelText("Current values");
+    await within(cur).findByText("82.0%");
+    await waitFor(() => expect(utilClasses(cur)).toEqual(["warn", "warn", "crit"]));
+    expect(cur).toHaveTextContent("warning ≥ 80% · critical ≥ 90%");
+    expect(cur).toHaveTextContent("warning ≥ 85% · critical ≥ 95%");
+    expect(cur).toHaveTextContent("warning ≥ 90% · critical ≥ 95%");
+  });
+
+  it("with thresholds unavailable, values carry no state colour and the page says why", async () => {
+    renderApp(view, {
+      api: api({
+        latest: latestFor([sample({ name: "system.cpu.utilization", value: 99 })]),
+        monitoringSettings: async () => { throw new ApiError(0, "network_error", "x"); },
+      }),
+      route: "/hosts/web-1",
+    });
+    const cur = await screen.findByLabelText("Current values");
+    expect(await within(cur).findByText(/Thresholds could not be loaded/)).toBeInTheDocument();
+    await within(cur).findByText("99.0%");
+    expect(utilClasses(cur)).toEqual([""]);
+    expect(cur).toHaveTextContent("thresholds unavailable");
+  });
+
+  it("a stale sample is labelled stale and never coloured, even when its value would breach", async () => {
+    renderApp(view, {
+      api: api({
+        latest: latestFor([sample({ name: "system.cpu.utilization", value: 99, stale: true })]),
+        monitoringSettings: async () => settingsDoc(),
+      }),
+      route: "/hosts/web-1",
+    });
+    const cur = await screen.findByLabelText("Current values");
+    expect(await within(cur).findByText("— stale")).toBeInTheDocument();
+    expect(cur).not.toHaveTextContent("99.0%");
+    expect(utilClasses(cur)).toEqual([]);
+  });
+});
+
+describe("Host detail: operational state", () => {
+  it("keeps health and agent reporting as separate facts (healthy health while the agent is silent)", async () => {
+    const silent = host({ host_id: "web-1", health: { status: "healthy", category: "healthy", reasons: [] }, reporting_status: "silent", last_seen_age_seconds: 4000 });
+    renderApp(view, { api: api({ host: async () => detail(silent) }), route: "/hosts/web-1" });
+    const strip = await screen.findByLabelText("Operational state");
+    expect(strip).toHaveTextContent("Health");
+    expect(within(strip).getByText("HEALTHY")).toBeInTheDocument();
+    expect(within(strip).getByText("Silent")).toBeInTheDocument();
+    expect(strip).toHaveTextContent("Last telemetry");
+  });
+
+  it("shows unknown health distinctly from a reporting agent", async () => {
+    const unknown = host({ host_id: "web-1", health: { status: "unknown", category: "unknown", reasons: [] }, reporting_status: "reporting" });
+    renderApp(view, { api: api({ host: async () => detail(unknown) }), route: "/hosts/web-1" });
+    const strip = await screen.findByLabelText("Operational state");
+    expect(within(strip).getByText("UNKNOWN")).toBeInTheDocument();
+    expect(within(strip).getByText("Reporting")).toBeInTheDocument();
+  });
+
+  it("states that the source label is derived from the host ID, not stored", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1" });
+    expect(await screen.findByText(/derived from the host ID\. Stored telemetry provenance is not implemented yet/)).toBeInTheDocument();
+  });
+});
+
+describe("Host detail: alerts for this host", () => {
+  it("requests alerts filtered by this host on the server, never a fleet-wide list", async () => {
+    const calls: unknown[][] = [];
+    renderApp(view, { api: api({ alerts: alertsFake([], { calls }) }), route: "/hosts/web-1" });
+    await screen.findByText("No alerts have been recorded for this host.");
+    expect(calls.length).toBeGreaterThan(0);
+    expect(calls.every((c) => c[2] === "web-1")).toBe(true);
+  });
+
+  it("separates active alerts (critical first) from recently resolved ones, labelling how each ended", async () => {
+    const rows = [
+      alertRow({ id: "warn", severity: "warning", opened_at: at(3 * MIN), metric: "system.memory.utilization", value: 88, threshold: 85 }),
+      alertRow({ id: "crit", state: "acknowledged", acknowledged_at: at(5 * MIN), acknowledged_by: "user_1" }),
+      alertRow({ id: "rec", host_id: "web-1", state: "resolved", resolved_at: at(2 * MIN), resolved_by: "system", resolution: "recovered", opened_at: at(30 * MIN) }),
+      alertRow({ id: "man", host_id: "web-1", state: "resolved", resolved_at: at(4 * MIN), resolved_by: "user_2", resolution: "manual", opened_at: at(40 * MIN), metric: "system.disk.utilization", labels: { mount: "C:" } }),
+    ];
+    renderApp(view, { api: api({ alerts: alertsFake(rows) }), route: "/hosts/web-1" });
+    const active = await screen.findByLabelText("Active alerts for this host");
+    const rowsText = within(active).getAllByRole("row").slice(1).map((r) => r.textContent ?? "");
+    expect(rowsText[0]).toContain("CPU utilisation");
+    expect(rowsText[0]).toContain("Acknowledged by user_1");
+    expect(rowsText[1]).toContain("Memory utilisation");
+    expect(rowsText[1]).toContain("Not acknowledged");
+    const resolved = screen.getByLabelText("Recently resolved alerts for this host");
+    expect(resolved).toHaveTextContent("Recovered by telemetry");
+    expect(resolved).toHaveTextContent("Resolved manually by user_2");
+    expect(resolved).not.toHaveTextContent("Recovered by user_2");
+    expect(resolved).toHaveTextContent("Disk utilisation (C:)");
+  });
+
+  it("links each alert to its own investigation, keeping the scope", async () => {
+    renderApp(view, { api: api({ alerts: alertsFake([alertRow({ id: "abc-123" })]) }), route: "/hosts/web-1?source=live&range=24h" });
+    const active = await screen.findByLabelText("Active alerts for this host");
+    const link = within(active).getByRole("link", { name: "Investigate" });
+    const url = new URL(link.getAttribute("href")!, "http://x");
+    expect(url.pathname).toBe("/alerts/abc-123");
+    expect(url.searchParams.get("source")).toBe("live");
+    expect(url.searchParams.get("range")).toBe("24h");
+  });
+
+  it("acknowledges an open alert in place through the existing mutation", async () => {
+    const ack = vi.fn(async (id: string) => alertRow({ id, state: "acknowledged", acknowledged_by: "user_test_1", acknowledged_at: at(MIN) }));
+    renderApp(view, { api: api({ alerts: alertsFake([alertRow({ id: "open-1" })]), acknowledgeAlert: ack }), route: "/hosts/web-1" });
+    fireEvent.click(await screen.findByRole("button", { name: /Acknowledge alert CPU utilisation/ }));
+    await waitFor(() => expect(ack).toHaveBeenCalledWith("open-1"));
+  });
+
+  it("says when the host has alerts beyond the loaded page", async () => {
+    renderApp(view, { api: api({ alerts: alertsFake([alertRow({ id: "one" })], { total: 250 }) }), route: "/hosts/web-1" });
+    expect(await screen.findByText(/Showing the 1 most recent of 250 alerts for this host/)).toBeInTheDocument();
+  });
+
+  it("shows a loading state while the alert section loads", async () => {
+    renderApp(view, { api: api({ alerts: alertsFake([], { pending: true }) }), route: "/hosts/web-1" });
+    expect(await screen.findByText("Loading alerts for this host")).toBeInTheDocument();
+  });
+
+  it("shows an error, not an empty list, when the alerts request fails", async () => {
+    renderApp(view, { api: api({ alerts: alertsFake([], { fail: new ApiError(0, "network_error", "x") }) }), route: "/hosts/web-1" });
+    const sec = await screen.findByLabelText("Alerts for this host");
+    expect(await within(sec).findByText("Could not reach the API")).toBeInTheDocument();
+    expect(sec).not.toHaveTextContent("No alerts have been recorded");
+  });
+
+  it("shows an empty state when the host has no alerts, and says so when none are active", async () => {
+    renderApp(view, { api: api({ alerts: alertsFake([]) }), route: "/hosts/web-1" });
+    expect(await screen.findByText("No alerts have been recorded for this host.")).toBeInTheDocument();
+  });
+
+  it("says there are no active alerts when only resolved ones exist", async () => {
+    const rows = [alertRow({ id: "r", state: "resolved", resolved_at: at(MIN), resolved_by: "system", resolution: "recovered" })];
+    renderApp(view, { api: api({ alerts: alertsFake(rows) }), route: "/hosts/web-1" });
+    expect(await screen.findByText("No active alerts for this host.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Recently resolved alerts for this host")).toBeInTheDocument();
+  });
+});
+
+describe("Host detail: never reported", () => {
+  it("a registered host with no telemetry yet is explained, not reported as not found", async () => {
+    renderApp(view, {
+      api: api({
+        host: async () => { throw new ApiError(404, "host_not_found", "Host not found"); },
+        registryHosts: async () => [{
+          host_id: "web-1", kind: "live", display_name: null, created_at: "2026-11-18T10:00:00Z", created_by: "user_1",
+          deactivated_at: null, telemetry_state: "awaiting_first_telemetry", last_envelope_at: null, active_credentials: 1,
+        }],
+      }),
+      route: "/hosts/web-1",
+    });
+    expect(await screen.findByText("Registered, no telemetry yet")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Open Agents/ })).toHaveAttribute("href", "/settings/agents");
+  });
+
+  it("a host unknown to both the host API and the registry is simply not found", async () => {
+    renderApp(view, {
+      api: api({ host: async () => { throw new ApiError(404, "host_not_found", "Host not found"); }, registryHosts: async () => [] }),
+      route: "/hosts/nope",
+    });
     expect(await screen.findByText("Not found")).toBeInTheDocument();
   });
 });

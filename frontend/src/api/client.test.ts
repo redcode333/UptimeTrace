@@ -61,4 +61,23 @@ describe("api client", () => {
     await expect(client.host("a/b c")).rejects.toMatchObject({ status: 0, code: "network_error", isNetwork: true });
     expect(fetchImpl.mock.calls[0]![0]).toBe("/api/v1/hosts/a%2Fb%20c");
   });
+
+  it("sends mutations with the right method, a JSON body and the bearer token, and surfaces API error details", async () => {
+    const { client, fetchImpl } = setup([
+      json(201, { id: "c1", name: "n", agent_id: "a", token: "utk_x", created_at: "t", created_by: "u", revoked_at: null, revoked_by: null }),
+      json(200, { id: "c1" }),
+      json(409, { error: { code: "credential_limit", message: "At most 5 active credentials per host; revoke one first." } }),
+    ]);
+    await client.issueCredential("web 01", { name: "n" });
+    const [url, init] = fetchImpl.mock.calls[0]!;
+    expect(url).toBe("/api/v1/registry/hosts/web%2001/credentials");
+    expect((init as RequestInit).method).toBe("POST");
+    expect((init as RequestInit).body).toBe(JSON.stringify({ name: "n" }));
+    expect(((init as RequestInit).headers as Record<string, string>)["Content-Type"]).toBe("application/json");
+    expect(auth(fetchImpl.mock.calls[0]!)).toBe("Bearer cached-token");
+    await client.revokeCredential("web-01", "c1");
+    expect((fetchImpl.mock.calls[1]![1] as RequestInit).method).toBe("DELETE");
+    expect((fetchImpl.mock.calls[1]![1] as RequestInit).body).toBeUndefined();
+    await expect(client.issueCredential("web-01", {})).rejects.toMatchObject({ status: 409, code: "credential_limit" });
+  });
 });

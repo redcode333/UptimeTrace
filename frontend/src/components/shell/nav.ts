@@ -29,7 +29,7 @@ export const NAV: NavGroup[] = [
     label: "Detect & respond",
     items: [
       { path: "/anomalies", label: "Anomalies", icon: "M3 12h4l3-8 4 16 3-8h4", unavailable: "Anomaly detection needs a statistical detector over stored metrics, which is not built yet." },
-      { path: "/alerts", label: "Alerts & Rules", icon: "M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0", unavailable: "Alert rules and their evaluation need the rules engine, which is not built yet." },
+      { path: "/alerts", label: "Alerts", icon: "M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0" },
       { path: "/incidents", label: "Incidents", icon: "M12 3 2 20h20zM12 10v5M12 18h.01", unavailable: "Incidents need the rules engine and an incident lifecycle, which are not built yet." },
       { path: "/events", label: "Events", icon: "M5 5h14M5 10h14M5 15h9M5 20h6", unavailable: "Events lists system events UptimeTrace generates itself. No event store exists yet, and application logs are not collected." },
     ],
@@ -44,7 +44,9 @@ export const NAV: NavGroup[] = [
   {
     label: "Settings",
     items: [
-      { path: "/settings/agents", label: "Agents", icon: "M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4", unavailable: "Agent credential management has no API yet. Credentials are issued with the backend command line." },
+      { path: "/settings/agents", label: "Agents", icon: "M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4" },
+      { path: "/settings/alerts", label: "Alert Policies", icon: "M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z" },
+      { path: "/settings/integrations", label: "Integrations", icon: "M9 7V3m6 4V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4" },
       { path: "/settings/workspace", label: "Workspace & members", icon: "M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 20c0-4 4-6 8-6s8 2 8 6", unavailable: "Workspaces and members are not implemented. Access today is a single-workspace allowlist on the backend." },
     ],
   },

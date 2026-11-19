@@ -13,9 +13,9 @@ export const facets = (over: Partial<HostList["facets"]["source"]> = {}): HostLi
   total: 36,
   facets: {
     source: { live: 3, synthetic: 31, replay: 2, ...over },
-    health: { healthy: 29, warning: 3, critical: 2, offline: 2, unknown: 0 },
+    health: { healthy: 29, warning: 3, critical: 2, stale: 0, offline: 2, unknown: 0 },
   },
-  thresholds: { offline_after_seconds: 300, stale_after_seconds: 300, rules: {} },
+  thresholds: { host_stale_after_seconds: 90, offline_after_seconds: 300, stale_after_seconds: 300, rules: {} },
 });
 
 export function fakeApi(over: Partial<ApiClient> = {}): ApiClient {
@@ -25,6 +25,11 @@ export function fakeApi(over: Partial<ApiClient> = {}): ApiClient {
     host: async () => { throw new Error("not used"); },
     latest: async () => { throw new Error("not used"); },
     series: async () => { throw new Error("not used"); },
+    registryHosts: async () => [],
+    registerHost: async () => { throw new Error("not used"); },
+    credentials: async () => [],
+    issueCredential: async () => { throw new Error("not used"); },
+    revokeCredential: async () => { throw new Error("not used"); },
     ...over,
   } as ApiClient;
 }

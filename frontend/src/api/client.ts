@@ -1,5 +1,8 @@
 /** HTTP client for the backend. No React and no Clerk import: the token source is injected so this stays testable. */
-import type { LatestMetrics, HostDetail, HostList, HostListParams, Me, SeriesResponse } from "./types";
+import type {
+  Alert, AlertDetail, AlertList, AlertStatusFilter, Credential, HostDetail, HostList, HostListParams, IssueCredentialBody, IssuedCredential,
+  Investigation, InvestigationRecord, IssueMcpTokenIn, IssuedMcpToken, LatestMetrics, Me, McpToken, MonitoringSettings, MonitoringSettingsIn, RegisterHostBody, RegistryHost, SeriesResponse,
+} from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -41,11 +44,16 @@ function query(params: Record<string, Param>): string {
 export function createApiClient({ baseUrl, getToken, onUnauthorized, fetchImpl }: ApiClientOptions) {
   const doFetch = fetchImpl ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
 
-  async function send(path: string, token: string | null, signal?: AbortSignal): Promise<Response> {
+  async function send(method: string, path: string, token: string | null, body?: unknown, signal?: AbortSignal): Promise<Response> {
     try {
       return await doFetch(`${baseUrl}${path}`, {
-        method: "GET",
-        headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        method,
+        headers: {
+          Accept: "application/json",
+          ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
         signal,
       });
     } catch (e) {
@@ -67,11 +75,12 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized, fetchImpl }
     return new ApiError(res.status, "http_error", `Request failed (${res.status}).`);
   }
 
-  async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-    let res = await send(path, await getToken(), signal);
+  async function call<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+    let res = await send(method, path, await getToken(), body, signal);
     if (res.status === 401) {
       // A short-lived session token may have expired between getToken() and the server: refresh once, then give up.
-      res = await send(path, await getToken({ skipCache: true }), signal);
+      // A 401 means the request was not processed, so replaying a mutation is safe.
+      res = await send(method, path, await getToken({ skipCache: true }), body, signal);
       if (res.status === 401) {
         onUnauthorized();
         throw await toError(res);
@@ -81,6 +90,7 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized, fetchImpl }
     return (await res.json()) as T;
   }
 
+  const get = <T,>(path: string, signal?: AbortSignal) => call<T>("GET", path, undefined, signal);
   const enc = encodeURIComponent;
   return {
     me: (signal?: AbortSignal) => get<Me>("/api/v1/me", signal),
@@ -93,6 +103,32 @@ export function createApiClient({ baseUrl, getToken, onUnauthorized, fetchImpl }
       p: { metric: string; start?: string; end?: string; step?: number; agg?: string },
       signal?: AbortSignal,
     ) => get<SeriesResponse>(`/api/v1/hosts/${enc(id)}/metrics/series${query(p)}`, signal),
+    // Host registry. The plaintext token is in the response to issueCredential only.
+    registryHosts: (signal?: AbortSignal) => get<RegistryHost[]>("/api/v1/registry/hosts", signal),
+    // Read-only: the configured thresholds and freshness windows. Editing is not part of this client yet.
+    monitoringSettings: (signal?: AbortSignal) => get<MonitoringSettings>("/api/v1/settings/monitoring", signal),
+    saveMonitoringSettings: (body: MonitoringSettingsIn) => call<MonitoringSettings>("PUT", "/api/v1/settings/monitoring", body),
+    // MCP access tokens (read-only MCP server). Metadata list, one-time issue, revoke.
+    mcpTokens: (signal?: AbortSignal) => get<McpToken[]>("/api/v1/registry/mcp-tokens", signal),
+    issueMcpToken: (body: IssueMcpTokenIn) => call<IssuedMcpToken>("POST", "/api/v1/registry/mcp-tokens", body),
+    revokeMcpToken: (id: string) => call<McpToken>("DELETE", `/api/v1/registry/mcp-tokens/${enc(id)}`),
+    registerHost: (body: RegisterHostBody) => call<RegistryHost>("POST", "/api/v1/registry/hosts", body),
+    credentials: (hostId: string, signal?: AbortSignal) => get<Credential[]>(`/api/v1/registry/hosts/${enc(hostId)}/credentials`, signal),
+    issueCredential: (hostId: string, body: IssueCredentialBody) =>
+      call<IssuedCredential>("POST", `/api/v1/registry/hosts/${enc(hostId)}/credentials`, body),
+    revokeCredential: (hostId: string, credentialId: string) =>
+      call<Credential>("DELETE", `/api/v1/registry/hosts/${enc(hostId)}/credentials/${enc(credentialId)}`),
+    // Alerts. Raised and resolved by the backend; the browser only reads them and records acknowledgement or manual resolution.
+    alerts: (status: AlertStatusFilter = "active", signal?: AbortSignal, limit?: number, hostId?: string) =>
+      get<AlertList>(`/api/v1/alerts${query({ status, limit, host_id: hostId })}`, signal),
+    alert: (id: string, signal?: AbortSignal) => get<AlertDetail>(`/api/v1/alerts/${enc(id)}`, signal),
+    acknowledgeAlert: (id: string) => call<Alert>("POST", `/api/v1/alerts/${enc(id)}/acknowledge`),
+    resolveAlert: (id: string) => call<Alert>("POST", `/api/v1/alerts/${enc(id)}/resolve`),
+    // Investigation: the evidence view (bounded window) and the persisted record for one alert.
+    investigation: (id: string, params: { window_minutes?: number }, signal?: AbortSignal) =>
+      get<Investigation>(`/api/v1/alerts/${enc(id)}/investigation${query(params)}`, signal),
+    investigationReport: (id: string, signal?: AbortSignal) => get<InvestigationRecord>(`/api/v1/alerts/${enc(id)}/investigation/report`, signal),
+    createInvestigationReport: (id: string) => call<InvestigationRecord>("POST", `/api/v1/alerts/${enc(id)}/investigation/report`),
   };
 }
 
