@@ -22,6 +22,7 @@ import pyarrow.parquet as pq
 
 from . import build_labels as bl
 from . import features as ft
+from .io_safe import write_parquet_verified
 from . import labels as lb
 
 ARTIFACTS = Path(__file__).resolve().parents[2] / "artifacts"
@@ -34,7 +35,7 @@ MISSING_BEHAVIOUR = ("Missing values are NaN (float32 NaN, not Arrow null), neve
 
 def _read_run_labels(labels_dir: Path, split: str, run_id: str):
     f = labels_dir / "labels" / f"split={split}" / "horizon_s=1800" / f"run={run_id}.parquet"
-    t = pq.ParquetFile(f).read(columns=["run_id", "host_id", "decision_index", "decision_ts", "scored"])   # no target columns
+    t = pq.ParquetFile(f).read(columns=["run_id", "host_id", "decision_index", "decision_ts", "evaluable"])   # no target columns: features only need the evaluable mask
     return t
 
 
@@ -42,8 +43,9 @@ def features_for_run(args) -> dict:
     ds, labels_dir, out, run = args
     ds, labels_dir, out = Path(ds), Path(labels_dir), Path(out)
     lab = _read_run_labels(labels_dir, run["split"], run["run_id"])
-    scored = np.array(lab.column("scored").to_pylist(), dtype=bool)
-    lab = lab.filter(pa.array(scored))
+    # Features exist for every EVALUABLE decision (positive, negative and unscorable), and for no excluded decision.
+    evaluable = np.array(lab.column("evaluable").to_pylist(), dtype=bool)
+    lab = lab.filter(pa.array(evaluable))
     start_us = lb.to_us(run["start_ts"])
     ts_us = np.array(lab.column("decision_ts").cast(pa.int64()).to_pylist(), dtype=np.int64)
     t = (ts_us - start_us) / 1e6
@@ -63,9 +65,8 @@ def features_for_run(args) -> dict:
     for i, name in enumerate(ft.NAMES):
         cols[name] = pa.array(X[:, i])
     d = out / "features" / f"split={run['split']}"
-    d.mkdir(parents=True, exist_ok=True)
-    pq.write_table(pa.table(cols), d / f"run={run['run_id']}.parquet", compression="zstd", write_statistics=False)
-    return {"run_id": run["run_id"], "split": run["split"], "rows": int(t.size)}
+    digest = write_parquet_verified(pa.table(cols), d / f"run={run['run_id']}.parquet")
+    return {"run_id": run["run_id"], "split": run["split"], "rows": int(lab.num_rows), "sha256": digest}
 
 
 def build_features(dataset_dir: Path, labels_dir: Path, out_root: Path | None = None, workers: int = 3) -> Path:
@@ -153,7 +154,9 @@ def load_xy(feature_dir: Path, labels_dir: Path, splits, horizon_s: int = 1800, 
         idt.append(t.append_column("split", pa.array([sp] * t.num_rows, type=pa.string())))
     ids = pa.concat_tables(idt)
     labs = bl.load_labels(labels_dir, splits=splits, horizons=[horizon_s], runs=rs)
-    sc = labs.column("scored").combine_chunks().to_numpy(zero_copy_only=False).astype(bool)
+    # rows = EVALUABLE decisions (positive, negative and unscorable), the same set the feature files were built on.
+    # `scored` is the narrower primary view (positive or negative only) and must not define the feature rows.
+    sc = labs.column("evaluable").combine_chunks().to_numpy(zero_copy_only=False).astype(bool)
     lab = labs.filter(pa.array(sc))
     fr, lr_ = _str_np(ids.column("run_id")), _str_np(lab.column("run_id"))
     fi = ids.column("decision_index").to_numpy().astype(np.int64)
@@ -178,7 +181,8 @@ def load_xy(feature_dir: Path, labels_dir: Path, splits, horizon_s: int = 1800, 
         src += n
         del t
     y_all = bl.targets_numpy(lab)
-    assert (y_all >= 0).all()
+    scored_rows = np.isin(lclass, ["positive", "negative"])
+    assert ((y_all >= 0) == scored_rows).all(), "target must be defined exactly on the scored (positive/negative) rows"
     kidx = np.nonzero(keep)[0]
     ids_sel = ids.take(pa.array(kidx))
     return {"X": X, "feature_names": names, "y": y_all[keep], "label_class": lclass[keep],

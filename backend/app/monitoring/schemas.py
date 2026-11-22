@@ -50,11 +50,21 @@ class LatestSummary(BaseModel):
     network_tx_bytes_per_second: float | None
 
 
+class GroupRefOut(BaseModel):
+    id: str
+    name: str
+
+
 class HostOut(BaseModel):
     host_id: str
     hostname: str
     agent_id: str
     service: str | None
+    # Inventory relationships from the registry. None / empty when the host has no registry row or is not placed in that group.
+    environment: GroupRefOut | None = None
+    region: GroupRefOut | None = None
+    cluster: GroupRefOut | None = None
+    services: list[GroupRefOut] = []
     source: Source
     # True only for source == "live". Synthetic and replay hosts are never connected infrastructure.
     connected_infrastructure: bool
@@ -86,6 +96,8 @@ class FacetsOut(BaseModel):
     # Each facet ignores its own filter (so the counts for the other options stay visible).
     source: dict[str, int]
     health: dict[str, int]
+    # LIVE hosts reporting within offline_after (see health.is_connected). Not filtered by the source or health filters.
+    connected: int = 0
 
 
 class HostListOut(BaseModel):

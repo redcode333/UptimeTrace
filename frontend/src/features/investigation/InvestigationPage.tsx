@@ -1,8 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../../api/client";
-import { useCreateInvestigationReport, useInvestigation, useInvestigationReport } from "../../api/hooks";
-import type { HealthStatus, Investigation, InvestigationRecord, InvestigationRelated, InvestigationSeries } from "../../api/types";
+import { useAlertMutations, useCreateInvestigationReport, useInvestigation, useInvestigationReport, useTrace } from "../../api/hooks";
+import type { HealthStatus, Investigation, InvestigationRecord, InvestigationRelated, InvestigationSeries, InvestigationTraces, TraceReason } from "../../api/types";
+import { useRehearsalsForAlert } from "../../api/rehearsalHooks";
 import { PageHeader } from "../../components/PageHeader";
 import { EmptyState, ErrorState, Loading } from "../../components/states/States";
 import { HealthBadge } from "../../components/ui/Badges";
@@ -41,6 +43,8 @@ export function InvestigationPage() {
   const { alertId } = useParams<{ alertId: string }>();
   const [windowMinutes, setWindowMinutes] = useState(30);
   const inv = useInvestigation(alertId, windowMinutes);
+  const raised = useRehearsalsForAlert(alertId);
+  const rehearsal = raised.data?.rehearsals[0] ?? null;
 
   return (
     <>
@@ -49,6 +53,14 @@ export function InvestigationPage() {
         subtitle="Why this alert fired, the telemetry around it, what followed, and whether the host recovered. Everything shown is stored evidence; nothing is inferred."
       />
       <p className="small"><Link to="/alerts">← Back to alerts</Link></p>
+      {rehearsal && (
+        <div className="banner notice" role="note">
+          <span>
+            <b>RAISED BY A REHEARSAL</b> This alert came from a Failure Rehearsal on synthetic host <span className="mono">{rehearsal.host_id}</span>. It is telemetry-only evidence, not a real machine fault.
+          </span>
+          <Link className="btn" to={`/rehearsal/${encodeURIComponent(rehearsal.id)}`}>Open rehearsal</Link>
+        </div>
+      )}
 
       {inv.isPending && <Loading label="Loading the investigation" />}
       {inv.isError && !inv.data && (inv.error instanceof ApiError && inv.error.code === "alert_not_found"
@@ -65,6 +77,7 @@ export function InvestigationPage() {
             ))}
           </div>
           <Summary inv={inv.data} />
+          <LifecycleActions inv={inv.data} />
           <div className="grid2">
             <TriggerEvidence inv={inv.data} />
             <RecoveryEvidence inv={inv.data} />
@@ -74,6 +87,7 @@ export function InvestigationPage() {
             <TimelineSection inv={inv.data} />
             <RelatedSection inv={inv.data} />
           </div>
+          <TracesSection traces={inv.data.traces} />
           <RecordSection alertId={alertId!} />
         </>
       )}
@@ -89,7 +103,8 @@ function Summary({ inv }: { inv: Investigation }) {
       <div className="row-actions">
         <HealthBadge status={inv.alert.severity as HealthStatus} />
         <span>{inv.alert.state === "resolved" ? "Resolved" : inv.alert.state === "acknowledged" ? "Acknowledged" : "Open"}</span>
-        <span className="mono">{inv.alert.host_id}</span>
+        <Link className="mono" to={`/hosts/${encodeURIComponent(inv.alert.host_id)}`}>{inv.alert.host_id}</Link>
+        <Link to="/investigations">All investigations</Link>
       </div>
       <p>
         {trigger.rule === "threshold" && trigger.metric
@@ -100,6 +115,72 @@ function Summary({ inv }: { inv: Investigation }) {
       <p className="dim small">
         First fired {timestamp(trigger.first_fired_at)}. Evidence as of {timestamp(inv.as_of)}. Telemetry window ±{inv.window_minutes} minutes.
       </p>
+    </section>
+  );
+}
+
+const FAILURE: Record<string, string> = {
+  alert_resolved: "This alert is already resolved, so it cannot be acknowledged.",
+  alert_not_found: "This alert no longer exists in this workspace.",
+};
+
+function failureOf(e: unknown): string {
+  if (e instanceof ApiError && FAILURE[e.code]) return FAILURE[e.code]!;
+  return "The request did not complete. Nothing was changed.";
+}
+
+/** Lifecycle actions on the alert this investigation belongs to. Same rules as the Alerts page: acknowledge while open, resolve by hand (confirmed) until resolved. */
+function LifecycleActions({ inv }: { inv: Investigation }) {
+  const m = useAlertMutations();
+  const qc = useQueryClient();
+  const [confirming, setConfirming] = useState(false);
+  const [outcome, setOutcome] = useState<{ tone: "ok" | "warn"; text: string } | null>(null);
+  const id = inv.alert.id;
+  const state = inv.alert.state;
+  const refreshInvestigation = () => qc.invalidateQueries({ queryKey: ["investigation"] });
+  return (
+    <section className="widget" aria-labelledby="inv-actions">
+      <h2 id="inv-actions">Alert actions</h2>
+      <p className="small">
+        Current state: <b>{state === "open" ? "Open" : state === "acknowledged" ? "Acknowledged" : "Resolved"}</b>
+        {state === "resolved" && inv.alert.resolution && <> ({inv.alert.resolution === "recovered" ? "recovered by telemetry" : "resolved by hand"})</>}.
+        {" "}These actions change the alert itself; the evidence on this page is not altered.
+      </p>
+      <div className="row-actions">
+        {state === "open" && (
+          <button type="button" className="btn" disabled={m.acknowledge.isPending}
+            onClick={() => m.acknowledge.mutate(id, {
+              onSuccess: (a) => { setOutcome({ tone: "ok", text: `Acknowledged by ${a.acknowledged_by ?? "you"} at ${a.acknowledged_at ? timestamp(a.acknowledged_at) : "now"}.` }); void refreshInvestigation(); },
+              onError: (e) => setOutcome({ tone: "warn", text: failureOf(e) }),
+            })}>
+            {m.acknowledge.isPending ? "Acknowledging…" : "Acknowledge"}
+          </button>
+        )}
+        {state === "acknowledged" && <span className="dim small">Already acknowledged.</span>}
+        {state === "resolved" && <span className="dim small">Resolved alerts cannot be acknowledged.</span>}
+        {state !== "resolved" && !confirming && (
+          <button type="button" className="btn" onClick={() => { setConfirming(true); setOutcome(null); }}>Resolve by hand</button>
+        )}
+      </div>
+      {state !== "resolved" && confirming && (
+        <div className="confirm" role="group" aria-label="Confirm resolving this alert">
+          <span>Resolve by hand? If the breach is still there, a new alert opens at the next evaluation.</span>{" "}
+          <button type="button" className="btn danger" disabled={m.resolve.isPending}
+            onClick={() => m.resolve.mutate(id, {
+              onSuccess: (a) => {
+                setConfirming(false);
+                setOutcome({ tone: "ok", text: `Resolved by hand by ${a.resolved_by ?? "you"} at ${a.resolved_at ? timestamp(a.resolved_at) : "now"}.` });
+                void refreshInvestigation();
+              },
+              onError: (e) => { setConfirming(false); setOutcome({ tone: "warn", text: failureOf(e) }); },
+            })}>
+            {m.resolve.isPending ? "Resolving…" : "Confirm resolve"}
+          </button>{" "}
+          <button type="button" className="btn" onClick={() => setConfirming(false)}>Cancel</button>
+        </div>
+      )}
+      {outcome && <p className={`banner ${outcome.tone === "ok" ? "notice" : "warn"}`} role={outcome.tone === "warn" ? "alert" : "status"}>{outcome.text}</p>}
+      <p className="dim small">Lifecycle actions are open to every signed-in member of the workspace. The product has no role model yet, so there is no finer permission to check.</p>
     </section>
   );
 }
@@ -201,12 +282,90 @@ function TimelineSection({ inv }: { inv: Investigation }) {
   );
 }
 
+const TRACE_REASON: Record<Exclude<TraceReason, null>, string> = {
+  not_configured: "Application tracing is not connected to this deployment. The evidence above is unaffected.",
+  no_registered_services: "No registered service runs on this host, so no traces can be attributed to it. Assign a service in Infrastructure.",
+  unavailable: "The trace backend could not be reached, so no trace evidence is shown for this window. The evidence above is unaffected.",
+};
+
+/** Application traces from this host's registered services in the window. A slow or failing span is evidence, not a cause. */
+function TracesSection({ traces }: { traces: InvestigationTraces }) {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <section className="widget" aria-labelledby="inv-traces">
+      <h2 id="inv-traces">Application traces</h2>
+      {!traces.available ? (
+        <p className="dim">{TRACE_REASON[traces.reason ?? "unavailable"]}</p>
+      ) : traces.items.length === 0 ? (
+        <p className="dim">No traces from this host's services in the window ({traces.services.join(", ")}).</p>
+      ) : (
+        <>
+          <p className="dim small">Traces from {traces.services.join(", ")} in the window. Slow spans are at least 1 s; evidence of where time went, not of a cause.</p>
+          <ul className="plain" aria-label="Traces in the window">
+            {traces.items.map((t) => (
+              <li key={t.trace_id}>
+                <div>
+                  <span className="mono">{t.trace_id.slice(0, 8)}</span> {t.root.service} · {t.root.operation}
+                  <span className="dim small"> · {timestamp(t.started_at)} · {Math.round(t.duration_ms)} ms · {t.span_count} spans</span>
+                  {t.error_count > 0 && <span className="small"> · {t.error_count} error span{t.error_count === 1 ? "" : "s"}</span>}
+                  {t.slow_span_count > 0 && <span className="small"> · {t.slow_span_count} slow</span>}
+                  <button type="button" className="btn" aria-expanded={open === t.trace_id}
+                    aria-label={`Inspect trace ${t.trace_id.slice(0, 8)}`} onClick={() => setOpen(open === t.trace_id ? null : t.trace_id)}>
+                    {open === t.trace_id ? "Hide" : "Inspect"}
+                  </button>
+                </div>
+                <p className="dim small">Slowest: {t.slowest.service} · {t.slowest.operation} ({Math.round(t.slowest.duration_ms)} ms)</p>
+                {open === t.trace_id && <TraceSpans traceId={t.trace_id} />}
+              </li>
+            ))}
+          </ul>
+          {traces.truncated && <p className="dim small">Showing the first {traces.items.length} traces.</p>}
+        </>
+      )}
+    </section>
+  );
+}
+
+function TraceSpans({ traceId }: { traceId: string }) {
+  const q = useTrace(traceId);
+  if (q.isPending) return <Loading label="Loading the trace" />;
+  if (q.isError) return <ErrorState error={q.error} onRetry={() => q.refetch()} />;
+  // Bars are placed on the trace's own timeline: start and length as a share of the whole trace, so the service sequence
+  // and where the time went read straight off the table.
+  const total = Math.max(1, q.data.summary.duration_ms);
+  return (
+    <div className="table-wrap">
+      <table aria-label={`Spans of trace ${traceId.slice(0, 8)}`}>
+        <thead><tr><th scope="col">Service</th><th scope="col">Operation</th><th scope="col">Timeline</th><th scope="col">Start</th><th scope="col">Duration</th><th scope="col">Flags</th></tr></thead>
+        <tbody>
+          {q.data.spans.map((s) => (
+            <tr key={s.span_id}>
+              <td>{s.service}</td>
+              <td style={{ paddingLeft: s.parent_span_id ? 16 : 0 }}>{s.operation}</td>
+              <td style={{ minWidth: 160 }}>
+                <div className="trace-track" aria-hidden="true">
+                  <span className={`trace-bar${s.error ? " is-error" : s.slow ? " is-slow" : ""}`}
+                    style={{ left: `${Math.min(100, (s.offset_ms / total) * 100)}%`, width: `${Math.max(0.6, Math.min(100, (s.duration_ms / total) * 100))}%` }} />
+                </div>
+              </td>
+              <td>+{Math.round(s.offset_ms)} ms</td>
+              <td>{Math.round(s.duration_ms)} ms</td>
+              <td>{[s.error && "error", s.slow && "slow"].filter(Boolean).join(", ") || "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {q.data.truncated && <p className="dim small">Showing the first spans of a very large trace.</p>}
+    </div>
+  );
+}
+
 function RelatedSection({ inv }: { inv: Investigation }) {
   const rel = inv.related;
   return (
     <section className="widget" aria-labelledby="inv-related">
-      <h2 id="inv-related">Related alerts on this host</h2>
-      <p className="dim small">{rel.note} Window ±{rel.window_minutes} min.</p>
+      <h2 id="inv-related">Correlated alerts on this host</h2>
+      <p className="dim small">{rel.note} Window ±{rel.window_minutes} min. Correlation is not a proven cause.</p>
       {rel.items.length === 0 ? (
         <p className="dim">No other alerts on this host opened in the window.</p>
       ) : (
@@ -229,8 +388,18 @@ function RelatedSection({ inv }: { inv: Investigation }) {
 function RecordSection({ alertId }: { alertId: string }) {
   const rec = useInvestigationReport(alertId);
   const create = useCreateInvestigationReport(alertId);
+  const [checked, setChecked] = useState<string | null>(null);
   const none = rec.error instanceof ApiError && rec.error.code === "report_not_found";
   const record: InvestigationRecord | undefined = create.data ?? rec.data;
+  const recheck = async () => {
+    setChecked(null);
+    const r = await rec.refetch();
+    if (r.data) {
+      setChecked(r.data.verified
+        ? `Re-checked ${timestamp(new Date().toISOString())}: the digest and the re-derived conclusions both match the stored evidence.`
+        : `Re-checked ${timestamp(new Date().toISOString())}: digest ${r.data.digest_matches ? "matches" : "does not match"}, re-derivation ${r.data.rederivation_matches ? "matches" : "does not match"}.`);
+    } else if (r.error) setChecked("The record could not be re-checked. Nothing was changed.");
+  };
   return (
     <section className="widget" aria-labelledby="inv-record">
       <h2 id="inv-record">Investigation record</h2>
@@ -246,6 +415,12 @@ function RecordSection({ alertId }: { alertId: string }) {
         </>
       )}
       {record && <RecordBody rec={record} />}
+      {record && (
+        <div className="row-actions">
+          <button type="button" className="btn" disabled={rec.isFetching} onClick={recheck}>{rec.isFetching ? "Re-checking…" : "Re-check record"}</button>
+          {checked && <span className="small" role="status">{checked}</span>}
+        </div>
+      )}
     </section>
   );
 }
@@ -254,7 +429,7 @@ function RecordBody({ rec }: { rec: InvestigationRecord }) {
   return (
     <>
       <p className="small">
-        Recorded {timestamp(rec.created_at)} by {rec.created_by}. Digest <span className="mono">{rec.evidence_digest.slice(0, 16)}…</span>{" "}
+        Recorded {timestamp(rec.created_at)} by {rec.created_by}. SHA-256 digest <span className="mono" style={{ overflowWrap: "anywhere" }}>{rec.evidence_digest}</span>{" "}
         {rec.verified ? <span>— verified: the stored evidence reproduces these conclusions.</span>
           : <span className="banner warn" role="alert">Verification failed: the stored record does not match its evidence.</span>}
       </p>

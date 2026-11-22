@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { ApiClient } from "../../api/client";
 import { useAlerts, useInfrastructure, useInfrastructureMutation, useTopologyHosts } from "../../api/hooks";
@@ -12,6 +12,11 @@ import {
   clusterAssignableHosts, clusterChoices, DESCRIPTION_MAX, failureText, hostLabel, NAME_MAX, regionChoices, serviceAssignableHosts, summarize,
   validateDescription, validateName,
 } from "../../lib/infrastructure";
+
+/** Loaded on demand so the 3D renderer is not part of the main bundle. */
+const Infrastructure3DView = lazy(() => import("./scene3d/Infrastructure3DView"));
+
+type View = "topology" | "3d" | "manage";
 
 /** One change. Each maps to exactly one server call; the server validates it again. */
 type Op =
@@ -62,8 +67,9 @@ export function InfrastructurePage() {
   const change = useInfrastructureMutation<Op, unknown>((api, op) => run(api, op));
   const [notice, setNotice] = useState<string | null>(null);
   const [params, setParams] = useSearchParams();
-  const view = params.get("view") === "manage" ? "manage" : "topology";
-  const showView = (next: "topology" | "manage") => setParams({ view: next }, { replace: true });
+  const requested = params.get("view");
+  const view: View = requested === "manage" || requested === "3d" ? requested : "topology";
+  const showView = (next: View) => setParams({ view: next }, { replace: true });
   const apply = (op: Op, done?: string) => {
     setNotice(null);
     change.mutate(op, { onSuccess: () => setNotice(done ?? null) });
@@ -78,11 +84,12 @@ export function InfrastructurePage() {
       />
       <div className="topo-tabs" role="tablist" aria-label="Infrastructure view">
         <button type="button" role="tab" aria-selected={view === "topology"} className={view === "topology" ? "on" : undefined} onClick={() => showView("topology")}>Topology</button>
+        <button type="button" role="tab" aria-selected={view === "3d"} className={view === "3d" ? "on" : undefined} onClick={() => showView("3d")}>3D view</button>
         <button type="button" role="tab" aria-selected={view === "manage"} className={view === "manage" ? "on" : undefined} onClick={() => showView("manage")}>Manage</button>
       </div>
       {inv.isPending && <Loading label="Loading the inventory" />}
       {inv.isError && !inv.data && <ErrorState error={inv.error} onRetry={() => inv.refetch()} />}
-      {inv.data && view === "topology" && <TopologyPanel inventory={inv.data} onManage={() => showView("manage")} />}
+      {inv.data && view !== "manage" && <TopologyPanel inventory={inv.data} mode={view} onManage={() => showView("manage")} onShowTopology={() => showView("topology")} />}
       {inv.data && view === "manage" && (
         <>
           {change.isError && <p className="banner warn" role="alert">{failureText(change.error)}</p>}
@@ -441,7 +448,7 @@ function ServiceCard({ service, inv, apply, busy }: { service: { id: string; nam
 }
 
 /** Loads monitoring records and active alerts only while the topology is open, then builds the map from them. */
-function TopologyPanel({ inventory, onManage }: { inventory: Inventory; onManage: () => void }) {
+function TopologyPanel({ inventory, mode, onManage, onShowTopology }: { inventory: Inventory; mode: "topology" | "3d"; onManage: () => void; onShowTopology: () => void }) {
   const hostsQ = useTopologyHosts();
   const alertsQ = useAlerts("active", 200);
   const hostsData = hostsQ.data;
@@ -455,5 +462,12 @@ function TopologyPanel({ inventory, onManage }: { inventory: Inventory; onManage
 
   const hostCoverage = hostsData ? { loaded: hostsData.items.length, total: hostsData.total, complete: hostsData.items.length >= hostsData.total } : null;
   const alertCoverage = alertsData ? { loaded: alertsData.alerts.length, total: alertsData.total, complete: alertsData.alerts.length >= alertsData.total } : null;
+  if (mode === "3d") {
+    return (
+      <Suspense fallback={<Loading label="Loading the 3D view" />}>
+        <Infrastructure3DView topology={topology} hostCoverage={hostCoverage} alertCoverage={alertCoverage} onManage={onManage} onShowTopology={onShowTopology} />
+      </Suspense>
+    );
+  }
   return <TopologyView inventory={inventory} topology={topology} hostCoverage={hostCoverage} alertCoverage={alertCoverage} onManage={onManage} />;
 }

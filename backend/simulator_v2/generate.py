@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import platform
+import shutil
 import statistics
 import time
 from collections import Counter
@@ -24,6 +25,22 @@ from .writer import write_json, write_jsonl, write_run_parquet
 REPO = Path(__file__).resolve().parents[2]
 ARTIFACTS = REPO / "artifacts" / "datasets"
 PKG = Path(__file__).resolve().parent
+
+
+class DatasetExists(FileExistsError):
+    """The dataset folder already holds files. Generation refuses to write into it unless told to replace a dataset."""
+
+
+def _refuse_or_clear(root: Path, overwrite: bool) -> None:
+    """Protect earlier runs. An empty or missing folder is fine. A folder holding a previous dataset (it has a manifest) is
+    replaced only when `overwrite` is set. Any other non-empty folder is never touched."""
+    if not root.exists() or not any(root.iterdir()):
+        return
+    if not (root / "manifest.json").exists():
+        raise DatasetExists(f"{root} is not empty and holds no dataset manifest; choose another location")
+    if not overwrite:
+        raise DatasetExists(f"{root} already holds a generated dataset; pass overwrite=True (--overwrite) to replace it")
+    shutil.rmtree(root)
 
 
 def code_hash() -> str:
@@ -76,7 +93,8 @@ def _strip(rec: dict) -> dict:
 
 def generate_dataset(master_seed: int, out_root: Path | None = None, workers: int | None = None, cadence: int = 60,
                      jitter_on: bool = True, kind: str = "primary", run_filter=None, label: str | None = None,
-                     runs_override=None, validate: bool = True, force_one_each: bool = False) -> Path:
+                     runs_override=None, validate: bool = True, force_one_each: bool = False,
+                     overwrite: bool = False) -> Path:
     t_start = time.perf_counter()
     runs, alloc_doc = allocate(master_seed) if runs_override is None else (runs_override, {"rule": "explicit dev runs"})
     if run_filter is not None:
@@ -85,6 +103,7 @@ def generate_dataset(master_seed: int, out_root: Path | None = None, workers: in
     phash = protocol_hash(protocol)
     ds_id = label or f"uptimetrace-m31-seed{master_seed}-{phash[:12]}"
     root = (out_root or ARTIFACTS) / ds_id
+    _refuse_or_clear(root, overwrite)
     root.mkdir(parents=True, exist_ok=True)
     workers = workers or max(1, (os.cpu_count() or 2) - 2)
     jobs = [(master_seed, r, str(root), cadence, jitter_on, kind, validate, force_one_each) for r in runs]
@@ -110,7 +129,30 @@ def generate_dataset(master_seed: int, out_root: Path | None = None, workers: in
     manifest = build_manifest(master_seed, ds_id, protocol, phash, results, alloc_doc, cadence, jitter_on, kind,
                               workers, gen_wall)
     write_json(root / "manifest.json", manifest)
+    write_file_index(root)
     return root
+
+
+def write_file_index(root: Path) -> dict:
+    """Index of the dataset folder: path, size and SHA-256 of every data file, so any copy can be checked against it.
+
+    manifest.json is not hashed byte for byte, because its `resources` block holds wall-clock timings that differ between
+    identical runs. It is recorded by the SHA-256 of its content with that block removed."""
+    skip = {"file_index.json", "manifest.json"}
+    entries = []
+    for f in sorted(p for p in root.rglob("*") if p.is_file() and p.name not in skip):
+        h = hashlib.sha256()
+        with open(f, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        entries.append({"path": f.relative_to(root).as_posix(), "bytes": f.stat().st_size, "sha256": h.hexdigest()})
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    manifest.pop("resources", None)
+    manifest_content = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode("utf-8")).hexdigest()
+    index = {"dataset_id": root.name, "files": entries,
+             "manifest": {"path": "manifest.json", "content_sha256_without_resources": manifest_content}}
+    write_json(root / "file_index.json", index)
+    return index
 
 
 LEDGER_SUM = ["ticks_nominal", "lost_agent_down", "lost_planned_reboot_gap", "lost_panic_gap", "normal_emitting",

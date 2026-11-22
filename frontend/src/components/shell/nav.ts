@@ -19,6 +19,7 @@ export const NAV: NavGroup[] = [
     items: [
       { path: "/hosts", label: "Hosts", icon: "M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01" },
       { path: "/metrics", label: "Metrics Explorer", icon: "M4 19V5M4 19h16M8 15l4-5 3 3 5-6" },
+      { path: "/signal-graph", label: "Signal Graph", icon: "M5 6h.01M19 6h.01M12 18h.01M5 6l7 12M19 6l-7 12M5 6h14" },
       {
         path: "/dependencies", label: "Dependencies", icon: "M6 6h.01M18 6h.01M12 18h.01M6 6l6 12M18 6l-6 12", tag: "soon",
         unavailable: "The dependency map is drawn only from discovered relationships. No discovery source exists yet, so nothing is shown rather than a guessed graph.",
@@ -30,6 +31,8 @@ export const NAV: NavGroup[] = [
     items: [
       { path: "/anomalies", label: "Anomalies", icon: "M3 12h4l3-8 4 16 3-8h4", unavailable: "Anomaly detection needs a statistical detector over stored metrics, which is not built yet." },
       { path: "/alerts", label: "Alerts", icon: "M12 4a5 5 0 0 0-5 5v4l-2 3h14l-2-3V9a5 5 0 0 0-5-5zM10 19a2 2 0 0 0 4 0" },
+      { path: "/states", label: "Operational states", icon: "M12 3v4M12 17v4M3 12h4M17 12h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" },
+      { path: "/rehearsal", label: "Failure Rehearsal", icon: "M7 4v16l13-8z" },
       { path: "/incidents", label: "Incidents", icon: "M12 3 2 20h20zM12 10v5M12 18h.01", unavailable: "Incidents need the rules engine and an incident lifecycle, which are not built yet." },
       { path: "/events", label: "Events", icon: "M5 5h14M5 10h14M5 15h9M5 20h6", unavailable: "Events lists system events UptimeTrace generates itself. No event store exists yet, and application logs are not collected." },
     ],
@@ -37,13 +40,14 @@ export const NAV: NavGroup[] = [
   {
     label: "Intelligence",
     items: [
+      { path: "/investigations", label: "Investigations", icon: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5" },
       { path: "/risk", label: "Risk Outlook", icon: "M4 18c4 0 4-10 8-10s4 10 8 10", tag: "EXP", unavailable: "Risk scores need the model serving and feature pipeline in the backend. The model is experimental and has only been validated on synthetic data." },
-      { path: "/investigations", label: "Investigations", icon: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM16 16l5 5", unavailable: "Investigations need an evidence store and a language-model service over structured evidence, which are not built yet." },
     ],
   },
   {
     label: "Settings",
     items: [
+      { path: "/system", label: "System", icon: "M4 6h16v10H4zM8 20h8M12 16v4" },
       { path: "/settings/agents", label: "Agents", icon: "M8 8h8v8H8zM4 10v4M20 10v4M10 4h4M10 20h4" },
       { path: "/settings/alerts", label: "Alert Policies", icon: "M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z" },
       { path: "/settings/integrations", label: "Integrations", icon: "M9 7V3m6 4V3M7 7h10v5a5 5 0 0 1-10 0zM12 17v4" },

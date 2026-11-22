@@ -31,6 +31,25 @@ function api(over: Over = {}) {
   });
 }
 
+describe("Host detail: section tabs and outlook (Host detail board)", () => {
+  it("offers real section links and shows Events and Incidents as unavailable, with the reason", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1" });
+    const tabs = await screen.findByRole("navigation", { name: "Host sections" });
+    expect(within(tabs).getByRole("link", { name: "Metrics" })).toHaveAttribute("href", expect.stringContaining("/metrics"));
+    expect(within(tabs).getByRole("link", { name: "Alerts" })).toHaveAttribute("href", "#alerts");
+    expect(within(tabs).getByRole("link", { name: "History" })).toHaveAttribute("href", "#history");
+    expect(within(tabs).getByText("Events")).toHaveAttribute("aria-disabled", "true");
+    expect(within(tabs).getByText("Incidents")).toHaveAttribute("title", "Incidents are not implemented yet");
+  });
+
+  it("states the outlook honestly: experimental, with no score", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1" });
+    const id = await screen.findByLabelText("Host identity");
+    expect(id).toHaveTextContent("no score");
+    expect(id).toHaveTextContent("Risk Outlook is not available yet");
+  });
+});
+
 describe("Host detail", () => {
   it("shows identity, health reasons and first/last seen", async () => {
     renderApp(view, { api: api(), route: "/hosts/web-1" });
@@ -184,7 +203,7 @@ describe("Host detail: operational state", () => {
     const strip = await screen.findByLabelText("Operational state");
     expect(strip).toHaveTextContent("Health");
     expect(within(strip).getByText("HEALTHY")).toBeInTheDocument();
-    expect(within(strip).getByText("Silent")).toBeInTheDocument();
+    expect(within(strip).getByText("Offline")).toBeInTheDocument();
     expect(strip).toHaveTextContent("Last telemetry");
   });
 
@@ -193,7 +212,7 @@ describe("Host detail: operational state", () => {
     renderApp(view, { api: api({ host: async () => detail(unknown) }), route: "/hosts/web-1" });
     const strip = await screen.findByLabelText("Operational state");
     expect(within(strip).getByText("UNKNOWN")).toBeInTheDocument();
-    expect(within(strip).getByText("Reporting")).toBeInTheDocument();
+    expect(within(strip).getByText("Connected")).toBeInTheDocument();
   });
 
   it("states that the source label is derived from the host ID, not stored", async () => {
@@ -301,5 +320,51 @@ describe("Host detail: never reported", () => {
       route: "/hosts/nope",
     });
     expect(await screen.findByText("Not found")).toBeInTheDocument();
+  });
+});
+
+describe("Host detail: returning to the filtered list", () => {
+  it("All hosts returns to the list the user came from, with its filters", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1?from=%2Fhosts%3Fhealth%3Dcritical%26cluster%3Dcl-a" });
+    const back = await screen.findAllByRole("link", { name: "All hosts" });
+    expect(back[0]).toHaveAttribute("href", "/hosts?health=critical&cluster=cl-a");
+  });
+
+  it("ignores a return path that does not point into the Hosts list", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1?from=https%3A%2F%2Fexample.com" });
+    const back = await screen.findAllByRole("link", { name: "All hosts" });
+    expect(back[0]).toHaveAttribute("href", "/hosts");
+  });
+});
+
+describe("Host detail: identity, registry placement and history limits", () => {
+  it("shows health, source and the registry placement from the host record", async () => {
+    const placed = { ...h, environment: { id: "env-prod", name: "prod" }, region: null, cluster: { id: "cl-a", name: "alpha" }, services: [{ id: "svc-api", name: "api" }] };
+    renderApp(view, { api: api({ host: async () => detail(placed) }), route: "/hosts/web-1" });
+    const bar = await screen.findByLabelText("Host summary");
+    expect(within(bar).getByText("WARNING")).toBeInTheDocument();
+    expect(within(bar).getByText("LIVE")).toBeInTheDocument();
+    const identity = screen.getByLabelText("Host identity");
+    expect(within(identity).getByRole("link", { name: "prod" })).toHaveAttribute("href", "/infrastructure");
+    expect(within(identity).getByRole("link", { name: "alpha" })).toHaveAttribute("href", "/infrastructure");
+    expect(within(identity).getByRole("link", { name: "api" })).toHaveAttribute("href", "/infrastructure");
+  });
+
+  it("states that disk I/O and process count are not collected, rather than drawing empty charts", async () => {
+    renderApp(view, { api: api(), route: "/hosts/web-1" });
+    const disk = await screen.findByLabelText("Disk I/O history");
+    expect(within(disk).getByText(/does not collect disk i\/o/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Process count history")).toHaveTextContent("not collected");
+  });
+
+  it("buckets the host's loaded alerts over the selected range and says when the list is capped", async () => {
+    const recent = alertRow({ id: "a-recent", opened_at: new Date(Date.now() - 30 * 60_000).toISOString() });
+    renderApp(view, {
+      api: api({ alerts: async () => ({ alerts: [recent], total: 500 }) }),
+      route: "/hosts/web-1?range=6h",
+    });
+    const timeline = await screen.findByLabelText("Alerts opened for this host in the last 6h");
+    expect(within(timeline).getByText(/1 opened in the last 6h/)).toBeInTheDocument();
+    expect(within(timeline).getByText(/capped at the most recent alerts/)).toBeInTheDocument();
   });
 });

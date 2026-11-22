@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { ApiError } from "../../api/client";
-import { useCredentials, useMonitoringSettings, useRegistryHosts, useRegistryMutations } from "../../api/hooks";
+import { rememberRegisteredHost, useCredentials, useMonitoringSettings, useRegistryHosts, useRegistryMutations } from "../../api/hooks";
 import type { IssuedCredential, RegistryHost, RegistryHostKind } from "../../api/types";
 import { apiBaseUrl } from "../../app/config";
 import { PageHeader } from "../../components/PageHeader";
@@ -127,6 +128,7 @@ function Progress({ current }: { current: OnboardingStep }) {
 }
 
 function RegisterStep({ known, onRegistered }: { known: RegistryHost[]; onRegistered: (id: string) => void }) {
+  const qc = useQueryClient();
   const [draft, setDraft] = useState<RegistrationDraft>({ hostId: "", kind: "live", displayName: "" });
   const [touched, setTouched] = useState(false);
   const m = useRegistryMutations();
@@ -141,7 +143,8 @@ function RegisterStep({ known, onRegistered }: { known: RegistryHost[]; onRegist
     const id = draft.hostId.trim();
     m.register.mutate(
       { host_id: id, kind: draft.kind, ...(draft.displayName.trim() ? { display_name: draft.displayName.trim() } : {}) },
-      { onSuccess: () => onRegistered(id) },
+      // Cache first, then navigate: both land in one render, so the page never shows "another host" for a moment.
+      { onSuccess: (host) => { rememberRegisteredHost(qc, host); onRegistered(id); } },
     );
   };
 

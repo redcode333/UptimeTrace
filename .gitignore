@@ -43,3 +43,6 @@ frontend/.impeccable/hook.cache.json
 htmlcov/
 coverage/
 *.tsbuildinfo
+
+# Trace ingestion credentials (hashed tokens, issued per service): never commit
+trace-ingest-credentials*.json

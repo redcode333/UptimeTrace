@@ -19,7 +19,8 @@ from sqlalchemy.engine import make_url
 from tests.conftest import alembic_config
 
 NEW_TABLES = {"workspaces", "hosts", "agent_credentials", "audit_events", "mcp_tokens", "monitoring_settings", "alerts", "alert_events",
-              "investigation_reports", "environments", "regions", "clusters", "services", "service_hosts"}
+              "investigation_reports", "environments", "regions", "clusters", "services", "service_hosts",
+              "failure_rehearsals", "failure_rehearsal_steps"}
 
 
 def _admin_url(test_url: str):
@@ -94,7 +95,7 @@ def test_data_survives_upgrade_downgrade_and_schema_is_identical_to_a_fresh_upgr
         assert NEW_TABLES <= tables
         assert c.execute(text("SELECT count(*) FROM telemetry_envelopes WHERE envelope_id = :e"), {"e": env_id}).scalar_one() == 1
         assert c.execute(text("SELECT count(*) FROM workspaces WHERE slug = 'default'")).scalar_one() == 1      # seeded exactly once
-        assert c.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0008"   # current head (infrastructure inventory)
+        assert c.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0009"   # current head (failure rehearsals)
     # new tables carry registry data; the downgrade is documented to drop it
     with eng.begin() as c:
         ws = c.execute(text("SELECT id FROM workspaces WHERE slug='default'")).scalar_one()

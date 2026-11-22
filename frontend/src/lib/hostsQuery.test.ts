@@ -3,7 +3,7 @@ import { applyHostsView, parseHostsView } from "./hostsQuery";
 
 describe("hosts view <-> URL", () => {
   it("defaults to newest-first page 1 and ignores junk values", () => {
-    expect(parseHostsView(new URLSearchParams("health=bogus&page=-4&sort=cpu&order=sideways"))).toEqual({ search: "", health: [], sort: "last_seen", order: "desc", page: 1 });
+    expect(parseHostsView(new URLSearchParams("health=bogus&page=-4&sort=cpu&order=sideways"))).toEqual({ search: "", health: [], environment: [], region: [], cluster: [], service: [], sort: "last_seen", order: "desc", page: 1 });
   });
 
   it("hostname sorts ascending by default and keeps an explicit order", () => {

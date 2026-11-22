@@ -1,4 +1,5 @@
 import { NavLink, useSearchParams } from "react-router-dom";
+import { BrandMark } from "../brand/BrandMark";
 import { globalSearch } from "../../lib/timeRange";
 import { NAV } from "./nav";
 
@@ -26,12 +27,7 @@ export function Sidebar({ collapsed, open, onNavigate, onToggleCollapsed }: Prop
       aria-label="Main"
       className={`sidebar${collapsed ? " collapsed" : ""}${open ? " open" : ""}`}
     >
-      <div className="logo sidebar-logo">
-        <i />
-        <span className="logo-text">
-          UPTIME<b>TRACE</b>
-        </span>
-      </div>
+      <BrandMark className="sidebar-logo" wordmarkClassName="logo-text" />
       {/* Placeholder: workspaces are not implemented, so this does not switch anything. */}
       <button type="button" className="workspace" disabled title="Workspace switching is not available yet">
         <span className="workspace-text">Workspace · single</span>

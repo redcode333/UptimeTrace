@@ -24,7 +24,8 @@ function niceMax(max: number): number {
  * Dependency-free SVG line chart. Null points are gaps (the line breaks), never zero. Hover shows a tooltip with the
  * value of every series at the nearest time bucket. Percent charts are fixed 0-100 so levels stay comparable.
  */
-export function TimeSeriesChart({ series, unit, start, end, label, height = 220 }: { series: Series[]; unit: Unit; start: string; end: string; label: string; height?: number }) {
+/** `threshold` draws a dashed line at a configured limit (percent charts only); it is drawn only when given. */
+export function TimeSeriesChart({ series, unit, start, end, label, height = 220, threshold }: { series: Series[]; unit: Unit; start: string; end: string; label: string; height?: number; threshold?: { value: number; label: string } }) {
   const [hover, setHover] = useState<number | null>(null);
   const ref = useRef<SVGSVGElement>(null);
   const t0 = Date.parse(start);
@@ -83,6 +84,12 @@ export function TimeSeriesChart({ series, unit, start, end, label, height = 220 
             {p.dots.map((pt) => <circle key={pt.t} cx={x(Date.parse(pt.t))} cy={y(pt.value!)} r={2} stroke="none" />)}
           </g>
         ))}
+        {threshold && unit === "percent" && (
+          <g>
+            <line x1={PAD.l} x2={W - PAD.r} y1={y(threshold.value)} y2={y(threshold.value)} stroke="#e5483a" strokeWidth={1} strokeDasharray="3 3" />
+            <text x={W - PAD.r} y={y(threshold.value) - 3} textAnchor="end" className="axis">{threshold.label}</text>
+          </g>
+        )}
         {hp != null && <line x1={x(hp)} x2={x(hp)} y1={PAD.t} y2={height - PAD.b} className="cursor" />}
       </svg>
       {hp != null && hover != null && (

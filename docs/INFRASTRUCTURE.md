@@ -55,7 +55,11 @@ Limits: at most 2,000 hosts (10 pages of 200) are loaded for the topology, and t
 
 ## Not in scope
 
-No visual topology, service discovery, dependency inference, cloud or Kubernetes integrations, OpenTelemetry, alert propagation through groups, or changes to the telemetry contract or alert evaluation.
+No service discovery, dependency inference, cloud or Kubernetes integrations, OpenTelemetry, alert propagation through groups, or changes to the telemetry contract or alert evaluation.
+
+## 3D view
+
+`/infrastructure?view=3d` draws the same inventory, health and alerts as a 3D scene, with a reusable component registry for models. See `docs/3D_INFRASTRUCTURE.md`.
 
 ## Future Infrastructure Map readiness
 

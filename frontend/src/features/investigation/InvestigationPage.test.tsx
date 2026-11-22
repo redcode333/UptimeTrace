@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Route, Routes } from "react-router-dom";
 import { ApiError } from "../../api/client";
-import type { Investigation, InvestigationRecord } from "../../api/types";
+import type { Alert, Investigation, InvestigationRecord } from "../../api/types";
 import { fakeApi, renderApp } from "../../test/harness";
 import { InvestigationPage } from "./InvestigationPage";
 
@@ -43,6 +43,7 @@ const investigation = (over: Partial<Investigation> = {}): Investigation => ({
       state: "resolved", opened_at: "2026-11-11T12:00:00Z", resolution: "recovered" }],
   },
   settings: { version: 0, warning_limit: 85, critical_limit: 95, stale_after_seconds: 90, offline_after_seconds: 300 },
+  traces: { available: false, reason: "not_configured", window_start: "2026-11-11T11:40:00Z", window_end: "2026-11-11T12:20:00Z", services: [], items: [], truncated: false },
   ...over,
 });
 
@@ -112,7 +113,7 @@ describe("InvestigationPage", () => {
     expect(items[0]).toMatch(/Opened/);
     expect(items[1]).toMatch(/Acknowledged/);
     expect(items[2]).toMatch(/Recovered/);
-    const related = screen.getByRole("region", { name: "Related alerts on this host" });
+    const related = screen.getByRole("region", { name: "Correlated alerts on this host" });
     expect(within(related).getByRole("link", { name: "Memory utilisation" })).toBeInTheDocument();
     expect(within(related).getByText(/correlation only/)).toBeInTheDocument();
   });
@@ -160,5 +161,90 @@ describe("InvestigationPage", () => {
       investigationReport: noRecord,
     }));
     expect(await screen.findByText("No such alert")).toBeInTheDocument();
+  });
+});
+
+
+describe("InvestigationPage: rehearsal provenance", () => {
+  const rehearsal = {
+    id: "44444444-4444-4444-8444-444444444444", host_id: "sim-web-1", scenario: "memory_saturation", metric: "system.memory.utilization",
+    execution: "COMPLETED", detection: "DETECTED", alert_id: ID,
+  } as unknown as import("../../api/rehearsalTypes").Rehearsal;
+
+  it("says when a rehearsal raised this alert, labels it synthetic, and links to the rehearsal", async () => {
+    const api = fakeApi({ investigation: async () => investigation(), investigationReport: noRecord, rehearsals: vi.fn(async () => ({ rehearsals: [rehearsal] })) });
+    renderPage(api);
+    const banner = await screen.findByRole("note");
+    expect(banner).toHaveTextContent("RAISED BY A REHEARSAL");
+    expect(banner).toHaveTextContent("synthetic host");
+    expect(within(banner).getByRole("link", { name: "Open rehearsal" })).toHaveAttribute("href", `/rehearsal/${rehearsal.id}`);
+    expect(api.rehearsals).toHaveBeenCalledWith(expect.anything(), ID);
+  });
+
+  it("shows no rehearsal banner for an alert that no rehearsal raised", async () => {
+    renderPage(fakeApi({ investigation: async () => investigation(), investigationReport: noRecord, rehearsals: async () => ({ rehearsals: [] }) }));
+    await screen.findByRole("region", { name: "What triggered it" });
+    expect(screen.queryByText(/RAISED BY A REHEARSAL/)).not.toBeInTheDocument();
+  });
+});
+
+const alertOut = (over: Partial<Alert> = {}): Alert => ({
+  id: ID, host_id: "web-1", condition_key: "system.cpu.utilization|{}", rule: "threshold", metric: "system.cpu.utilization", labels: {},
+  severity: "critical", state: "open", value: 97, threshold: 95, opened_at: "2026-11-11T12:00:00Z", last_evaluated_at: "2026-11-11T12:10:00Z",
+  acknowledged_at: null, acknowledged_by: null, resolved_at: null, resolved_by: null, resolution: null, ...over,
+});
+
+const openInvestigation = (): Investigation => investigation({
+  alert: { id: ID, host_id: "web-1", state: "open", severity: "critical", rule: "threshold", metric: "system.cpu.utilization", labels: {},
+    condition_key: "system.cpu.utilization|{}", acknowledged_by: null, acknowledged_at: null, resolved_by: null, resolution: null },
+  recovery: { recovered: false, resolution: null, resolved_by: null, resolved_at: null, value: null, observed_at: null },
+});
+
+describe("InvestigationPage: alert actions and the record", () => {
+  it("acknowledges an open alert from the investigation and reports the outcome", async () => {
+    const acknowledge = vi.fn(async (id: string) => alertOut({ id, state: "acknowledged", acknowledged_by: "user_test_1", acknowledged_at: "2026-11-11T12:05:00Z" }));
+    renderPage(fakeApi({ investigation: async () => openInvestigation(), investigationReport: noRecord, acknowledgeAlert: acknowledge as never }));
+    fireEvent.click(await screen.findByRole("button", { name: "Acknowledge" }));
+    await waitFor(() => expect(acknowledge).toHaveBeenCalledWith(ID));
+    expect(await screen.findByText(/Acknowledged by user_test_1/)).toBeInTheDocument();
+  });
+
+  it("shows the server's reason when an acknowledgement is refused, and changes nothing", async () => {
+    const refuse = vi.fn(async () => { throw new ApiError(409, "alert_resolved", "resolved"); });
+    renderPage(fakeApi({ investigation: async () => openInvestigation(), investigationReport: noRecord, acknowledgeAlert: refuse as never }));
+    fireEvent.click(await screen.findByRole("button", { name: "Acknowledge" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("This alert is already resolved, so it cannot be acknowledged.");
+  });
+
+  it("resolves by hand only after confirmation", async () => {
+    const resolve = vi.fn(async (id: string) => alertOut({ id, state: "resolved", resolved_by: "user_test_1", resolved_at: "2026-11-11T12:20:00Z", resolution: "manual" }));
+    renderPage(fakeApi({ investigation: async () => openInvestigation(), investigationReport: noRecord, resolveAlert: resolve as never }));
+    fireEvent.click(await screen.findByRole("button", { name: "Resolve by hand" }));
+    expect(resolve).not.toHaveBeenCalled();
+    expect(screen.getByRole("group", { name: "Confirm resolving this alert" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm resolve" }));
+    await waitFor(() => expect(resolve).toHaveBeenCalledWith(ID));
+    expect(await screen.findByText(/Resolved by hand by user_test_1/)).toBeInTheDocument();
+  });
+
+  it("does not offer acknowledgement on a resolved alert, and says why", async () => {
+    renderPage(fakeApi({ investigation: async () => investigation(), investigationReport: noRecord }));
+    expect(await screen.findByText("Resolved alerts cannot be acknowledged.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Acknowledge" })).not.toBeInTheDocument();
+  });
+
+  it("links the host and words the related alerts as correlation, not cause", async () => {
+    renderPage(fakeApi({ investigation: async () => investigation(), investigationReport: noRecord }));
+    const links = await screen.findAllByRole("link", { name: "web-1" });
+    expect(links.some((a) => a.getAttribute("href") === "/hosts/web-1")).toBe(true);
+    expect(screen.getByText(/Correlation is not a proven cause/)).toBeInTheDocument();
+  });
+
+  it("re-checks the stored record by reading it again, and says whether it still verifies", async () => {
+    const report = vi.fn(async () => record());
+    renderPage(fakeApi({ investigation: async () => investigation(), investigationReport: report }));
+    fireEvent.click(await screen.findByRole("button", { name: "Re-check record" }));
+    await waitFor(() => expect(report.mock.calls.length).toBeGreaterThanOrEqual(2));
+    expect(await screen.findByText(/both match the stored evidence/)).toBeInTheDocument();
   });
 });

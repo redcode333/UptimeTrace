@@ -25,6 +25,20 @@ export function fakeApi(over: Partial<ApiClient> = {}): ApiClient {
     host: async () => { throw new Error("not used"); },
     latest: async () => { throw new Error("not used"); },
     series: async () => { throw new Error("not used"); },
+    alertHistogram: async (p) => ({
+      start: p.start, end: p.end, bucket_seconds: p.bucket_seconds, sources: p.source ?? ["live", "synthetic", "replay"],
+      buckets: [], total: 0, critical: 0, warning: 0, complete: true,
+    }),
+    distribution: async (p) => ({
+      metric: p.metric, sources: p.source ?? ["live", "synthetic", "replay"], total_in_scope: 0, bucket_labels: ["0–20", "20–40", "40–60", "60–80", "80–100"],
+      buckets: [0, 0, 0, 0, 0], no_data: 0, states: { normal: 0, warning: 0, critical: 0, none: 0 }, max: null, complete: true,
+    }),
+    rankings: async (p) => ({
+      metric: p.metric, sources: p.source ?? ["live", "synthetic", "replay"], total_in_scope: 0, with_value: 0, without_value: 0,
+      limit: p.limit ?? 8, items: [], complete: true,
+    }),
+    platformHealth: async () => ({ http: 200, status: "ok", app: "ok", database: "ok" }),
+    infrastructure: async () => ({ environments: [], unassigned_regions: [], unassigned_clusters: [], ungrouped_hosts: [], services: [], unassigned_services: [] }),
     registryHosts: async () => [],
     registerHost: async () => { throw new Error("not used"); },
     credentials: async () => [],

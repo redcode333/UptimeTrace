@@ -6,6 +6,7 @@ import type { Alert, AlertList, Host, HostListParams } from "../../api/types";
 import { fakeApi, renderApp } from "../../test/harness";
 import { host, hostList } from "../../test/fixtures";
 import { OverviewPage, distribution } from "./OverviewPage";
+import { attentionFakeOrder, distributionFake } from "../../test/commandCenterFakes";
 
 const none = { disk_percent_max: null, disk_mount_max: null, network_rx_bytes_per_second: null, network_tx_bytes_per_second: null };
 const web = host({
@@ -20,7 +21,7 @@ function api(calls: HostListParams[] = []) {
   return fakeApi({
     hosts: async (p = {}) => {
       calls.push(p);
-      const items = p.health ? [off, web] : [web, db, off];
+      const items = p.health ? (p.sort === "attention" ? [web, off] : [off, web]) : [web, db, off];
       return hostList(items, {
         facets: { source: { live: 2, synthetic: 1, replay: 0 }, health: { healthy: 1, warning: 0, critical: 1, stale: 0, offline: 1, unknown: 0 } },
       });
@@ -169,12 +170,14 @@ function ccApi(o: CcOptions = {}) {
       const health = { healthy: 0, warning: 0, critical: 0, stale: 0, offline: 0, unknown: 0 };
       for (const h of healthPool) health[h.health.status]++;
       if (p.health) items = items.filter((h) => p.health!.includes(h.health.status));
+      if (p.sort === "attention") items = attentionFakeOrder(items);
       const pageSize = p.page_size ?? 50;
       return hostList(items.slice(0, pageSize), {
         total: items.length, page_size: pageSize, facets: { source, health },
         thresholds: { host_stale_after_seconds: 90, offline_after_seconds: 300, stale_after_seconds: 300, rules: RULES },
       });
     },
+    distribution: async (p) => distributionFake(all, p.metric, RULES, p.source),
     alerts: async (status = "active", _signal?: AbortSignal, limit?: number): Promise<AlertList> => {
       o.alertCalls?.push({ status, limit });
       if (o.failAlerts) throw o.failAlerts;
@@ -200,7 +203,7 @@ describe("Command Center: utilisation and thresholds (CC-7, CC-4)", () => {
     renderApp(ccPage, { api: ccApi() });
     // CPU across the fleet: 97 and 95 critical, 90 warning, 50 and 10 normal, two with no value (blank and silent).
     expect((await screen.findAllByText(/Warning 1 · Critical 2 · Normal 2/)).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/2 with no data/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/2 with no current value/).length).toBeGreaterThan(0);
   });
 
   it("never shows a host with no measurement as 0%", async () => {
@@ -213,18 +216,21 @@ describe("Command Center: utilisation and thresholds (CC-7, CC-4)", () => {
     expect(blank!.textContent).not.toMatch(/0\.0%/);
   });
 
-  it("states that the heading count is exact and that the ranking covers only the 100 most recent non-healthy hosts", async () => {
+  it("orders the whole fleet by severity on the server, so a critical host beyond the first 100 still leads the table", async () => {
     const hosts = [...manyHosts(101, "warning"), fleetHosts.web];
     renderApp(ccPage, { api: ccApi({ hosts }) });
     const table = await screen.findByLabelText("Hosts needing attention");
     expect(await within(table).findByText("Top 10 of 102 not healthy")).toBeInTheDocument();
-    expect(await within(table).findByText(/Ranked among the 100 most recent non-healthy hosts/)).toBeInTheDocument();
+    const rows = await within(table).findAllByRole("row");
+    expect(rows[1]).toHaveTextContent("web-1");
+    expect(within(table).queryByText(/Ranked among/)).toBeNull();
   });
 
-  it("says the distributions cover only the first 200 hosts when the fleet is larger (201 hosts)", async () => {
+  it("counts the distributions over the whole in-scope fleet, not only the first 200 hosts (201 hosts)", async () => {
     renderApp(ccPage, { api: ccApi({ hosts: manyHosts(201) }) });
     const panel = await screen.findByLabelText("Utilisation distribution");
-    expect(await within(panel).findByText(/First 200 hosts by name/)).toBeInTheDocument();
+    expect(await within(panel).findByText("201 hosts in scope")).toBeInTheDocument();
+    expect(within(panel).queryByText(/First 200 hosts by name/)).toBeNull();
   });
 
   it("does not caption a distribution as partial at exactly 200 hosts", async () => {

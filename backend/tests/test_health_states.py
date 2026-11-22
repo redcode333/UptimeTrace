@@ -84,6 +84,18 @@ def test_replay_hosts_are_never_stale_or_offline_by_the_clock():
     assert H.reporting_status("replay", NOW - timedelta(days=9), NOW) == "replay"
 
 
+def test_connected_uses_the_offline_boundary_and_only_counts_live_hosts():
+    cfg = DEFAULT_CONFIG
+    assert H.is_connected("live", NOW - timedelta(seconds=5), NOW)
+    assert H.is_connected("live", NOW - cfg.offline_after, NOW)                    # exactly at 300 s: not offline, so connected
+    assert not H.is_connected("live", NOW - cfg.offline_after - timedelta(seconds=1), NOW)
+    assert not H.is_connected("synthetic", NOW - timedelta(seconds=5), NOW)
+    assert not H.is_connected("replay", NOW - timedelta(seconds=5), NOW)
+    # The same boundary as the health classifier: at 300 s the host is not offline, one second later it is.
+    assert H.classify("live", NOW - cfg.offline_after, NOW, []).status != "offline"
+    assert H.classify("live", NOW - cfg.offline_after - timedelta(seconds=1), NOW, []).status == "offline"
+
+
 def test_reporting_status_matches_health_freshness():
     for age, want in ((0, "reporting"), (90, "reporting"), (91, "stale"), (300, "stale"), (301, "silent")):
         assert H.reporting_status("live", NOW - timedelta(seconds=age), NOW) == want

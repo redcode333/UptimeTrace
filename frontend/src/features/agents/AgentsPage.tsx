@@ -7,13 +7,14 @@ import { PageHeader } from "../../components/PageHeader";
 import { EmptyState, ErrorState, Loading } from "../../components/states/States";
 import { SourceBadge } from "../../components/ui/Badges";
 import { DASH, timestamp } from "../../lib/format";
+import { CONNECTION_LABEL } from "../../lib/connection";
 
 const STATE_LABEL: Record<TelemetryState, string> = {
-  awaiting_first_telemetry: "Awaiting first telemetry",
-  reporting: "Reporting",
-  stale: "Stale",
-  silent: "Silent (offline)",
-  replay: "Replay (not live)",
+  awaiting_first_telemetry: CONNECTION_LABEL.pending,
+  reporting: CONNECTION_LABEL.connected,
+  stale: CONNECTION_LABEL.stale,
+  silent: CONNECTION_LABEL.offline,
+  replay: CONNECTION_LABEL.replay,
 };
 
 /** A failed operation, in words. Field-level problems from the API are listed; nothing about the request body is echoed. */

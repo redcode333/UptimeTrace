@@ -1,0 +1,48 @@
+# OpenTelemetry Collector: accept OTLP only from the UptimeTrace backend (bearer token), remove sensitive attributes,
+# batch, and export to Jaeger. The token comes from the environment (TRACE_COLLECTOR_TOKEN); it is never written here.
+extensions:
+  bearertokenauth:
+    token: ${env:TRACE_COLLECTOR_TOKEN}
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        auth:
+          authenticator: bearertokenauth
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  attributes/redact:
+    actions:
+      - key: http.request.header.authorization
+        action: delete
+      - key: http.request.header.cookie
+        action: delete
+      - key: http.request.header.x-api-key
+        action: delete
+      - key: http.request.body
+        action: delete
+      - key: db.statement
+        action: delete
+  batch:
+    send_batch_size: 512
+    timeout: 2s
+
+exporters:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+service:
+  extensions: [bearertokenauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/redact, batch]
+      exporters: [otlp/jaeger]

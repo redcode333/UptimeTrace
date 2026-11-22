@@ -114,10 +114,12 @@ SCENARIOS: dict[str, Callable[[int, int, random.Random], Sample]] = {
 
 
 def build_envelope(
-    scenario: str, t: int, n: int, rng: random.Random, state: State, id_rng: random.Random, *,
-    agent_id: str, host_id: str, hostname: str, service: str | None, now: datetime, interval: float,
+    scenario: "str | Callable[[int, int, random.Random], Sample]", t: int, n: int, rng: random.Random, state: State,
+    id_rng: random.Random, *, agent_id: str, host_id: str, hostname: str, service: str | None, now: datetime, interval: float,
 ) -> dict:
-    sample = SCENARIOS[scenario](t, n, rng)
+    """`scenario` is a catalogue name, or any sample function with the same (t, n, rng) signature."""
+    sample_fn = SCENARIOS[scenario] if isinstance(scenario, str) else scenario
+    sample = sample_fn(t, n, rng)
     state.rx += max(0, int(sample.rx_rate * max(interval, 1.0)))
     state.tx += max(0, int(sample.tx_rate * max(interval, 1.0)))
     observed = fmt_ts(now - timedelta(milliseconds=rng.randint(50, 400)))  # sampled just before sending

@@ -144,6 +144,34 @@ describe("Onboarding: registration", () => {
     expect(screen.getByRole("region", { name: "Registered host" })).toHaveTextContent("Not received yet");
   });
 
+  it("shows the credential step from the registration response, while the registry refetch is still in flight", async () => {
+    // A real refetch takes a network round trip. Hold it open so the window between "registered" and "refetched" is observable.
+    const r = registry();
+    let registered = false;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const registerOriginal = r.api.registerHost;
+    const listOriginal = r.api.registryHosts;
+    r.api.registerHost = vi.fn(async (b: { host_id: string; kind: RegistryHost["kind"]; display_name?: string }) => {
+      const row = await registerOriginal(b);
+      registered = true;
+      return row;
+    });
+    r.api.registryHosts = vi.fn(async () => {
+      if (registered) await gate;
+      return listOriginal();
+    });
+    renderApp(page, { api: fakeApi(r.api as never), route: "/onboarding" });
+    fireEvent.change(await screen.findByRole("textbox", { name: "Host id" }), { target: { value: "web-01" } });
+    fireEvent.click(screen.getByRole("button", { name: "Register host" }));
+
+    // The step must appear while the refetch is still held: the page must not wait for the registry list to know the host.
+    expect(await screen.findByRole("button", { name: "Create agent credential" })).toBeInTheDocument();
+    expect(screen.queryByText("That host is not registered")).not.toBeInTheDocument();
+    expect(screen.getByTestId("where")).toHaveTextContent("/onboarding?host=web-01");
+    release();
+  });
+
   it("shows a duplicate id as a clear conflict, not a generic failure", async () => {
     const r = registry([reg({ host_id: "web-01" })]);
     r.api.registerHost.mockImplementationOnce(async () => { throw new ApiError(409, "host_exists", "x"); });

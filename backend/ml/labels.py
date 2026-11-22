@@ -55,6 +55,25 @@ def load_all_incident_views(dataset_root: Path) -> dict[str, list[IncidentView]]
     return {k: sorted(v, key=lambda x: x.onset) for k, v in out.items()}
 
 
+@dataclass(frozen=True)
+class IncidentMeta:
+    """Evaluation-only metadata (family, group, onset). Never used to build labels or features."""
+    run_id: str
+    incident_id: str
+    family: str
+    group: str                # PRECURSOR | ABRUPT | SILENT
+    onset: int                # microseconds since epoch
+
+
+def load_incident_meta(dataset_root: Path) -> list[IncidentMeta]:
+    out = []
+    with open(Path(dataset_root) / "incidents.jsonl", encoding="utf-8") as f:
+        for line in f:
+            r = json.loads(line)
+            out.append(IncidentMeta(r["run_id"], r["incident_id"], r["family"], r["group"], to_us(r["onset"])))
+    return out
+
+
 def incident_counts(dataset_root: Path) -> dict:
     """Merged incidents per split and group (reporting only)."""
     root = Path(dataset_root)

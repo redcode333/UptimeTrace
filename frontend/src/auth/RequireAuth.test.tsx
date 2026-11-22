@@ -17,6 +17,7 @@ function tree() {
       <Route path="/sign-in" element={<div>SIGN IN PAGE</div>} />
       <Route element={<RequireAuth />}>
         <Route path="/" element={<div>PROTECTED APP</div>} />
+        <Route path="/hosts" element={<div>PROTECTED APP</div>} />
       </Route>
     </Routes>
   );
@@ -36,7 +37,8 @@ describe("RequireAuth (the authentication boundary)", () => {
   it("sends a signed-out visitor to sign-in and never asks the API anything", () => {
     clerk.auth = { isLoaded: true, isSignedIn: false };
     const me = vi.fn();
-    renderApp(tree(), { api: fakeApi({ me }) });
+    // "/" is the public landing page for signed-out visitors (see journey.test.tsx); a protected page is what asks for sign-in.
+    renderApp(tree(), { api: fakeApi({ me }), route: "/hosts" });
     expect(screen.getByText("SIGN IN PAGE")).toBeInTheDocument();
     expect(me).not.toHaveBeenCalled();
   });

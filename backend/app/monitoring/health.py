@@ -74,6 +74,12 @@ def reporting_status(source: str, last_seen: datetime, now: datetime, cfg: Monit
     return "reporting" if age <= cfg.stale_after else "stale"
 
 
+def is_connected(source: str, last_seen: datetime, now: datetime, cfg: MonitoringConfig = DEFAULT_CONFIG) -> bool:
+    """Connected infrastructure: a LIVE host whose newest envelope is within offline_after. Same boundary as `classify`
+    (age equal to offline_after is not offline, so it is connected). Synthetic and replay hosts are never connected."""
+    return source == "live" and (now - last_seen) <= cfg.offline_after
+
+
 def evaluate_thresholds(last_seen: datetime, samples: list, cfg: MonitoringConfig = DEFAULT_CONFIG) -> tuple[int, list[Reason]]:
     """(number of metrics that could be evaluated, conditions found). Samples older than SAMPLE_STALE_AFTER are skipped, not zeroed."""
     reasons: list[Reason] = []
