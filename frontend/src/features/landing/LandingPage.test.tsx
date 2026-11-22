@@ -23,7 +23,10 @@ describe("landing page", () => {
 
   it("states the MCP connection in generic terms and names only real MCP tools", () => {
     const { container, unmount } = render(<LandingPage />);
-    expect(screen.getByText("any MCP client")).toBeInTheDocument();
+    const roller = container.querySelector("#roller");
+    expect(roller).not.toBeNull();
+    expect(roller?.getAttribute("aria-label")).toBe("Claude, ChatGPT, Cursor, GitHub Copilot, Windsurf, Gemini CLI");
+    expect(roller?.querySelectorAll(".ro").length).toBe(7); // six agents plus the repeat that makes the loop seamless
     const text = container.textContent ?? "";
     expect(text).toContain("list_hosts");
     expect(text).toContain("get_host_health");
@@ -34,7 +37,7 @@ describe("landing page", () => {
   it("makes no claims for capabilities the product does not have", () => {
     const { container, unmount } = render(<LandingPage />);
     const html = container.innerHTML.toLowerCase();
-    for (const claim of ["pagerduty", "discord", "intelligence lab", "docker", "opentelemetry", "gemini", "windsurf", "copilot",
+    for (const claim of ["pagerduty", "discord", "intelligence lab", "docker", "opentelemetry",
       "get_alerts", "drill_results", "telemetry loss", "network latency", "throwaway container"]) {
       expect(html, claim).not.toContain(claim);
     }
