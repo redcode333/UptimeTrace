@@ -101,7 +101,7 @@
 .landing:not([data-theme="light"]) .sun { display: block }
 .landing:not([data-theme="light"]) .moon { display: none }
 }
-.landing .hero { position: relative; isolation: isolate; margin-top: -76px; min-height: clamp(640px, 100vh, 900px); overflow: hidden;
+.landing .hero { position: relative; isolation: isolate; margin-top: -76px; min-height: clamp(580px, 86vh, 780px); overflow: hidden;
   background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 72%, var(--bg) 100%) }
 .landing .hero canvas, .landing .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1 }
 .landing .hero .poster { object-fit: cover; object-position: 50% 100%; transition: opacity .8s }
@@ -110,8 +110,8 @@
 .landing .hero.live canvas { opacity: 1 }
 .landing .hero.live .poster { opacity: 0 }
 .landing .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; z-index: 0; pointer-events: none; background: linear-gradient(180deg, transparent, var(--bg)) }
-.landing .hero-copy { position: relative; z-index: 1; text-align: center; padding: min(132px, 14vh) 20px 0; max-width: 860px; margin: 0 auto }
-.landing .hero h1 { font: 400 clamp(34px, min(5.2vw, 8.4vh), 72px)/1.04 var(--f-serif); font-variation-settings: "opsz" 72; letter-spacing: -0.032em; color: var(--ink) }
+.landing .hero-copy { position: relative; z-index: 1; text-align: center; padding: min(116px, 12vh) 20px 0; max-width: 860px; margin: 0 auto }
+.landing .hero h1 { font: 400 clamp(36px, min(4.8vw, 7.4vh), 66px)/1.06 var(--f-serif); font-variation-settings: "opsz" 72; letter-spacing: -0.032em; color: var(--ink) }
 .landing .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 .landing .rot { display: inline-block; position: relative; white-space: nowrap; vertical-align: bottom; font-style: italic; font-weight: 360; color: var(--accent); transition: width .55s cubic-bezier(.6,0,.2,1); padding-bottom: .06em }
 .landing .rw { display: inline-block }
@@ -126,7 +126,7 @@
 .landing .rtrack { display: flex; flex-direction: column; align-items: flex-start; transition: transform .6s cubic-bezier(.65,0,.2,1) }
 .landing .ro { height: 34px; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px 0 9px; white-space: nowrap; font-weight: 500; color: var(--ink) }
 .landing .ro svg { flex: none }
-.landing .hero .lede { margin: 20px auto 0; max-width: 540px; font-size: clamp(16px, 1.4vw, 18.5px); color: var(--text-2) }
+.landing .hero .lede { margin: 18px auto 0; max-width: 520px; font-size: clamp(15.5px, 1.25vw, 17.5px); line-height: 1.55; color: var(--text-2) }
 .landing .hero .cta { margin-top: min(26px, 3vh); display: flex; gap: 10px; justify-content: center; flex-wrap: wrap }
 .landing .btn-cloud { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 1px 1px var(--glass-rim), inset 0 0 0 1px var(--line) }
 .landing .btn-cloud:hover { background: var(--surface) }
@@ -136,7 +136,7 @@
 .landing .hero-copy a, .landing .hero-copy .mcp-line { pointer-events: auto }
 .landing .hero.inspecting .hero-copy, .landing .hero.inspecting .hero-copy * { opacity: 0; transform: translateY(-16px); pointer-events: none }
 .landing #parts { position: absolute; inset: 0; z-index: 2; pointer-events: none }
-.landing .part { position: absolute; left: 0; top: 0; width: min(196px, 42vw); display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 12px 11px; border: 0; border-radius: 14px;
+.landing .part { position: absolute; left: 0; top: 0; width: min(176px, 40vw); display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 9px 11px 10px; border: 0; border-radius: 12px;
   text-align: left; cursor: pointer; color: var(--ink); pointer-events: auto; transition: opacity .3s, box-shadow .2s }
 .landing .hero:not(.inspecting) .part { pointer-events: none }
 .landing .part .pn { font: 500 14px/1.2 var(--f-sans) }
@@ -456,3 +456,9 @@
   --normal: #1f8f73; --normal-text: #35d0b5; --offline: #8aa3b8; --focus: #62a8ff;
   background: var(--ground); color: var(--ink); font-family: var(--font-ui);
 }
+
+/* The console screens in the showcase use console buttons, not the landing CTA style above. Restore the console values inside the frame. */
+.landing .showcase-screen .btn { display: inline-block; height: auto; gap: 0; padding: 6px 12px; border-radius: 4px; border: 1px solid var(--seam-strong); background: transparent; color: var(--ink); box-shadow: none; font: 600 12px/1.2 var(--font-ui, var(--f-sans)); }
+.landing .showcase-screen .btn:hover:not(:disabled) { background: var(--widget-alt, var(--surface)); transform: none; }
+.landing .showcase-screen .btn:active { transform: none; }
+.landing .showcase-screen .btn:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: 2px; }
