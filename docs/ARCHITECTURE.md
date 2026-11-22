@@ -50,6 +50,30 @@ Three layers per table (0002/0003/0004): no grants to `PUBLIC`/Supabase API role
 ```
 Workspace comes from the verified token record; visibility is the host registry. See `MCP_INTEGRATION.md` and `SECURITY.md`.
 
+## Current public deployment
+
+- Frontend: Vercel static site (`uptimetrace-web.vercel.app`), built with `VITE_API_BASE_URL` pointing at the API.
+- API: Vercel Python function (`uptimetrace-api.vercel.app`), the same ASGI app as `uvicorn app.asgi:app`, through `api/index.py`.
+- Database: hosted Supabase PostgreSQL, reached as `uptimetrace_app` over TLS (`sslmode=require`). Migration revision 0009.
+- Serverless consequence: there is no persistent background worker. Alerts are evaluated on ingest. The periodic sweep (`alert_sweep_seconds`) does not run.
+- See `DEPLOYMENT.md` for the environment variables and verification checks.
+
+## ML inference path (experimental, local and hosted telemetry)
+
+```
+ stored telemetry_envelopes (per host, last 6 h)
+   └─ app/ml_inference/live.py        metric names → cpu · mem · disk · rx · tx; per-mount and per-interface labels kept
+        └─ app/ml_inference/inputs.py  explicit disk-role mapping (root/data mounts) · network: one interface only
+             │                         fail closed: history < 1 h, stale series, missing or ambiguous mapping → no score
+             └─ ml/features.py          the verified feature pipeline (compute_features), unchanged
+                  └─ app/ml_inference/outage.py   saved XGBoost + schema + threshold, unchanged → experimental risk score
+```
+
+- The ECOD anomaly artifact (`artifacts/models/anomaly_ecod_v1/`, 62.7 MB) is locally verified and git-ignored. It is not loaded by the API.
+- Results are computed on request. They are not yet persisted, and there are no ML endpoints or dashboard panels.
+
 ## Planned (not built)
 
-Alert engine + incidents (M2) · experiment runner + reports (M3) · demo service, OTLP collector, Jaeger (M4) · workspace membership/RLS (M6) · Docker Compose deployment · MCP tools for alerts/incidents/experiments/traces.
+Persistence of inference results (migration 0010 is proposed, not applied; its review package is kept outside the repository) · authenticated ML endpoints · dashboard panels for ML · MCP tools for alerts, incidents, experiments and traces · Docker Compose deployment.
+
+Review note: the planned list above predates `app/alerts`, `app/investigation`, `app/rehearsal` and `app/traces`, which exist in the repository. Their status is not restated here and should be verified before the list is relied on.

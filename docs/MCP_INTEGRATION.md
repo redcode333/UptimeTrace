@@ -79,18 +79,41 @@ experiment and trace pages do not exist, so no links to them are produced.
 
 ## Connecting a client (customer steps)
 
-Prerequisites: an operator has enabled MCP (`MCP_ENABLED`, `MCP_PUBLIC_URL`, `MCP_ALLOWED_HOSTS`, `CONSOLE_BASE_URL`) behind TLS; hosts are registered and reporting.
+Prerequisites: an operator has enabled MCP and deployed the API publicly behind TLS (see the deployment configuration below); hosts are registered and reporting.
 
-1. In the console API, create a token (UI not built yet): `POST /api/v1/registry/mcp-tokens` with your Clerk session. Choose the minimum scopes and a short expiry. Copy the token now.
-2. Configure your MCP client with URL `https://<api-host>/mcp/` and header `Authorization: Bearer <token>`. Example for a client using the common JSON config shape (**unverified against any specific product**):
-   ```json
-   { "mcpServers": { "uptimetrace": { "type": "http", "url": "https://api.example.com/mcp/", "headers": { "Authorization": "Bearer utm_…" } } } }
-   ```
+Each user creates their own token and keeps it secret. A token is shown once, cannot be recovered, and grants the scopes it was issued with to whoever holds it. Do not share tokens, commit them to source control, or paste them into a chat.
+
+1. Open **Settings → Integrations** in the console and create a token. Choose the minimum scopes and a short expiry. Copy the token now. (The same endpoints are available directly: `POST /api/v1/registry/mcp-tokens`.)
+2. Connect your client to the endpoint shown on that page, `<MCP_PUBLIC_URL>/mcp/`, with header `Authorization: Bearer <your token>`:
+   - **Claude Code:** `claude mcp add --transport http uptimetrace <endpoint> --header "Authorization: Bearer <token>"`. The syntax was checked against the installed CLI's help.
+   - **Claude Desktop:** the page shows a configuration that uses the `mcp-remote` bridge through `npx`. It has not been tested in Claude Desktop from this project.
+   - **ChatGPT:** not verified. This server does not implement OAuth, and ChatGPT's custom remote connectors may require OAuth or no authentication, so it may not be able to connect.
+   - **Python (official SDK):** the verification script on the page prints the three tool names when the connection works.
 3. Ask: "Which hosts look unhealthy?" The agent calls `list_hosts`; follow the `console_url` for evidence.
-4. Revoke: `DELETE /api/v1/registry/mcp-tokens/{id}` — effective on the next call.
+4. Revoke: in **Settings → Integrations**, or `DELETE /api/v1/registry/mcp-tokens/{id}`. Effective on the next call.
 
-Troubleshooting: 401 = unknown/expired/revoked token or missing `Authorization` header · a 4xx before authentication = Host header not in `MCP_ALLOWED_HOSTS` (exact status not tested) · tool error `host_not_found` = host is unregistered, deactivated or in
-another workspace · `rate_limited` = more than 60 calls/min · use the trailing slash (`/mcp/`); behaviour of the bare `/mcp` path was not tested.
+If the console shows **"MCP not publicly deployed"**, no public endpoint is configured for that console build. The page shows a placeholder, not a working address, and no connection is possible until the deployment configuration below is in place.
+
+### Deployment configuration
+
+Backend (names only; values are per deployment and never belong in the repository):
+
+| Variable | Purpose |
+|---|---|
+| `MCP_ENABLED` | `true` turns the endpoint on. Default `false`. |
+| `MCP_PUBLIC_URL` | The API's public base URL, for example `https://api.<your-domain>`. Required when enabled; the server refuses to start without it. |
+| `MCP_ALLOWED_HOSTS` | Comma-separated Host header values the endpoint accepts (DNS-rebinding protection). Required when enabled. |
+| `CONSOLE_BASE_URL` | The console's public base URL, used for `console_url` links. |
+
+Frontend build (the console shows the endpoint from this value only):
+
+| Variable | Purpose |
+|---|---|
+| `VITE_MCP_PUBLIC_URL` | The same value as the backend's `MCP_PUBLIC_URL`. Unset means the Integrations page reports "MCP not publicly deployed". The console never falls back to its own origin. |
+
+The console does not report whether MCP is enabled. Set `VITE_MCP_PUBLIC_URL` only when the endpoint is actually reachable from the internet, so the page never shows a connection that cannot work.
+
+Troubleshooting: 401 = unknown/expired/revoked token or missing `Authorization` header · a 4xx before authentication = Host header not in `MCP_ALLOWED_HOSTS` (exact status not tested) · tool error `host_not_found` = host is unregistered, deactivated or in another workspace · `rate_limited` = more than 60 calls/min · use the trailing slash (`/mcp/`); behaviour of the bare `/mcp` path was not tested.
 
 ## Future write operations (design only — nothing implemented)
 

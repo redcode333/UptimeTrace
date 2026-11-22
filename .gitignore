@@ -46,3 +46,16 @@ coverage/
 
 # Trace ingestion credentials (hashed tokens, issued per service): never commit
 trace-ingest-credentials*.json
+
+# Submission media and capture output: kept outside the source repository
+submission/
+*.mp4
+*.webm
+*.mov
+*.raw.mp4
+*.ffmpeg.log
+playwright-report/
+test-results/
+# Local Claude Code runtime state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
