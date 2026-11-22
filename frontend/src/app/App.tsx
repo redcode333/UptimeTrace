@@ -11,29 +11,43 @@ import { OnboardingPage } from "../features/onboarding/OnboardingPage";
 import { InfrastructurePage } from "../features/infrastructure/InfrastructurePage";
 import { AlertsPage } from "../features/alerts/AlertsPage";
 import { InvestigationPage } from "../features/investigation/InvestigationPage";
+import { InvestigationsListPage } from "../features/investigation/InvestigationsListPage";
+import { StatesPage } from "../features/states/StatesPage";
+import { SystemPage } from "../features/system/SystemPage";
+import { RehearsalPage } from "../features/rehearsal/RehearsalPage";
+import { RehearsalDetailPage } from "../features/rehearsal/RehearsalDetailPage";
 import { HostDetailPage } from "../features/hosts/HostDetailPage";
 import { HostsPage } from "../features/hosts/HostsPage";
 import { OverviewPage } from "../features/overview/OverviewPage";
 import { UnavailablePage } from "../features/StubPages";
+import { LandingPage } from "../features/landing/LandingPage";
+import { SignalGraphPage } from "../features/signals/SignalGraphPage";
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/sign-in/*" element={<SignInPage />} />
       <Route path="/sign-up/*" element={<SignUpPage />} />
+      <Route path="/welcome" element={<LandingPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<OverviewPage />} />
           <Route path="hosts" element={<HostsPage />} />
           <Route path="hosts/:hostId" element={<HostDetailPage />} />
           <Route path="metrics" element={<MetricsExplorerPage />} />
+          <Route path="signal-graph" element={<SignalGraphPage />} />
           <Route path="settings/agents" element={<AgentsPage />} />
           <Route path="settings/alerts" element={<AlertPoliciesPage />} />
           <Route path="settings/integrations" element={<IntegrationsPage />} />
           <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="infrastructure" element={<InfrastructurePage />} />
           <Route path="alerts" element={<AlertsPage />} />
+          <Route path="investigations" element={<InvestigationsListPage />} />
+          <Route path="states" element={<StatesPage />} />
+          <Route path="system" element={<SystemPage />} />
           <Route path="alerts/:alertId" element={<InvestigationPage />} />
+          <Route path="rehearsal" element={<RehearsalPage />} />
+          <Route path="rehearsal/:rehearsalId" element={<RehearsalDetailPage />} />
           {flatNav().filter((i) => i.unavailable).map((i) => (
             <Route key={i.path} path={i.path.slice(1)} element={<UnavailablePage />} />
           ))}

@@ -4,7 +4,7 @@ import { useMemo, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiProvider } from "../api/context";
 import { createApiClient } from "../api/client";
-import { clerkAppearance } from "../auth/clerkAppearance";
+import { clerkAppearance, clerkLocalization } from "../auth/clerkAppearance";
 import { apiBaseUrl } from "./config";
 
 const queryClient = new QueryClient({
@@ -22,7 +22,9 @@ function ApiBridge({ children }: { children: ReactNode }) {
         getToken: (opts) => getToken(opts?.skipCache ? { skipCache: true } : undefined),
         onUnauthorized: () => {
           queryClient.clear();
-          void clerk.signOut({ redirectUrl: "/sign-in" });
+          // Keep the page the user was on, so signing in again returns them there (sign-in validates the path).
+          const here = window.location.pathname + window.location.search;
+          void clerk.signOut({ redirectUrl: `/sign-in?reason=session_expired&redirect_url=${encodeURIComponent(here)}` });
         },
       }),
     [getToken, clerk],
@@ -36,6 +38,7 @@ export function Providers({ publishableKey, children }: { publishableKey: string
     <ClerkProvider
       publishableKey={publishableKey}
       appearance={clerkAppearance}
+      localization={clerkLocalization}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       signInFallbackRedirectUrl="/"

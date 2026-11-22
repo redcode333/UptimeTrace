@@ -1,5 +1,6 @@
 import { useClerk, useUser } from "@clerk/react";
 import { useEffect, useRef, useState } from "react";
+import { timestamp } from "../../lib/format";
 
 export function UserMenu() {
   const { user } = useUser();
@@ -27,8 +28,12 @@ export function UserMenu() {
         <div className="menu" role="menu">
           <div className="menu-id">
             <strong>{user?.fullName ?? "Signed in"}</strong>
-            <span className="dim">{user?.primaryEmailAddress?.emailAddress}</span>
+            <span className="dim">{user?.primaryEmailAddress?.emailAddress ?? "No email on this account"}</span>
+            {user?.createdAt && <span className="dim small">Account created {timestamp(user.createdAt.toISOString())}</span>}
           </div>
+          <button type="button" role="menuitem" className="menu-item" onClick={() => { setOpen(false); clerk.openUserProfile(); }}>
+            Manage account
+          </button>
           <button type="button" role="menuitem" className="menu-item" onClick={() => clerk.signOut({ redirectUrl: "/sign-in" })}>
             Sign out
           </button>

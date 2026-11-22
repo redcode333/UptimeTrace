@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useMe } from "../api/hooks";
 import { ErrorState, Loading } from "../components/states/States";
+import { LandingPage } from "../features/landing/LandingPage";
+import { signInUrlFor } from "./redirect";
 
 /**
  * The authentication boundary of the app:
@@ -15,7 +17,11 @@ export function RequireAuth() {
   const { isLoaded, isSignedIn } = useAuth();
   const location = useLocation();
   if (!isLoaded) return <div className="centered"><Loading label="Checking your session" /></div>;
-  if (!isSignedIn) return <Navigate to="/sign-in" replace state={{ from: location.pathname + location.search }} />;
+  if (!isSignedIn) {
+    // A signed-out visitor at the root sees the public landing page; any other protected page asks for sign-in and returns there.
+    if (location.pathname === "/") return <LandingPage />;
+    return <Navigate to={signInUrlFor(location.pathname + location.search)} replace />;
+  }
   return <AuthorizedGate />;
 }
 

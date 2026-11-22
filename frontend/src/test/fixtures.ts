@@ -2,7 +2,8 @@ import type { Host, HostDetail, HostList, LatestMetrics, MetricSample, SeriesRes
 
 /** Builders for API-shaped test data. Every value a test cares about is passed explicitly; defaults are neutral. */
 export const host = (over: Partial<Host> & { host_id: string }): Host => ({
-  hostname: over.host_id, agent_id: "agent-1", service: null, source: "live", connected_infrastructure: true,
+  hostname: over.host_id, agent_id: "agent-1", service: null, environment: null, region: null, cluster: null, services: [],
+  source: "live", connected_infrastructure: true,
   first_seen: "2026-11-01T00:00:00Z", last_seen: "2026-11-13T10:00:00Z", last_seen_age_seconds: 20, reporting_status: "reporting",
   health: { status: "healthy", category: "healthy", reasons: [] },
   latest: { cpu_percent: 10, memory_percent: 20, disk_percent_max: 30, disk_mount_max: "C:", network_rx_bytes_per_second: null, network_tx_bytes_per_second: null },

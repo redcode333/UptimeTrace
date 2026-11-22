@@ -26,8 +26,9 @@ import pyarrow.parquet as pq
 
 from . import availability as av
 from . import labels as lb
+from .io_safe import write_parquet_verified
 
-LABELER_VERSION = "1.0"
+LABELER_VERSION = "2.0"
 HORIZONS = (900, 1800, 3600)            # 30 min is primary; 15 and 60 min are sensitivity horizons
 OBS_COLUMNS = ["metric", "labels", "obs_ts", "env_ts"]          # NO `value`: labels never see telemetry values
 SERIES_KEY = {"cpu": ("system.cpu.utilization", "{}"), "mem": ("system.memory.utilization", "{}"),
@@ -73,6 +74,22 @@ def _us(ts: str) -> int:
     return lb.to_us(ts)
 
 
+def label_views(evaluable: np.ndarray, n_in: np.ndarray, any_p: np.ndarray):
+    """The three label views for one horizon, from the evaluable mask and the window facts.
+
+    Returns (class, scored, target, operational):
+      class        excluded | positive | negative | unscorable
+      scored       True only for positive and negative: the PRIMARY view. Unscorable decisions are never scored.
+      target       primary label: 1 for positive, 0 for negative (meaningful only where scored)
+      operational  SECONDARY view: 1 when any incident onset lies in the window (positive and unscorable); 0 where excluded
+    """
+    cls = np.where(evaluable, lb.label_class(n_in, any_p), "excluded").astype(object)
+    scored = (cls == "positive") | (cls == "negative")
+    target = (cls == "positive").astype(np.int8)
+    operational = np.where(evaluable, (n_in > 0).astype(np.int8), 0).astype(np.int8)
+    return cls, scored, target, operational
+
+
 def label_one_run(args) -> dict:
     root, out, run, cadence, delta, offset, horizons = args
     root, out = Path(root), Path(out)
@@ -108,7 +125,9 @@ def label_one_run(args) -> dict:
     for k in np.nonzero(excluded_active)[0]:
         detail[k] = f"{lb.PHASE[int(phase[k])]}:{incs[int(owner[k])].incident_id}"
     exclusion = np.where(insufficient, "insufficient_data", np.where(active, "active_incident", None)).astype(object)
-    scored = ~(insufficient | active)
+    # evaluable = not excluded. Excluded decisions (insufficient data, or inside an incident's oracle mask) have no label and no features.
+    # Evaluable decisions are positive, negative or unscorable (the protocol's "evaluable_classes").
+    evaluable = ~(insufficient | active)
     counts = {"decisions": int(t_us.size), "insufficient_data": int(insufficient.sum()), "active_incident": int(excluded_active.sum()),
               "active_phases": dict(Counter(lb.PHASE[int(p)] for p in phase[excluded_active])),
               "reasons": dict(Counter(code for k in np.nonzero(insufficient)[0] for code in av.decode(int(mask[k])))),
@@ -116,15 +135,16 @@ def label_one_run(args) -> dict:
     split = run["split"]
     for H in horizons:
         n_in, any_p, nxt = lb.window_labels(t_us, incs, H)
-        cls = np.where(scored, lb.label_class(n_in, any_p), "excluded")
-        target = np.where(scored, (n_in > 0).astype(np.int8), -1)
+        cls, scored, target, operational = label_views(evaluable, n_in, any_p)
         table = pa.table({
             "host_id": pa.array([host_id] * t_us.size, type=pa.string()).dictionary_encode(),
             "run_id": pa.array([run["run_id"]] * t_us.size, type=pa.string()).dictionary_encode(),
             "decision_index": pa.array(j.astype(np.int32)),
             "decision_ts": pa.array(t_us, type=pa.int64()).cast(pa.timestamp("us", tz="UTC")),
-            "scored": pa.array(scored),                        # non-null: filter on this (see targets_numpy)
+            "evaluable": pa.array(evaluable),                  # not excluded: these decisions have features and can alert
+            "scored": pa.array(scored),                        # primary view only: positive or negative
             "target": pa.array(np.where(scored, target, 0).astype(np.int8), mask=~scored),
+            "operational_target": pa.array(np.where(evaluable, operational, 0).astype(np.int8), mask=~evaluable),
             "label_class": pa.array(cls.astype(object), type=pa.string()).dictionary_encode(),
             "exclusion": pa.array(exclusion, type=pa.string()).dictionary_encode(),
             "exclusion_detail": pa.array(np.where(detail == "", None, detail), type=pa.string()),
@@ -132,11 +152,11 @@ def label_one_run(args) -> dict:
             "next_onset_s": pa.array(nxt.astype(np.float32), mask=np.isnan(nxt)),
         })
         d = out / "labels" / f"split={split}" / f"horizon_s={H}"
-        d.mkdir(parents=True, exist_ok=True)
-        pq.write_table(table, d / f"run={run['run_id']}.parquet", compression="zstd", use_dictionary=True, write_statistics=False)
+        digest = write_parquet_verified(table, d / f"run={run['run_id']}.parquet")
         c = Counter(cls.tolist())
-        counts["by_horizon"][H] = {"scored": int(scored.sum()), "positive": c["positive"], "negative": c["negative"],
-                                   "unscorable": c["unscorable"], "target_1": int((target == 1).sum())}
+        counts["by_horizon"][H] = {"evaluable": int(evaluable.sum()), "scored": int(scored.sum()), "positive": c["positive"],
+                                   "negative": c["negative"], "unscorable": c["unscorable"], "target_1": int((target == 1).sum()),
+                                   "operational_1": int((operational == 1)[evaluable].sum()), "sha256": digest}
     return {"run_id": run["run_id"], "split": split, "counts": counts}
 
 
@@ -168,8 +188,10 @@ def build_labels(dataset_dir: Path, out_root: Path | None = None, workers: int =
         "source_code_hash": man["code_hash"], "spec_version": man.get("spec_version"),
         "config": {"delta_s": delta, "decision_offset_s": offset, "cadence_s": cadence, "horizons_s": list(horizons),
                    "primary_horizon_s": 1800, "origin": "run_start"},
-        "definition": "target = 1 iff a merged incident onset lies in (t, t+H]; rows with t in [onset, oracle_mask_end) of any incident, "
-                      "or failing the data-sufficiency rule, are excluded (target null)",
+        "definition": "Excluded (no label, no features): t in [onset, oracle_mask_end) of any incident, or failing the data-sufficiency rule. "
+                      "Evaluable decisions are positive (a PRECURSOR onset in (t, t+H]), negative (no onset in (t, t+H]) or unscorable "
+                      "(onsets in (t, t+H] but none PRECURSOR). PRIMARY view: target = 1 for positive, 0 for negative, scored only for those; "
+                      "unscorable is never scored. SECONDARY operational view: operational_target = 1 for positive and unscorable.",
         "n_runs": len(results), "n_files": len(files), "seconds": round(time.time() - t0, 1),
         "files_sha256": {p.relative_to(out).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
     }

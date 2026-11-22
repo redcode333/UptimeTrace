@@ -52,6 +52,16 @@ class Settings(BaseSettings):
     mcp_allowed_hosts: str | None = None       # comma-separated Host header values (DNS-rebinding protection), e.g. api.example.com
     console_base_url: str | None = None        # web console base URL used to build deep links, e.g. https://app.example.com
 
+    # Application traces (OpenTelemetry via Jaeger). The URL is Jaeger's query API on a PRIVATE network; the browser never
+    # reaches it. Unset means investigations report that tracing is not connected.
+    trace_backend_url: str | None = None
+    trace_query_timeout_seconds: float = 3.0
+    # Trusted OTLP ingestion: credential file (hashed tokens, outside the repository), and the PRIVATE Collector that is the
+    # only place spans are forwarded to, with the bearer token the Collector requires. Any missing piece disables ingestion.
+    trace_ingest_credentials_file: Path | None = None
+    trace_collector_url: str | None = None
+    trace_collector_token: SecretStr | None = None
+
     @property
     def sqlalchemy_url(self) -> str:
         return to_sqlalchemy_url(self.database_url.get_secret_value())

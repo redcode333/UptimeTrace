@@ -14,6 +14,7 @@ def main(argv=None) -> int:
     g.add_argument("--seed", type=int, required=True)
     g.add_argument("--workers", type=int, default=None)
     g.add_argument("--out", default=None)
+    g.add_argument("--overwrite", action="store_true", help="replace an existing dataset folder with the same id")
     a = sub.add_parser("audit")
     a.add_argument("dataset")
     a.add_argument("--fraction", type=float, default=0.05)
@@ -33,7 +34,7 @@ def main(argv=None) -> int:
         from pathlib import Path
         from .generate import generate_dataset
         t = time.time()
-        root = generate_dataset(args.seed, Path(args.out) if args.out else None, args.workers)
+        root = generate_dataset(args.seed, Path(args.out) if args.out else None, args.workers, overwrite=args.overwrite)
         print(f"generated {root} in {time.time() - t:.1f}s")
         return 0
     from .audit import run_audit

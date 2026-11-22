@@ -95,6 +95,41 @@ def fetch_hosts(session: Session, host_id: str | None = None) -> list[HostRow]:
     return [HostRow(r.host_id, r.hostname, r.agent_id, r.service, r.first_seen, r.last_seen) for r in rows]
 
 
+_GROUPS = """
+SELECT h.host_id, e.id AS env_id, e.name AS env_name, r.id AS reg_id, r.name AS reg_name, c.id AS cl_id, c.name AS cl_name
+FROM hosts h
+LEFT JOIN clusters c ON c.id = h.cluster_id AND c.workspace_id = h.workspace_id
+LEFT JOIN regions r ON r.id = c.region_id AND r.workspace_id = h.workspace_id
+LEFT JOIN environments e ON e.id = r.environment_id AND e.workspace_id = h.workspace_id
+WHERE h.workspace_id = :wid
+"""
+
+_SERVICES = """
+SELECT h.host_id, s.id AS svc_id, s.name AS svc_name
+FROM service_hosts sh
+JOIN hosts h ON h.id = sh.host_pk AND h.workspace_id = sh.workspace_id
+JOIN services s ON s.id = sh.service_id AND s.workspace_id = sh.workspace_id
+WHERE sh.workspace_id = :wid
+ORDER BY s.name, s.id
+"""
+
+
+def host_groups(session: Session, wid) -> dict[str, dict]:
+    """Registry placement of each host: environment, region, cluster and services, keyed by host_id. Hosts absent here have no placement."""
+    out: dict[str, dict] = {}
+    for r in session.execute(text(_GROUPS), {"wid": wid}).all():
+        out[r.host_id] = {
+            "environment": {"id": str(r.env_id), "name": r.env_name} if r.env_id else None,
+            "region": {"id": str(r.reg_id), "name": r.reg_name} if r.reg_id else None,
+            "cluster": {"id": str(r.cl_id), "name": r.cl_name} if r.cl_id else None,
+            "services": [],
+        }
+    for r in session.execute(text(_SERVICES), {"wid": wid}).all():
+        entry = out.setdefault(r.host_id, {"environment": None, "region": None, "cluster": None, "services": []})
+        entry["services"].append({"id": str(r.svc_id), "name": r.svc_name})
+    return out
+
+
 _LATEST = """
 SELECT host_id, name, kind, unit, labels, ts, value, rn FROM (
     SELECT l.host_id,

@@ -5,12 +5,14 @@ import uuid
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     DateTime,
     Float,
     ForeignKey,
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -233,3 +235,66 @@ class ServiceHost(Base):
     host_pk: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+
+
+# --- failure rehearsal (migration 0009). Execution and detection outcomes are separate columns. ------------------------------------
+class FailureRehearsal(Base):
+    """One controlled fault rehearsal against a registered synthetic host. Rows are updated as the run progresses."""
+
+    __tablename__ = "failure_rehearsals"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    host_pk: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    host_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    scenario: Mapped[str] = mapped_column(String(64), nullable=False)
+    execution: Mapped[str] = mapped_column(String(16), nullable=False)
+    execution_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detection: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    detection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    started_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_progress_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    stop_requested_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    stop_requested_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    phase: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    planned_envelopes: Mapped[int] = mapped_column(Integer, nullable=False)
+    sent_envelopes: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    accepted_envelopes: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    failed_envelopes: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    fault_sent: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    fault_accepted: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    recovery_accepted: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    fault_confirmed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    fault_observed_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fault_ended_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    recovery_sent_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cleanup_status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="not_needed")
+    alert_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("alerts.id"), nullable=True)
+    alert_opened_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    alert_resolved_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    detection_delay_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
+    recovery_observed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    recovery_seconds: Mapped[float | None] = mapped_column(Float, nullable=True)
+    evidence_useful: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    evidence_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error_class: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    config: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="{}")
+
+
+class FailureRehearsalStep(Base):
+    """Append-only: one envelope the rehearsal sent, and what the database read back for it."""
+
+    __tablename__ = "failure_rehearsal_steps"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    rehearsal_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("failure_rehearsals.id"), nullable=False)
+    workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
+    seq: Mapped[int] = mapped_column(Integer, nullable=False)
+    phase: Mapped[str] = mapped_column(String(16), nullable=False)
+    envelope_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    sent_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    outcome: Mapped[str] = mapped_column(String(16), nullable=False)
+    error_class: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    observed_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    observed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

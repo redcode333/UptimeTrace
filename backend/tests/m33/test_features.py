@@ -183,7 +183,7 @@ def test_absent_series_is_all_nan_with_zero_coverage():
 
 # ------------------------------------------------------------------------------------------------ manifest
 def test_registry_is_consistent_and_contains_no_target_like_names():
-    assert len(ft.NAMES) == len(set(ft.NAMES)) == ft.F == 196
+    assert len(ft.NAMES) == len(set(ft.NAMES)) == ft.F == 192          # registry v1.1: four unsupported rate spreads removed
     assert all(m["dtype"] == "float32" and m["source"] and "unit" in m for m in ft.manifest_entries())
     banned = ("target", "label", "incident", "fault", "onset", "precursor", "group", "exclu", "scored")
     assert not [n for n in ft.NAMES if any(b in n for b in banned)]
@@ -203,7 +203,7 @@ def _dirs():
 def test_features_and_labels_align_row_for_row_for_every_horizon():
     ds, lab, feat_dir = _dirs()
     m = json.load(open(feat_dir / "features_manifest.json"))
-    assert m["n_features"] == 196 and m["feature_version"] == ft.VERSION and m["lookback_windows_s"] == [300, 900, 3600]
+    assert m["n_features"] == len(ft.NAMES) and m["feature_version"] == ft.VERSION and m["lookback_windows_s"] == [300, 900, 3600]
     for H in (900, 1800, 3600):
         xy = bf.load_xy(feat_dir, lab, ["train", "val", "test_iid", "test_ood"], H)
         n = len(xy["y"])
@@ -259,7 +259,7 @@ def test_feature_pipeline_reads_no_targets_and_no_incident_or_fault_sidecars(tmp
     bf.features_for_run((str(ds), str(lab), str(tmp_path), run))
     assert not [p for p in opened if p.endswith(("incidents.jsonl", "faults.jsonl", "benign_episodes.jsonl", "gaps.jsonl"))]
     cols = {c for cs in read_cols if cs for c in cs}
-    assert cols == {"run_id", "host_id", "decision_index", "decision_ts", "scored"}      # labels: identifiers and scored flag only
+    assert cols == {"run_id", "host_id", "decision_index", "decision_ts", "evaluable"}   # labels: identifiers and evaluable mask only
     out = bf.pq.read_table(tmp_path / "features" / "split=val" / "run=r0095.parquet")
     ref = bf.pq.read_table(feat_dir / "features" / "split=val" / "run=r0095.parquet")
     assert out.column_names == ref.column_names

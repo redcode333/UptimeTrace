@@ -1,6 +1,6 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useApi } from "./context";
-import type { AlertStatusFilter, Host, HostListParams, InvestigationRecord, IssueCredentialBody, IssueMcpTokenIn, MonitoringSettingsIn, RegisterHostBody } from "./types";
+import type { AlertStatusFilter, DistributionMetric, Host, HostListParams, InvestigationRecord, IssueCredentialBody, IssueMcpTokenIn, MonitoringSettingsIn, RankedMetric, RegisterHostBody, RegistryHost, Source } from "./types";
 
 /** Who am I, and am I allowed to read telemetry? Needs only a valid session. */
 export function useMe() {
@@ -172,13 +172,21 @@ export function useCredentials(hostId: string | null) {
   return useQuery({ queryKey: ["registry", "credentials", hostId], enabled: !!hostId, queryFn: ({ signal }) => api.credentials(hostId!, signal) });
 }
 
+/** Puts a host the server has just registered into the registry list at once. A page that navigates to that host in the same
+ *  tick then renders its next step from the response, not from a refetch that is still in flight. */
+export function rememberRegisteredHost(qc: QueryClient, host: RegistryHost) {
+  qc.setQueryData<RegistryHost[]>(["registry", "hosts"], (prev) => (prev ? [...prev.filter((h) => h.host_id !== host.host_id), host] : prev));
+}
+
 /** Mutations refresh the registry and fleet queries. The issued token lives only in the mutation result held by the caller. */
 export function useRegistryMutations() {
   const api = useApi();
   const qc = useQueryClient();
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ["registry"] }), qc.invalidateQueries({ queryKey: ["hosts"] })]);
   return {
-    register: useMutation({ mutationFn: (b: RegisterHostBody) => api.registerHost(b), onSuccess: refresh }),
+    // Not awaited: react-query runs a mutation's per-call onSuccess only after the hook-level onSuccess promise settles, and
+    // `refresh` waits for the registry refetch. The refetch still runs; the page moves on from the response.
+    register: useMutation({ mutationFn: (b: RegisterHostBody) => api.registerHost(b), onSuccess: () => { void refresh(); } }),
     issue: useMutation({ mutationFn: (v: { hostId: string; body: IssueCredentialBody }) => api.issueCredential(v.hostId, v.body), onSuccess: refresh }),
     revoke: useMutation({ mutationFn: (v: { hostId: string; credentialId: string }) => api.revokeCredential(v.hostId, v.credentialId), onSuccess: refresh }),
   };
@@ -196,6 +204,55 @@ export function useAlerts(status: AlertStatusFilter, limit?: number, hostId?: st
 }
 
 /** Detail (with the timeline) is loaded only for the row that is expanded. */
+/**
+ * Alerts opened per bucket over a window ending now (rounded up to the minute, so the query key is stable between refreshes).
+ * The database counts every qualifying alert; the source scope is passed through unchanged.
+ */
+export function useAlertHistogram(windowMs: number, bucketSeconds: number, sources: Source[] | undefined) {
+  const api = useApi();
+  const end = Math.ceil(Date.now() / 60_000) * 60_000;
+  return useQuery({
+    queryKey: ["alert-histogram", windowMs, bucketSeconds, end, sources ?? null],
+    queryFn: ({ signal }) =>
+      api.alertHistogram({ start: new Date(end - windowMs).toISOString(), end: new Date(end).toISOString(), bucket_seconds: bucketSeconds, source: sources }, signal),
+    placeholderData: keepPreviousData,
+    refetchInterval: 15_000,
+  });
+}
+
+/** Platform health from GET /health. Refreshed every 30 s; a failed probe is an error, never a healthy result. */
+export function usePlatformHealth() {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["platform-health"],
+    queryFn: ({ signal }) => api.platformHealth(signal),
+    refetchInterval: 30_000,
+    retry: false,
+  });
+}
+
+/** Utilisation distribution over the whole in-scope fleet, computed by the server. */
+export function useDistribution(metric: DistributionMetric, sources: Source[] | undefined) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["distribution", metric, sources ?? null],
+    queryFn: ({ signal }) => api.distribution({ metric, source: sources }, signal),
+    placeholderData: keepPreviousData,
+    refetchInterval: 15_000,
+  });
+}
+
+/** The top hosts for one metric across the whole in-scope fleet, computed by the server. */
+export function useRankings(metric: RankedMetric, sources: Source[] | undefined, limit = 8) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["rankings", metric, sources ?? null, limit],
+    queryFn: ({ signal }) => api.rankings({ metric, source: sources, limit }, signal),
+    placeholderData: keepPreviousData,
+    refetchInterval: 15_000,
+  });
+}
+
 export function useAlert(id: string | null) {
   const api = useApi();
   return useQuery({
@@ -226,6 +283,16 @@ export function useInvestigation(id: string | undefined, windowMinutes: number) 
     queryFn: ({ signal }) => api.investigation(id!, { window_minutes: windowMinutes }, signal),
     enabled: !!id,
     refetchInterval: 15_000,
+  });
+}
+
+/** One application trace, loaded only when an engineer opens it. */
+export function useTrace(traceId: string | null) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ["trace", traceId],
+    queryFn: ({ signal }) => api.trace(traceId!, signal),
+    enabled: !!traceId,
   });
 }
 

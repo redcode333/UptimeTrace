@@ -36,11 +36,21 @@ export interface LatestSummary {
   network_rx_bytes_per_second: number | null;
   network_tx_bytes_per_second: number | null;
 }
+/** A registry group a host belongs to (environment, region, cluster or service). */
+export interface GroupRef {
+  id: string;
+  name: string;
+}
 export interface Host {
   host_id: string;
   hostname: string;
   agent_id: string;
   service: string | null;
+  /** Registry placement. Null / empty when the host has no registry row or is not placed in that group. */
+  environment: GroupRef | null;
+  region: GroupRef | null;
+  cluster: GroupRef | null;
+  services: GroupRef[];
   source: Source;
   connected_infrastructure: boolean;
   first_seen: string;
@@ -64,7 +74,7 @@ export interface HostList {
   page: number;
   page_size: number;
   total: number;
-  facets: { source: Record<Source, number>; health: Record<HealthStatus, number> };
+  facets: { source: Record<Source, number>; health: Record<HealthStatus, number>; connected?: number };
   thresholds: Thresholds;
 }
 export interface SeriesPoint {
@@ -98,7 +108,11 @@ export interface HostListParams {
   search?: string;
   source?: Source[];
   health?: HealthStatus[];
-  sort?: "last_seen" | "hostname";
+  environment?: string[];
+  region?: string[];
+  cluster?: string[];
+  service?: string[];
+  sort?: "last_seen" | "hostname" | "attention";
   order?: "asc" | "desc";
   page?: number;
   page_size?: number;
@@ -186,6 +200,14 @@ export interface AlertDetail extends Alert {
 }
 
 /** GET /api/v1/settings/monitoring: the configured rules and freshness windows in force (defaults if nothing is stored). */
+/** GET /health (public, no credentials). `app` is liveness of the API process; `database` is a readiness dependency. */
+export interface PlatformHealth {
+  http: number;
+  status: string;
+  app: string;
+  database: string;
+}
+
 export interface MonitoringSettings {
   config: {
     freshness: { stale_after_seconds: number; offline_after_seconds: number };
@@ -257,6 +279,59 @@ export interface AlertList {
   total: number;
 }
 
+/** GET /api/v1/alerts/histogram: counts from the database over the whole window, every bucket present (empty ones at zero). */
+export interface AlertHistogramBucket {
+  start: string;
+  critical: number;
+  warning: number;
+}
+export interface AlertHistogram {
+  start: string;
+  end: string;
+  bucket_seconds: number;
+  sources: Source[];
+  buckets: AlertHistogramBucket[];
+  total: number;
+  critical: number;
+  warning: number;
+  complete: boolean;
+}
+
+/** GET /api/v1/hosts/rankings: the top hosts across the whole in-scope fleet, with the counts of hosts that could not be ranked. */
+export type RankedMetric = "system.cpu.utilization" | "system.memory.utilization";
+export interface RankedHost {
+  host_id: string;
+  hostname: string;
+  source: Source;
+  value: number;
+  observed_at: string;
+  last_seen_age_seconds: number;
+  reporting_status: Host["reporting_status"];
+}
+/** GET /api/v1/hosts/distribution: utilisation over the whole in-scope fleet. */
+export type DistributionMetric = "cpu" | "memory" | "disk_max";
+export interface Distribution {
+  metric: DistributionMetric;
+  sources: Source[];
+  total_in_scope: number;
+  bucket_labels: string[];
+  buckets: number[];
+  no_data: number;
+  states: { normal: number; warning: number; critical: number; none: number };
+  max: { value: number; host_id: string; hostname: string } | null;
+  complete: boolean;
+}
+export interface Ranking {
+  metric: RankedMetric;
+  sources: Source[];
+  total_in_scope: number;
+  with_value: number;
+  without_value: number;
+  limit: number;
+  items: RankedHost[];
+  complete: boolean;
+}
+
 // Investigation (GET /api/v1/alerts/{id}/investigation). Null or empty means the evidence was not recorded, never a guess.
 export interface InvestigationPoint {
   t: string;
@@ -308,7 +383,26 @@ export interface Investigation {
   events: { event: AlertEvent["event"]; occurred_at: string; actor: string; detail: Record<string, unknown> }[];
   related: { window_minutes: number; total: number; limit: number; offset: number; note: string; items: InvestigationRelated[] };
   settings: { version: number; warning_limit: number | null; critical_limit: number | null; stale_after_seconds: number; offline_after_seconds: number };
+  traces: InvestigationTraces;
 }
+
+/** Application trace evidence for the window. Live from the trace backend; never part of a saved record. */
+export type TraceReason = "not_configured" | "no_registered_services" | "unavailable" | null;
+export interface TraceSummary {
+  trace_id: string; started_at: string; duration_ms: number;
+  root: { service: string; operation: string };
+  services: string[]; span_count: number; error_count: number; slow_span_count: number;
+  slowest: { service: string; operation: string; duration_ms: number };
+}
+export interface InvestigationTraces {
+  available: boolean; reason: TraceReason; window_start: string; window_end: string;
+  services: string[]; items: TraceSummary[]; truncated: boolean;
+}
+export interface TraceSpan {
+  span_id: string; parent_span_id: string | null; service: string; operation: string;
+  offset_ms: number; duration_ms: number; error: boolean; slow: boolean;
+}
+export interface TraceDetail { summary: TraceSummary; spans: TraceSpan[]; truncated: boolean }
 export interface InvestigationRecord {
   id: string;
   alert_id: string;

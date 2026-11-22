@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
-VERSION = "1.0"
+VERSION = "1.1"
 WINDOWS = (300, 900, 3600)
 PCT = ("cpu", "mem", "disk_root", "disk_data")           # percent gauges
 NET = ("rx", "tx")                                       # byte counters -> rates
@@ -27,6 +27,8 @@ def _registry():
     names, meta = [], {}
 
     def add(name, series, window, desc, unit):
+        if not _supported(name):
+            return
         names.append(name)
         meta[name] = {"source": series, "window_s": window, "description": desc, "unit": unit}
     for s in PCT:
@@ -59,6 +61,18 @@ def _registry():
     add("elapsed_s", "all", None, "seconds since the first observation of the run", "s")
     add("n_series_stale", "all", None, "number of the six series whose latest observation is older than 3 x cadence (or undefined)", "count")
     return names, meta
+
+
+# Features that cannot be defined under the protocol's own requirements, so they are not produced.
+# A rate standard deviation or slope needs at least 5 valid pairs (MIN_STD_SLOPE), i.e. at least 6 observations inside a 300-second
+# window. At 60-second sampling the window holds 5 observations, so this is attainable only through sampling jitter. Measured on the
+# dataset: NaN in every one of 355,387 sampled rows for each of these four features. They carry no information and are not produced;
+# the 900 and 3600-second rate spreads (which have room for 5 pairs) are unchanged.
+UNSUPPORTED = frozenset(f"{s}_{k}_300" for s in NET for k in ("rate_std", "rate_slope"))
+
+
+def _supported(name: str) -> bool:
+    return name not in UNSUPPORTED
 
 
 NAMES, META = _registry()
@@ -161,9 +175,10 @@ def compute_features(series: dict, t: np.ndarray) -> np.ndarray:
                         if pairs >= 2:
                             row[INDEX[f"{s}_rate_delta_{w}"]] = r_[-1] - r_[0]
                         if pairs >= MIN_STD_SLOPE:
-                            row[INDEX[f"{s}_rate_std_{w}"]] = r_.std(ddof=1)
+                            if f"{s}_rate_std_{w}" in INDEX:
+                                row[INDEX[f"{s}_rate_std_{w}"]] = r_.std(ddof=1)
                             tm = ((wt[:-1] + wt[1:]) / 2.0)[ok]
-                            if tm[-1] - tm[0] >= MIN_SPAN * w:
+                            if tm[-1] - tm[0] >= MIN_SPAN * w and f"{s}_rate_slope_{w}" in INDEX:
                                 row[INDEX[f"{s}_rate_slope_{w}"]] = _slope_per_min(tm, r_)
                         if w == WINDOWS[-1]:
                             te = float(wt[1:][ok][-1])

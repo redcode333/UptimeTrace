@@ -1,0 +1,25 @@
+# Private tracing backend for local development. Nothing here is reachable except through the UptimeTrace backend:
+#  - Jaeger's UI and query API are bound to 127.0.0.1 only; the browser never talks to them.
+#  - The Collector's OTLP port is bound to 127.0.0.1 and REQUIRES a bearer token (TRACE_COLLECTOR_TOKEN). Set it in the
+#    environment or a git-ignored .env file; compose refuses to start without it.
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "127.0.0.1:16686:16686"
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.111.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    environment:
+      - TRACE_COLLECTOR_TOKEN=${TRACE_COLLECTOR_TOKEN:?set TRACE_COLLECTOR_TOKEN (see docker-compose.yml)}
+    volumes:
+      - ./collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "127.0.0.1:4318:4318"
+    depends_on:
+      - jaeger
+    restart: unless-stopped

@@ -11,9 +11,11 @@ from sqlalchemy.orm import Session, sessionmaker
 from app import errors
 from app.clerk_auth import Principal
 from app.investigation import service as I
+from app.traces import service as TS
 
 
-def build_investigation_router(session_factory: sessionmaker[Session], clock: Callable[[], datetime], authorize) -> APIRouter:
+def build_investigation_router(session_factory: sessionmaker[Session], clock: Callable[[], datetime], authorize,
+                               trace_client=None) -> APIRouter:
     router = APIRouter(prefix="/api/v1/alerts", dependencies=[Depends(authorize)])
 
     @router.get("/{alert_id}/investigation")
@@ -27,7 +29,12 @@ def build_investigation_router(session_factory: sessionmaker[Session], clock: Ca
         window = I.parse_window(window_minutes)
         with session_factory() as session:
             alert = I._load_alert(session, alert_id)
-            return I.build_view(session, alert, clock(), window, related_limit, related_offset)
+            view = I.build_view(session, alert, clock(), window, related_limit, related_offset)
+            # Live trace evidence is added to the view only. It is not part of the report snapshot, so a saved record stays
+            # reproducible from its own evidence even when the trace backend changes.
+            view["traces"] = TS.related_for_alert(session, alert.workspace_id, alert.host_id, alert.opened_at - window.delta,
+                                                  alert.opened_at + window.delta, trace_client)
+            return view
 
     @router.get("/{alert_id}/investigation/report")
     def get_report(alert_id: uuid.UUID = Path(), _: Principal = Depends(authorize)):

@@ -34,9 +34,9 @@ describe("Agents page (host registry)", () => {
       }),
     });
     await screen.findByText("web-01");
-    expect(screen.getByText("Awaiting first telemetry")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
     expect(screen.getByText("Stale")).toBeInTheDocument();
-    expect(screen.getByText("Silent (offline)")).toBeInTheDocument();
+    expect(screen.getByText("Offline")).toBeInTheDocument();
     const row = screen.getByText("new-01").closest("tr")!;
     expect(within(row).getByText("—")).toBeInTheDocument();           // no last telemetry: a dash, never a fake time
     expect(within(row).queryByText(/healthy/i)).toBeNull();

@@ -176,3 +176,23 @@ export function tallyStates(values: ReadonlyArray<number | null | undefined>, ru
 export function thresholdRule(thresholds: Thresholds | undefined, metric: string): { warning: number; critical: number } | undefined {
   return thresholds?.rules[metric];
 }
+
+/**
+ * Alerts that belong to the selected sources. Same join as summarizeAlerts: an alert's source is its host's source, looked up in
+ * the loaded host index. An alert whose host is not loaded cannot be placed in scope and is counted in `notLoaded`, never guessed.
+ */
+export function alertsInScope(
+  alerts: readonly Alert[],
+  selected: readonly Source[],
+  hostIndex: Map<string, Host> | null,
+): { alerts: Alert[]; notLoaded: number } {
+  if (isAllSelected(selected)) return { alerts: [...alerts], notLoaded: 0 };
+  let notLoaded = 0;
+  const kept: Alert[] = [];
+  for (const a of alerts) {
+    const src = hostIndex?.get(a.host_id)?.source;
+    if (src === undefined) notLoaded++;
+    else if (selected.includes(src)) kept.push(a);
+  }
+  return { alerts: kept, notLoaded };
+}

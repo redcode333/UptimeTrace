@@ -73,7 +73,15 @@
 .flag.crit { border-color: var(--critical-text); color: var(--critical-text); }
 .idrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .idrow code { background: var(--ground); border: 1px solid var(--seam); padding: 6px 8px; font-size: 12px; overflow-wrap: anywhere; }
-.auth-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.auth { grid-template-columns: minmax(0, 1fr); }
+.auth-col { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 400px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.brand svg { display: block; flex: 0 0 auto; }
+.brand-wordmark { font: 600 18px/1 var(--font-mono); letter-spacing: -0.03em; white-space: nowrap; }
+.brand-wordmark b { font-weight: 400; color: var(--forecast); }
+.sidebar-logo { gap: 8px; }
+.sidebar-logo .brand-wordmark { font-size: 15px; }
+.sidebar-logo svg { width: 40px; height: 22px; }
 .scrim { display: none; }
 
 @media (max-width: 1100px) { .search { display: none; } }

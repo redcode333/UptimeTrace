@@ -23,6 +23,9 @@ from app.alerts.router import build_alert_router
 from app.alerts.service import evaluate_after_ingest, sweep_all
 from app.infrastructure.router import build_infrastructure_router
 from app.investigation.router import build_investigation_router
+from app.traces.router import build_trace_router
+from app.traces.jaeger import JaegerClient
+from app.traces.ingest import TraceIngest, build_otlp_router
 from app.auth import CredentialAuthenticator
 from app.clerk_auth import ClerkVerifier
 from app.config import MAX_BODY_BYTES, SCHEMA_PATH, SUPPORTED_SCHEMA_VERSIONS
@@ -38,6 +41,8 @@ from app.mcp.router import build_mcp_token_router
 from app.monitoring.router import build_router
 from app.monitoring.settings_router import build_settings_router
 from app.registry.router import build_registry_router
+from app.rehearsal import service as RehearsalService
+from app.rehearsal.router import build_rehearsal_router
 from app.user_auth import build_me_router, make_dependencies
 
 log = logging.getLogger("uptimetrace")
@@ -74,6 +79,8 @@ def create_app(
     verifier: ClerkVerifier | None = None,
     mcp_server=None,
     alert_sweep_seconds: float | None = None,
+    trace_client: JaegerClient | None = None,
+    trace_ingest: TraceIngest | None = None,
 ) -> FastAPI:
     """`mcp_server` (a FastMCP built by app.mcp.server) is OFF unless passed: the MCP endpoint is opt-in per deployment.
     `alert_sweep_seconds` starts the periodic alert sweep for the life of the app; None (the default, used by tests) starts none."""
@@ -88,6 +95,7 @@ def create_app(
         sweep = None
         if alert_sweep_seconds:
             sweep = asyncio.create_task(_alert_sweep_forever(session_factory, clock, alert_sweep_seconds))
+        await run_in_threadpool(_reconcile_rehearsals_at_start)
         try:
             if mcp_server is not None:
                 async with mcp_server.session_manager.run():
@@ -102,6 +110,14 @@ def create_app(
 
     app = FastAPI(title="UptimeTrace ingestion", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     schema_validator = EnvelopeSchemaValidator(schema_path)
+    rehearsal_submit = RehearsalService.make_submit(session_factory, schema_validator, clock)
+
+    def _reconcile_rehearsals_at_start() -> None:
+        # A rehearsal whose executor died with a previous process is judged now, so its fault is ended. Never blocks startup.
+        try:
+            RehearsalService.reconcile_interrupted(session_factory, rehearsal_submit, clock)
+        except Exception as exc:  # noqa: BLE001
+            log.error("rehearsal reconciliation failed at startup: %s", type(exc).__name__)
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, exc: ApiError):
@@ -198,8 +214,12 @@ def create_app(
     app.include_router(build_mcp_token_router(session_factory, clock, authorize))
     app.include_router(build_settings_router(session_factory, clock, authorize))
     app.include_router(build_alert_router(session_factory, clock, authorize))
-    app.include_router(build_investigation_router(session_factory, clock, authorize))
+    app.include_router(build_investigation_router(session_factory, clock, authorize, trace_client))
+    app.include_router(build_trace_router(session_factory, clock, authorize, trace_client))
+    if trace_ingest is not None:                         # OTLP ingestion is OFF unless configured (fails closed)
+        app.include_router(build_otlp_router(trace_ingest))
     app.include_router(build_infrastructure_router(session_factory, clock, authorize))
+    app.include_router(build_rehearsal_router(session_factory, clock, authorize, rehearsal_submit))
     if mcp_asgi is not None:
         app.mount("/mcp", mcp_asgi)                          # clients connect to <base>/mcp/ (bearer token required by the SDK middleware)
     app.include_router(build_me_router(verifier, authenticate))

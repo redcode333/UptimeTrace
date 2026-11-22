@@ -15,3 +15,19 @@ export const clerkAppearance = {
     fontSize: "14px",
   },
 } as const;
+
+/** Headings on Clerk's sign-in and sign-up cards. Set on ClerkProvider, which is where Clerk reads localization. */
+export const clerkLocalization = {
+  signIn: {
+    start: {
+      title: "Sign in to UptimeTrace",
+      subtitle: "See whether your alerts would catch the next outage.",
+    },
+  },
+  signUp: {
+    start: {
+      title: "Create your UptimeTrace account",
+      subtitle: "Connect your first host and test its alerts.",
+    },
+  },
+} as const;
