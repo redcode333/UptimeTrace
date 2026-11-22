@@ -25,12 +25,36 @@ export function startLanding(root: HTMLElement): () => void {
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches
 
 root.querySelector("#theme").addEventListener("click", () => {
-  const root = root
   const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches
   root.dataset.theme = dark ? "light" : "dark"
   try { localStorage.setItem("ut-landing-theme", root.dataset.theme) } catch {}
   dispatchEvent(new Event("themechange"))
 })
+
+/* MCP line: the agent names roll past one after another. The track is the list plus a repeat of its first name, so the
+   loop is seamless: at the repeat it snaps back to the start. Reduced motion shows the first name only. */
+{
+  const roller = root.querySelector<HTMLElement>("#roller");
+  const track = roller?.querySelector<HTMLElement>(".rtrack");
+  if (roller && track) {
+    const items = [...track.children] as HTMLElement[];
+    const n = items.length - 1;
+    let k = 0;
+    const fit = () => { roller.style.width = items[k].getBoundingClientRect().width + "px"; };
+    fit();
+    document.fonts?.ready.then(fit);
+    addEventListener("resize", fit);
+    if (reduce) items.forEach((el, i) => { if (i) el.style.display = "none"; });
+    else every(() => {
+      if (document.hidden) return;
+      k++;
+      track.style.transition = "";
+      track.style.transform = `translateY(${-34 * k}px)`;
+      fit();
+      if (k === n) setTimeout(() => { track.style.transition = "none"; k = 0; track.style.transform = "translateY(0)"; fit(); }, 650);
+    }, 2200);
+  }
+}
 
 /* Logo: ring and trace draw in, the dot pops and pings; replays on hover, then idles. */
 root.querySelectorAll("[data-logo]").forEach((el, i) => {
@@ -80,8 +104,19 @@ new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting && !r
   const letters = t => [...t].map((c, i) => `<i style="--i:${i}">${c}</i>`).join("")
   const measure = t => { const m = document.createElement("span"); m.className = "rw"; m.style.cssText = "position:absolute;visibility:hidden"; m.textContent = t; rot.append(m); const w = m.getBoundingClientRect().width; m.remove(); return w }
   let k = 0, w = rot.querySelector(".rw")
+  // Reserve the tallest headline, so a longer phrase never moves the lines below it (the MCP line and the model fit depend on them).
+  const h1 = root.querySelector<HTMLElement>(".hero h1")
+  const reserve = () => {
+    if (!h1) return
+    h1.style.minHeight = ""
+    let tallest = 0
+    for (const p of phrases) { w.innerHTML = letters(p); tallest = Math.max(tallest, h1.offsetHeight) }
+    h1.style.minHeight = tallest + "px"
+    w.innerHTML = letters(phrases[k])
+  }
+  reserve(); if (document.fonts) document.fonts.ready.then(reserve)
   w.innerHTML = letters(phrases[0]); rot.style.width = measure(phrases[0]) + "px"
-  addEventListener("resize", () => { rot.style.width = measure(phrases[k]) + "px" })
+  addEventListener("resize", () => { reserve(); rot.style.width = measure(phrases[k]) + "px" })
   every(() => {
     if (document.hidden) return
     w.className = "rw out"
@@ -376,9 +411,9 @@ const makeRenderer = canvas => {
   const PARTS = [
     { id: "cpu", name: "Processor", status: "up", word: "Healthy", why: "38% load, 61 °C. Well within limits.", at: [-3.7, 1.35, .5], n: [-1.75, 2.9, .5] },
     { id: "fan", name: "Chassis fan", status: "up", word: "Healthy", why: "2,400 rpm and steady.", at: [3.7, 1.35, .4], n: [1.75, 2.9, .4] },
-    { id: "ram", name: "Memory", status: "warn", word: "Needs work", why: "86% used and climbing 4% an hour.", at: [-4, -.75, 1.1], n: [-1.8, .3, 1.1] },
-    { id: "nic", name: "Network card", status: "up", word: "Healthy", why: "1.2 Gb/s, no errors in 24 h.", at: [4, -.75, 1.0], n: [1.8, .3, 1.0] },
-    { id: "ssd", name: "NVMe disk", status: "crit", word: "Faulty", why: "12 reallocated sectors. Replace soon.", at: [-2.9, -2.35, 2.1], n: [-1.5, -2.5, 2.1] },
+    { id: "ram", name: "Memory", status: "warn", word: "Needs work", why: "86% used and climbing 4% an hour.", at: [-4, -.75, 1.1], n: [-2.1, .05, 1.1] },
+    { id: "nic", name: "Network card", status: "up", word: "Healthy", why: "1.2 Gb/s, no errors in 24 h.", at: [4, -.75, 1.0], n: [2.1, .05, 1.0] },
+    { id: "ssd", name: "NVMe disk", status: "crit", word: "Faulty", why: "12 reallocated sectors. Replace soon.", at: [-2.9, -2.35, 2.1], n: [-1.9, -2.95, 2.1] },
     { id: "psu", name: "Power supply", status: "warn", word: "Needs work", why: "Backup unit offline. Running on one.", at: [2.9, -2.35, 2.0], n: [1.5, -2.5, 2.0] },
   ]
   const partsEl = root.querySelector("#parts"), hintEl = root.querySelector("#inspect-hint"), backBtn = root.querySelector("#reassemble")
@@ -467,7 +502,7 @@ const makeRenderer = canvas => {
   const size = () => {
     const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h
     const narrow = w / h < .9; camera.fov = narrow ? 46 : 30; camera.updateProjectionMatrix()
-    camera.userData.z = narrow ? 24 : 18; world.position.y = narrow ? -2.2 : -1.55
+    camera.userData.z = narrow ? 19 : 17; world.position.y = narrow ? -2.2 : -1.55
     camera.userData.baseX = 0
     // Keep the stack clear of the buttons on any screen height: make room if needed, then aim the camera
     // so the top of the stack lands a little below the call-to-action row.
@@ -481,12 +516,13 @@ const makeRenderer = canvas => {
     const aim = sc => { const top = world.position.y + (ringTop + .1) * sc; let a = -8, b = 8, fa = proj(top, a) - want
       for (let i = 0; i < 40; i++) { const m = (a + b) / 2, fm = proj(top, m) - want; if (Math.sign(fm) === Math.sign(fa)) { a = m; fa = fm } else b = m } return (a + b) / 2 }
     // Medium size by default: the stack is about a third of a desktop hero and about half of a phone width. Shrinks further only on short screens.
-    let sc = narrow ? .72 : .8, ly = aim(sc)
-    while (sc > .7 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { sc -= .05; ly = aim(sc) }
-    if (sc <= .7 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { host.style.minHeight = Math.ceil(h + proj(world.position.y - ringTop * .8 * sc, ly) - floor) + "px"; raf(size); return }
+    let sc = narrow ? 1 : 1.25, ly = aim(sc)
+    while (sc > .85 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { sc -= .05; ly = aim(sc) }
+    if (sc <= .85 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { host.style.minHeight = Math.ceil(h + proj(world.position.y - ringTop * .8 * sc, ly) - floor) + "px"; raf(size); return }
     camera.userData.lookY = ly; camera.userData.scale = sc
   }
-  size(); new ResizeObserver(size).observe(host)
+  size(); new ResizeObserver(size).observe(host); document.fonts?.ready.then(size)
+  const copy = root.querySelector(".hero-copy"); if (copy) new ResizeObserver(size).observe(copy)
   let visible = true; new IntersectionObserver(es => { visible = es[0].isIntersecting }).observe(host)
   const v = new THREE.Vector3(), clock = new THREE.Clock(); let t0 = reduce ? 1.2 : 0
   const PERIOD = 12

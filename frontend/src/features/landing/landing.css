@@ -101,7 +101,7 @@
 .landing:not([data-theme="light"]) .sun { display: block }
 .landing:not([data-theme="light"]) .moon { display: none }
 }
-.landing .hero { position: relative; isolation: isolate; margin-top: -76px; min-height: clamp(580px, 86vh, 780px); overflow: hidden;
+.landing .hero { position: relative; isolation: isolate; margin-top: -76px; min-height: clamp(640px, 100vh, 900px); overflow: hidden;
   background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 42%, var(--sky-3) 72%, var(--bg) 100%) }
 .landing .hero canvas, .landing .hero .poster { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1 }
 .landing .hero .poster { object-fit: cover; object-position: 50% 100%; transition: opacity .8s }
@@ -109,9 +109,10 @@
 .landing .hero canvas { opacity: 0; transition: opacity .8s }
 .landing .hero.live canvas { opacity: 1 }
 .landing .hero.live .poster { opacity: 0 }
+.landing .hero + .showcase-block { padding-top: 24px }
 .landing .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; z-index: 0; pointer-events: none; background: linear-gradient(180deg, transparent, var(--bg)) }
-.landing .hero-copy { position: relative; z-index: 1; text-align: center; padding: min(116px, 12vh) 20px 0; max-width: 860px; margin: 0 auto }
-.landing .hero h1 { font: 400 clamp(36px, min(4.8vw, 7.4vh), 66px)/1.06 var(--f-serif); font-variation-settings: "opsz" 72; letter-spacing: -0.032em; color: var(--ink) }
+.landing .hero-copy { position: relative; z-index: 1; text-align: center; padding: min(132px, 14vh) 20px 0; max-width: 860px; margin: 0 auto }
+.landing .hero h1 { font: 400 clamp(34px, min(5.2vw, 8.4vh), 72px)/1.06 var(--f-serif); font-variation-settings: "opsz" 72; letter-spacing: -0.032em; color: var(--ink) }
 .landing .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
 .landing .rot { display: inline-block; position: relative; white-space: nowrap; vertical-align: bottom; font-style: italic; font-weight: 360; color: var(--accent); transition: width .55s cubic-bezier(.6,0,.2,1); padding-bottom: .06em }
 .landing .rw { display: inline-block }
