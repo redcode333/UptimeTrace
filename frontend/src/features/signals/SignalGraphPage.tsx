@@ -130,10 +130,10 @@ function Scope({ model }: { model: SignalModel }) {
 }
 
 function Stage({ model }: { model: SignalModel }) {
-  const [threeD, setThreeD] = useState(true);
+  // The 3D plane needs room to be read. On narrow screens the flat view opens first; the 3D toggle stays available.
+  const [threeD, setThreeD] = useState(() => typeof window.matchMedia !== "function" || window.matchMedia("(min-width: 721px)").matches);
   const [focus, setFocus] = useState<string | null>(null);
   const selected = model.lanes.flatMap((l) => l.components).find((c) => c.id === focus) ?? null;
-  const columns = Math.max(1, ...model.lanes.map((l) => l.components.length));
   return (
     <div className="sg-panel">
       <div className="sg-head">
@@ -144,7 +144,8 @@ function Stage({ model }: { model: SignalModel }) {
         </div>
       </div>
       <div className={threeD ? "sg-stage" : "sg-stage sg-flat"}>
-        <div className="sg-plane" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+        {/* One column per host lane, centred. Lanes are sized by their track, not by how many components a host has. */}
+        <div className="sg-plane">
           {model.lanes.map((lane) => (
             <div className="sg-lane" key={lane.hostId}>
               <div className="sg-lane-name">

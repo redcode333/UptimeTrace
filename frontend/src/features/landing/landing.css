@@ -409,3 +409,50 @@
 .landing *, .landing *::before, .landing *::after { animation: none !important; transition: none !important }
 .landing { scroll-behavior: auto }
 }
+
+/* Product showcase: the real console screens below the hero. The frame stays inert, so it is a read-only preview. */
+.landing .showcase { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; min-width: 0 }
+.landing .showcase-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; justify-content: center; scrollbar-width: thin }
+.landing .showcase-tab { flex: 0 0 auto; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text-2); font: 500 13px/1 var(--f-sans); cursor: pointer; transition: background .2s, color .2s, border-color .2s }
+.landing .showcase-tab:hover { color: var(--ink); border-color: var(--line-2) }
+.landing .showcase-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.landing .showcase-tab.on { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.landing .showcase-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; min-width: 0; box-shadow: 0 30px 60px -40px rgba(15,27,46,.35) }
+.landing .showcase-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); font: 12px/1 var(--f-mono); color: var(--text-3) }
+.landing .showcase-dots { display: inline-flex }
+.landing .showcase-dots i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); margin-right: 5px }
+.landing .showcase-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.landing .showcase-tag { padding: 5px 9px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 600; white-space: nowrap }
+.landing .showcase-screen { min-width: 0; overflow-x: auto }
+.landing .showcase-page { min-width: 0; padding: 18px }
+.landing .showcase-note { margin: 0; text-align: center; font-size: 13px; color: var(--text-3) }
+@media (max-width: 720px) {
+  .landing .showcase-tabs { justify-content: flex-start }
+  .landing .showcase-page { padding: 10px }
+  .landing .showcase-tag { display: none }
+}
+@media (prefers-reduced-motion: reduce) { .landing .showcase-tab { transition: none } }
+
+/* MCP clients appear one at a time, each with its wire. The wire and chip share data-seq and the .on state. */
+.landing .h-agents .chip[data-seq] { opacity: 0; transform: translateY(8px) scale(.97); transition: opacity .5s ease, transform .6s cubic-bezier(.3,1.2,.5,1), box-shadow .25s }
+.landing .h-agents .chip[data-seq].on { opacity: 1; transform: none }
+.landing .hub.in .wires path[data-seq]:not(.on) { stroke-dashoffset: 1 }
+.landing .wires path[data-seq] { transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1) }
+.landing .wires circle[data-seq] { opacity: 0; transition: opacity .4s }
+.landing .wires circle[data-seq].on { opacity: 1 }
+@media (prefers-reduced-motion: reduce) {
+  .landing .h-agents .chip[data-seq] { opacity: 1; transform: none; transition: none }
+  .landing .wires path[data-seq], .landing .wires circle[data-seq] { transition: none }
+}
+
+/* The console screens are dark-first and use the product's own tokens. Re-declare them here so the landing's light
+   tokens do not leak into the preview (the same values as src/styles/tokens.css). */
+.landing .showcase-screen {
+  color-scheme: dark;
+  --ground: #0a1420; --widget: #0f1d2c; --widget-alt: #0c1928; --raised: #14283a; --selected: #1b3348;
+  --seam: #20384d; --seam-faint: #162a3b; --seam-strong: #2c4a63;
+  --ink: #e6eef4; --ink-2: #a3b8c8; --ink-3: #7f98ad;
+  --forecast: #f2b64a; --critical: #e5483a; --critical-text: #ff6a55; --warning: #e9b8ff;
+  --normal: #1f8f73; --normal-text: #35d0b5; --offline: #8aa3b8; --focus: #62a8ff;
+  background: var(--ground); color: var(--ink); font-family: var(--font-ui);
+}

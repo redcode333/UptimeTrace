@@ -30,7 +30,7 @@
 .util-bar i { display: block; height: 100%; background: var(--s1); }
 .util-bar i.warn { background: var(--warning); } .util-bar i.crit { background: var(--critical); }
 
-.table-wrap { overflow-x: auto; background: var(--widget); border: 1px solid var(--seam); }
+.table-wrap { position: relative; overflow-x: auto; background: var(--widget); border: 1px solid var(--seam); } /* relative: keeps absolutely positioned .sr-only labels inside the scroll area */
 .table-wrap.is-fetching { opacity: .7; }
 .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 .tbl th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding: 8px 10px; border-bottom: 1px solid var(--seam); white-space: nowrap; }

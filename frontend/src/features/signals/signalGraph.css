@@ -17,9 +17,9 @@
 /* 3D view: the plane spans the stage and is tilted about its own centre, so the threads sit in the middle of the panel
    instead of being pushed left by a steep Z rotation. The stage scrolls inside the panel on narrow screens. */
 .sg-stage { perspective: 1400px; perspective-origin: 50% 40%; padding: 22px 16px 12px; min-height: 300px; overflow: auto; }
-.sg-plane { display: grid; width: 100%; min-width: 0; gap: 14px; transform-style: preserve-3d; transform: rotateX(44deg) rotateZ(-8deg); transform-origin: 50% 50%; padding: 12px; }
+.sg-plane { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 220px)); justify-content: center; width: 100%; min-width: 0; gap: 14px; transform-style: preserve-3d; transform: rotateX(44deg) rotateZ(-8deg); transform-origin: 50% 50%; padding: 12px; }
 .sg-flat .sg-plane { transform: none; }
-@media (max-width: 720px) { .sg-plane { min-width: 640px; } }
+@media (max-width: 720px) { .sg-stage:not(.sg-flat) .sg-plane { min-width: 640px; } }
 .sg-lane { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .sg-lane-name { font: 500 12px/1.2 var(--font-mono); display: flex; flex-direction: column; gap: 2px; }
 .sg-lane-name span { opacity: 0.65; font-size: 11px; }

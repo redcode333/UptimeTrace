@@ -65,10 +65,7 @@ const spy = new IntersectionObserver(es => es.forEach(e => {
 ;["hero", "product", "drills", "playground", "integrations", "faq"].forEach(id => spy.observe(document.getElementById(id)))
 addEventListener("resize", () => moveTo(current))
 
-/* Product window tilts up as it scrolls in; loop cards lean toward the pointer. */
-const win = root.querySelector("#window")
-const tilt = () => { const r = win.getBoundingClientRect(), p = Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight * .75))); win.style.setProperty("--tilt", (reduce ? 0 : (1 - p) * 24).toFixed(2) + "deg") }
-addEventListener("scroll", tilt, { passive: true }); tilt()
+/* Loop cards lean toward the pointer. */
 if (!reduce) root.querySelectorAll("[data-tilt]").forEach(c => {
   c.addEventListener("pointermove", e => { const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; c.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)` })
   c.addEventListener("pointerleave", () => { c.style.transform = "" })
@@ -96,19 +93,20 @@ new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting && !r
   }, 3200)
 })()
 
-/* MCP line: agent names roll past one after another. */
+/* MCP clients: each client appears in turn with its own wire, holds, fades out, and the sequence starts again. Reduced motion shows them all. */
 ;(() => {
-  const roller = root.querySelector("#roller"); if (!roller) return
-  const track = roller.querySelector(".rtrack"), items = [...track.children], n = items.length - 1
-  let k = 0
-  const fit = () => { roller.style.width = items[k].getBoundingClientRect().width + "px" }
-  fit(); if (document.fonts) document.fonts.ready.then(fit); addEventListener("resize", fit)
-  if (reduce) return
-  every(() => {
-    if (document.hidden) return
-    k++; track.style.transition = ""; track.style.transform = `translateY(${-34 * k}px)`; fit()
-    if (k === n) setTimeout(() => { track.style.transition = "none"; k = 0; track.style.transform = "translateY(0)"; fit() }, 650)
-  }, 2200)
+  const chips = [...root.querySelectorAll(".h-agents .chip[data-seq]")]
+  if (!chips.length) return
+  const setSeq = (i, on) => root.querySelectorAll(`[data-seq="${i}"]`).forEach(el => el.classList.toggle("on", on))
+  if (reduce) { chips.forEach((_, i) => setSeq(i, true)); return }
+  const STEP = 900, LEAD = 400, HOLD = 2600, GAP = 900
+  const run = () => {
+    chips.forEach((_, i) => timers.push(setTimeout(() => setSeq(i, true), LEAD + i * STEP)))
+    const off = LEAD + chips.length * STEP + HOLD
+    timers.push(setTimeout(() => chips.forEach((_, i) => setSeq(i, false)), off))
+    timers.push(setTimeout(run, off + GAP))
+  }
+  run()
 })()
 
 /* Scroll reveals: content below the fold rises in as it arrives; siblings stagger. */
@@ -138,8 +136,10 @@ new IntersectionObserver((es, o) => es.forEach(e => { if (e.isIntersecting && !r
       const d = horiz ? `M${p1} C${mx},${p1[1]} ${mx},${p2[1]} ${p2}` : `M${p1} C${p1[0]},${my} ${p2[0]},${my} ${p2}`
       const id = "wire" + k, path = document.createElementNS(NS, "path")
       path.setAttribute("d", d); path.setAttribute("id", id); path.setAttribute("pathLength", "1"); path.style.transitionDelay = k * 70 + "ms"; svg.append(path)
+      const seq = from.dataset.seq
+      if (seq !== undefined) { path.dataset.seq = seq; if (from.classList.contains("on")) path.classList.add("on") }
       if (!reduce) {
-        const c = document.createElementNS(NS, "circle"); c.setAttribute("r", "3"); if (out) c.classList.add("out")
+        const c = document.createElementNS(NS, "circle"); c.setAttribute("r", "3"); if (out) c.classList.add("out"); if (seq !== undefined) { c.dataset.seq = seq; if (from.classList.contains("on")) c.classList.add("on") }
         const am = document.createElementNS(NS, "animateMotion"); am.setAttribute("dur", (2.2 + (k % 4) * .45) + "s"); am.setAttribute("repeatCount", "indefinite"); am.setAttribute("begin", ((k * .41) % 2.4).toFixed(2) + "s")
         const mp = document.createElementNS(NS, "mpath"); mp.setAttribute("href", "#" + id); am.append(mp); c.append(am); svg.append(c)
       }
@@ -467,7 +467,7 @@ const makeRenderer = canvas => {
   const size = () => {
     const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h
     const narrow = w / h < .9; camera.fov = narrow ? 46 : 30; camera.updateProjectionMatrix()
-    camera.userData.z = narrow ? 19 : 17; world.position.y = narrow ? -2.2 : -1.55
+    camera.userData.z = narrow ? 24 : 18; world.position.y = narrow ? -2.2 : -1.55
     camera.userData.baseX = 0
     // Keep the stack clear of the buttons on any screen height: make room if needed, then aim the camera
     // so the top of the stack lands a little below the call-to-action row.
@@ -480,8 +480,8 @@ const makeRenderer = canvas => {
     const proj = (y, ly) => { camera.position.set(0, 1.6, camera.userData.z); camera.lookAt(0, ly, 0); camera.updateMatrixWorld(); return (-new THREE.Vector3(0, y, 0).project(camera).y * .5 + .5) * h }
     const aim = sc => { const top = world.position.y + (ringTop + .1) * sc; let a = -8, b = 8, fa = proj(top, a) - want
       for (let i = 0; i < 40; i++) { const m = (a + b) / 2, fm = proj(top, m) - want; if (Math.sign(fm) === Math.sign(fa)) { a = m; fa = fm } else b = m } return (a + b) / 2 }
-    // Medium size by default (the stack was starting at 1.25x and dominated the hero); shrinks further only on short screens.
-    let sc = narrow ? .9 : .95, ly = aim(sc)
+    // Medium size by default: the stack is about a third of a desktop hero and about half of a phone width. Shrinks further only on short screens.
+    let sc = narrow ? .72 : .8, ly = aim(sc)
     while (sc > .7 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { sc -= .05; ly = aim(sc) }
     if (sc <= .7 && proj(world.position.y - (ringTop * .8) * sc, ly) > floor) { host.style.minHeight = Math.ceil(h + proj(world.position.y - ringTop * .8 * sc, ly) - floor) + "px"; raf(size); return }
     camera.userData.lookY = ly; camera.userData.scale = sc

@@ -100,7 +100,7 @@ function HostHealthSection({
         )}
         {counts.data && (
           <>
-            <table className="tbl" aria-label="Host health counts">
+            <div className="table-wrap"><table className="tbl" aria-label="Host health counts">
               <thead>
                 <tr><th>State</th><th className="num">Hosts</th><th>What it means</th><th><span className="sr-only">Actions</span></th></tr>
               </thead>
@@ -121,7 +121,7 @@ function HostHealthSection({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
             <p className="dim small">
               Counts cover hosts that have sent telemetry. A registered host that has never reported is not counted here; see Agents.
               {" "}Counts follow the selected sources only; each state's list is the server's own.
@@ -153,7 +153,7 @@ function HostRows({ data, health, source }: { data: HostList; health: HealthStat
       {data.total > data.items.length && (
         <p className="dim small" role="status">Showing {data.items.length} of {data.total}. The rest are in Hosts with the same filter.</p>
       )}
-      <table className="tbl" aria-label={`${healthLabel(health)} hosts`}>
+      <div className="table-wrap"><table className="tbl" aria-label={`${healthLabel(health)} hosts`}>
         <thead><tr><th>Host</th><th>Source</th><th>Reporting</th><th>Last telemetry</th><th>Why</th></tr></thead>
         <tbody>
           {data.items.map((h: Host) => (
@@ -166,7 +166,7 @@ function HostRows({ data, health, source }: { data: HostList; health: HealthStat
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </>
   );
 }
@@ -206,7 +206,7 @@ function AlertLifecycleSection({
         {active.isPending && <Loading label="Counting active alerts" />}
         {active.isError && !active.data && <ErrorState error={active.error} onRetry={() => active.refetch()} />}
         {active.data && (
-          <table className="tbl" aria-label="Alert lifecycle counts">
+          <div className="table-wrap"><table className="tbl" aria-label="Alert lifecycle counts">
             <thead><tr><th>Lifecycle state</th><th className="num">Alerts</th><th>Meaning</th></tr></thead>
             <tbody>
               <tr><td>Open</td><td className="num mono">{partial ? `${breakdown.open} of loaded` : breakdown.open}</td><td className="small">Raised and not yet acknowledged. Severity is warning or critical.</td></tr>
@@ -214,7 +214,7 @@ function AlertLifecycleSection({
               <tr><td>Active, total</td><td className="num mono">{activeTotal}</td><td className="small">Open or acknowledged, in the whole workspace.</td></tr>
               <tr><td>Resolved, total</td><td className="num mono">{resolved.data ? resolved.data.total : resolved.isError ? "unavailable" : "—"}</td><td className="small">Closed by recovery (telemetry cleared the condition) or by hand.</td></tr>
             </tbody>
-          </table>
+          </table></div>
         )}
         {partial && (
           <p className="dim small" role="status">
@@ -240,7 +240,7 @@ function AlertLifecycleSection({
           />
         )}
         {listed.data && rows.length > 0 && (
-          <table className="tbl" aria-label="Alerts in this scope">
+          <div className="table-wrap"><table className="tbl" aria-label="Alerts in this scope">
             <thead><tr><th>Host</th><th>Source</th><th>Condition</th><th>Severity</th><th>Lifecycle</th><th>Opened</th><th><span className="sr-only">Investigation</span></th></tr></thead>
             <tbody>
               {rows.map((a) => {
@@ -258,7 +258,7 @@ function AlertLifecycleSection({
                 );
               })}
             </tbody>
-          </table>
+          </table></div>
         )}
         {listed.data && rows.length > 0 && listed.data.alerts.length >= 200 && (
           <p className="dim small">The list holds at most the 200 most recent alerts for this status; older ones are in Investigations.</p>
